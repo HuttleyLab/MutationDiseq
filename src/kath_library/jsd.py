@@ -3,8 +3,9 @@ from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 from cogent3.core.profile import safe_p_log_p
 from cogent3.util.dict_array import DictArray
-from kath_analysis.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 from numpy import array as np_array
+
+from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

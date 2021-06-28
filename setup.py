@@ -63,7 +63,7 @@ setup(
     url="https://github.com/GavinHuttley/KathLibrary",  # REPLACE WITH YOUR PROJECT DETAILS
     project_urls=PROJECT_URLS,
     # REPLACE WITH YOUR PROJECT DEPENDENCIES
-    install_requires=["numpy", "cogent3", "click", "accupy"],
+    install_requires=["numpy", "cogent3", "click", "accupy", "scipy"],
     # THE FOLLOWING BECOMES A COMMAND LINE SCRIPT
     entry_points={
         "console_scripts": [

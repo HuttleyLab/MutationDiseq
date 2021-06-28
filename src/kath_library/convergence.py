@@ -1,5 +1,6 @@
 from numpy.linalg import eig
 
+
 def get_eig_ii(Q):
     """
     Returns the second largest eigenvalue from the rate matrix

@@ -1,13 +1,14 @@
 from accupy import fdot as dot
 from accupy import fsum as sum
-from kath_analysis.utils.numeric_utils import (
-    valid_probability_vector,
-    valid_stochastic_matrix,
-)
 from numpy import allclose
 from numpy.linalg import eig, inv, norm
 from numpy.ma import dot as ma_dot
 from numpy.ma.core import array, diag
+
+from kath_library.utils.numeric_utils import (
+    valid_probability_vector,
+    valid_stochastic_matrix,
+)
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]

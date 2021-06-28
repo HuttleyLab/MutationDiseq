@@ -2,6 +2,7 @@ import numpy
 from accupy import fsum
 from cogent3 import get_model, make_table, make_tree
 from cogent3.maths.stats import chisqprob
+
 from kath_library.jsd import get_jsd
 
 __author__ = "Katherine Caley"

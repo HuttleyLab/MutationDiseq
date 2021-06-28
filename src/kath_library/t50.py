@@ -2,8 +2,9 @@ from accupy import fdot as dot
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
-from kath_analysis.stationary_pi import get_stat_pi_via_brute
 from scipy.linalg import expm
+
+from kath_library.stationary_pi import get_stat_pi_via_brute
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
