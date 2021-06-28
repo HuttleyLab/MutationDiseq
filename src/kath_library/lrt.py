@@ -1,0 +1,150 @@
+from cogent3 import get_moltype
+from cogent3.app import evo, io
+from cogent3.app.composable import SERIALISABLE_TYPE, user_function
+from cogent3.app.result import generic_result
+from cogent3.evolve.ns_substitution_model import GeneralStationary
+
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley"]
+__version__ = "2021.06.28"
+__maintainer__ = "Katherine Caley"
+__email__ = "katherine.caley@anu.edu.au"
+__status__ = "develop"
+
+
+def GS_mod():
+    """
+    A General Stationary Nucleotide substitution model instance.
+    """
+    GS = GeneralStationary(
+        get_moltype("dna").alphabet, optimise_motif_probs=True, name="GS"
+    )
+
+    return GS
+
+
+def get_no_init_model_coll(aln):
+    """
+    creates a model_collection object without sequential fitting to be called with given aln.
+
+    Parameters
+    ----------
+    aln : alignment to fit models to. NOTE! aln needs the foreground edge as an entry to the .info dictionary!
+
+    Returns
+    -------
+    model_collection_result containing GS and GN models (without sequential fitting)
+    """
+
+    fg_edge = aln.info.fg_edge
+
+    if fg_edge is None:
+        raise TypeError("Alignment needs a info.fg_edge attribute")
+
+    bg_edges = list({fg_edge} ^ set(aln.names))
+
+    GS = evo.model(
+        GS_mod(),
+        sm_args=dict(optimise_motif_probs=True),
+        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        lf_args=dict(discrete_edges=bg_edges, expm="pade"),
+    )
+    GN = evo.model(
+        "GN",
+        sm_args=dict(optimise_motif_probs=True),
+        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        lf_args=dict(discrete_edges=bg_edges, expm="pade"),
+    )
+    mc = evo.model_collection(GS, GN, sequential=False)
+
+    mc_result = mc(aln)
+
+    return mc_result
+
+
+def get_init_model_coll(aln):
+    """
+    creates a model_collection object with sequential fitting to be called with given aln.
+
+    Parameters
+    ----------
+    aln : alignment to fit models to. NOTE! aln needs the foreground edge as an entry to the .info dictionary!
+
+    Returns
+    -------
+    model_collection_result containing GTR, GS and GN models (with sequential fitting)
+    """
+
+    fg_edge = aln.info.fg_edge
+
+    if fg_edge is None:
+        raise TypeError("Alignment needs a info.fg_edge attribute")
+
+    bg_edges = list({fg_edge} ^ set(aln.names))
+
+    GTR = evo.model(
+        "GTR",
+        sm_args=dict(optimise_motif_probs=True),
+        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        lf_args=dict(discrete_edges=bg_edges, expm="pade"),
+    )
+    GS = evo.model(
+        GS_mod(),
+        sm_args=dict(optimise_motif_probs=True),
+        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        lf_args=dict(discrete_edges=bg_edges, expm="pade"),
+    )
+    GN = evo.model(
+        "GN",
+        sm_args=dict(optimise_motif_probs=True),
+        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        lf_args=dict(discrete_edges=bg_edges, expm="pade"),
+    )
+    mc = evo.model_collection(GTR, GS, GN, sequential=True)
+
+    mc_result = mc(aln)
+
+    return mc_result
+
+
+def _get_no_init_hypothesis(aln):
+    mc_result = get_no_init_model_coll(aln)
+    result = generic_result(source=aln.info.source)
+    result.update([("mcr", mc_result)])
+    return result
+
+
+get_no_init_hypothesis = user_function(
+    _get_no_init_hypothesis,
+    input_types=SERIALISABLE_TYPE,
+    output_types=SERIALISABLE_TYPE,
+)
+
+
+def _get_init_hypothesis(aln):
+    mc_result = get_init_model_coll(aln)
+    result = generic_result(source=aln.info.source)
+    result.update([("mcr", mc_result)])
+    return result
+
+
+get_init_hypothesis = user_function(
+    _get_init_hypothesis, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
+
+
+def get_fit_model_process(aln_id, length, num, init):
+    reader = io.load_db()
+
+    if init:
+        mc_result = get_init_hypothesis
+        path = f"~/repos/results/aim_2/microbial/{aln_id}/{length}bp/mcr-init.tinydb"
+    else:
+        mc_result = get_no_init_hypothesis
+        path = f"~/repos/results/aim_2/microbial/{aln_id}/{length}bp/mcr-ninit.tinydb"
+
+    writer = io.write_db(path, create=True, if_exists=io.RAISE)
+
+    process = reader + mc_result + writer
+
+    return process
