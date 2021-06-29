@@ -4,11 +4,10 @@ import sys
 
 from setuptools import find_packages, setup
 
-# REPLACE WITH YOUR NAME ETC...
+
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__license__ = "n/a"
-__version__ = "2021.06.28"
+__version__ = "2021.06.29"
 __maintainer__ = "Katherine Caley"
 __email__ = "katherine.caley@anu.edu.au"
 __status__ = "Development"
@@ -19,17 +18,14 @@ if sys.version_info < (3, 6):
         "Python-3.6 or greater is required, Python-%s used." % py_version
     )
 
-# REPLACE WITH YOUR PROJECT DETAILS
 PROJECT_URLS = {
     "Documentation": "https://github.com/GavinHuttley/KathLibrary",
     "Bug Tracker": "https://github.com/GavinHuttley/KathLibrary/issues",
     "Source Code": "https://github.com/GavinHuttley/KathLibrary",
 }
 
-# REPLACE WITH YOUR PROJECT NAME
 short_description = "KathLibrary"
 
-# REPLACE WITH YOUR PROJECT README NAME
 readme_path = pathlib.Path(__file__).parent / "README.md"
 
 long_description = readme_path.read_text()
@@ -37,7 +33,7 @@ long_description = readme_path.read_text()
 PACKAGE_DIR = "src"
 
 setup(
-    name="KathLibrary",  # REPLACE WITH YOUR PROJECT NAME
+    name="KathLibrary",
     version=__version__,
     author="Katherine Caley",
     author_email="katherine.caley@anu.edu.au",
@@ -45,7 +41,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",  # change if it's in markdown format
     platforms=["any"],
-    license=__license__,
     keywords=["science"],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -60,9 +55,8 @@ setup(
     ],
     packages=find_packages(where="src"),
     package_dir={"": PACKAGE_DIR},
-    url="https://github.com/GavinHuttley/KathLibrary",  # REPLACE WITH YOUR PROJECT DETAILS
+    url="https://github.com/GavinHuttley/KathLibrary",
     project_urls=PROJECT_URLS,
-    # REPLACE WITH YOUR PROJECT DEPENDENCIES
     install_requires=["numpy", "cogent3", "click", "accupy", "scipy"],
     # THE FOLLOWING BECOMES A COMMAND LINE SCRIPT
     entry_points={

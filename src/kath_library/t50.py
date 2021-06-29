@@ -8,7 +8,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
-__version__ = "2021.06.28"
+__version__ = "2021.06.29"
 __maintainer__ = "Katherine Caley"
 __email__ = "katherine.caley@anu.edu.au"
 __status__ = "develop"
