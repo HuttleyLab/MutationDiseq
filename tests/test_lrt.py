@@ -1,7 +1,7 @@
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app.evo import model_collection_result
-from kath_analysis.lrt import get_init_model_coll, get_no_init_model_coll
+from kath_library.lrt import get_init_model_coll, get_no_init_model_coll
 
 
 @pytest.fixture()

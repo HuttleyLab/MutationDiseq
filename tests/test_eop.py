@@ -2,13 +2,13 @@ import numpy
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
-from kath_analysis.eop import EOP
+from kath_library.eop import EOP
 
 
 @pytest.fixture()
 def dstore_instance():
     dstore = io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp/alns.tinydb"
+        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
     )
     return dstore
 
@@ -110,7 +110,7 @@ def test_eop_different_lengths(diff_length_alns):
 
 def test_eop_short_seq():
     dstore = io.get_data_store(
-        "/Users/katherine/repos/results/aim_2/microbial/758_443154_73021/300bp_10000_repeats.tinydb"
+        "~/repos/data/microbial/synthetic/758_443154_73021/300bp.tinydb"
     )
     loader = io.load_db()
     aln1 = loader(dstore[9])

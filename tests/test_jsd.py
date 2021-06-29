@@ -2,7 +2,7 @@ import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 from cogent3.app.result import generic_result
-from kath_analysis.jsd import _jsd_fg_edge, _max_jsd_tree, get_entropy, get_jsd
+from kath_library.jsd import _jsd_fg_edge, _max_jsd_tree, get_entropy, get_jsd
 
 
 @pytest.fixture()

@@ -2,7 +2,7 @@ import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree
 from cogent3.app import evo
-from kath_analysis.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 from numpy import eye
 from numpy.testing import assert_allclose
 
@@ -127,7 +127,7 @@ def test_get_stat_pi(likelihood_gtr):
 
     for p in psubs:
         p = p.to_array()
-        assert_allclose(get_stat_pi_via_brute(p, pi_not_stat), pi, rtol=1e-8, atol=1e-8)
+        assert_allclose(get_stat_pi_via_brute(p, pi_not_stat), pi, rtol=1e-6, atol=1e-6)
 
 
 def test_eigen_numerical_same_pi(likelihood_gn):
@@ -142,7 +142,7 @@ def test_eigen_numerical_same_pi(likelihood_gn):
     for p in psubs:
         p = p.to_array()
         numpy.testing.assert_almost_equal(
-            get_stat_pi_via_brute(p, pi), get_stat_pi_via_eigen(p), decimal=8
+            get_stat_pi_via_brute(p, pi), get_stat_pi_via_eigen(p), decimal=6
         )
 
 
@@ -154,6 +154,9 @@ def test_throw_error():
 
 
 def test_eigen_with_almost_identity(almost_identity):
+    """
+    I expect this to fail at the minute
+    """
     P, pi = almost_identity
     get_stat_pi_via_eigen(P, pi)
 
@@ -164,6 +167,9 @@ def test_brute_with_almost_identity(almost_identity):
 
 
 def test_eigen_with_identity(identity):
+    """
+    I expect this to fail at the minute
+    """
     P, pi = identity
     get_stat_pi_via_eigen(P, pi)
 

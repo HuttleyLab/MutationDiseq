@@ -1,11 +1,11 @@
 from cogent3.app import evo, io
-from kath_analysis.convergence import get_eig_ii
+from kath_library.convergence import get_eig_ii
 
 
 def test_convervenge_construction():
 
     dstore = io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp/alns.tinydb"
+        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
     )
     loader = io.load_db()
     aln1 = loader(dstore[0])
