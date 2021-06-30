@@ -4,7 +4,7 @@ from cogent3 import get_model, make_table, make_tree
 from cogent3.maths.stats import chisqprob
 
 from kath_library.jsd import get_jsd
-
+from kath_library.utils.numeric_utils import fix_rounding_error
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 __version__ = "2021.06.29"
@@ -81,6 +81,7 @@ class EOP:
         df = sum([l.nfp for l in self.alt_lfs.values()]) - self.null_lf.nfp
 
         LR = 2 * fsum(numpy.array([alt, -null]))
+        LR = fix_rounding_error(LR, ROUND_ERROR=1e-6)
 
         table = make_table(
             header=["LR", "df", "p"],
