@@ -137,3 +137,5 @@ dmypy.json
 /requirements.txt
 /.isort.cfg
 /.pre-commit-config.yaml
+src/kath_library/utils/numeric_utils.py
+.DS_Store
