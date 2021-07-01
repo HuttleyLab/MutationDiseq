@@ -1,13 +1,14 @@
 from numpy.linalg import eig
 
 
-def get_eig_ii(Q):
+def convergence(Q):
     """
-    Returns the second largest eigenvalue from the rate matrix
+    Returns the absolute value of the second largest eigenvalue from the rate matrix
     """
     v, r = eig(Q)
     v = v.flatten()
     v.sort()
     eigII = v[-2]
+    conv = abs(eigII)
 
-    return eigII
+    return conv
