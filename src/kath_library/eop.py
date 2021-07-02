@@ -30,7 +30,6 @@ class EOP:
         return named_loci
 
     def get_fg_and_bg(self):
-
         if self.loci["aln1"].info.fg_edge is None:
             fg, _, _ = get_jsd(self.loci["aln1"])
             for locus in self.loci.values():
@@ -46,13 +45,14 @@ class EOP:
     def get_null_lf(self):
         sm = get_model(self.mod, optimise_motif_probs=True)
         tree = make_tree(tip_names=list(self.loci.values())[0].names)
+        names = list(self.loci.keys())
         null_lf = sm.make_likelihood_function(
             tree,
-            loci=list(self.loci.keys()),
+            loci=names,
             discrete_edges=self.edges["bg_edges"],
             expm="pade",
         )
-        null_lf.set_alignment(list(self.loci.values()))
+        null_lf.set_alignment([self.loci[k] for k in names])
         null_lf.set_param_rule("mprobs", is_independent=False)
         null_lf.optimise(max_restarts=5, tolerance=1e-8, show_progress=False)
 
@@ -81,7 +81,7 @@ class EOP:
         df = sum([l.nfp for l in self.alt_lfs.values()]) - self.null_lf.nfp
 
         LR = 2 * fsum(numpy.array([alt, -null]))
-        LR = fix_rounding_error(LR, ROUND_ERROR=1e-6)
+        LR = fix_rounding_error(LR, round_error=1e-6)
 
         table = make_table(
             header=["LR", "df", "p"],
