@@ -107,6 +107,27 @@ def get_init_model_coll(aln):
     return mc_result
 
 
+
+def discrete_lf_same_fg(sm, tree, names, bg_edges):
+    lf = sm.make_likelihood_function(
+        tree,
+        loci=names,
+        discrete_edges=bg_edges,
+        expm="pade",
+        )
+    return lf
+
+
+def continuous_lf_same_fg(sm, tree, names, bg_edges):
+    lf = sm.make_likelihood_function(
+        tree,
+        time_het="max",
+        loci=names,
+        expm="pade",
+        )
+    return lf
+
+
 def _get_no_init_hypothesis(aln):
     mc_result = get_no_init_model_coll(aln)
     result = generic_result(source=aln.info.source)
