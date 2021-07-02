@@ -17,7 +17,7 @@ class EOP:
     def __init__(self, loci, mod="GN"):
         self.loci = self.get_loci(loci)
         self.mod = mod
-        self.edges = self.get_fg_ang_bg()
+        self.edges = self.get_fg_an_bg()
         self.null_lf = self.get_null_lf()
         self.alt_lfs = self.get_alt_lfs()
         self.LRT = self.get_LRT_stats()
@@ -29,7 +29,7 @@ class EOP:
             named_loci[f"aln{index+1}"] = locus
         return named_loci
 
-    def get_fg_ang_bg(self):
+    def get_fg_and_bg(self):
 
         if self.loci["aln1"].info.fg_edge is None:
             fg, _, _ = get_jsd(self.loci["aln1"])
