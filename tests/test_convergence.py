@@ -1,8 +1,8 @@
 from cogent3.app import evo, io
-from kath_library.convergence import get_eig_ii
+from kath_library.convergence import convergence
 
 
-def test_convervenge_construction():
+def test_convergence_construction():
 
     dstore = io.get_data_store(
         "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
@@ -27,4 +27,4 @@ def test_convervenge_construction():
 
     Q = result.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
 
-    get_eig_ii(Q)
+    convergence(Q)

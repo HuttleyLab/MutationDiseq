@@ -36,10 +36,13 @@ def get_no_init_model_coll(aln):
     model_collection_result containing GS and GN models (without sequential fitting)
     """
 
-    fg_edge = aln.info.fg_edge
+    try:
+        fg_edge = aln.info.fg_edge
+    except AttributeError:
+        raise AttributeError("Alignment needs a info.fg_edge attribute")
 
     if fg_edge is None:
-        raise TypeError("Alignment needs a info.fg_edge attribute")
+        raise AttributeError("Alignment needs a info.fg_edge attribute")
 
     bg_edges = list({fg_edge} ^ set(aln.names))
 
@@ -75,10 +78,13 @@ def get_init_model_coll(aln):
     model_collection_result containing GTR, GS and GN models (with sequential fitting)
     """
 
-    fg_edge = aln.info.fg_edge
+    try:
+        fg_edge = aln.info.fg_edge
+    except AttributeError:
+        raise AttributeError("Alignment needs a info.fg_edge attribute")
 
     if fg_edge is None:
-        raise TypeError("Alignment needs a info.fg_edge attribute")
+        raise AttributeError("Alignment needs a info.fg_edge attribute")
 
     bg_edges = list({fg_edge} ^ set(aln.names))
 
@@ -107,27 +113,6 @@ def get_init_model_coll(aln):
     return mc_result
 
 
-
-def discrete_lf_same_fg(sm, tree, names, bg_edges):
-    lf = sm.make_likelihood_function(
-        tree,
-        loci=names,
-        discrete_edges=bg_edges,
-        expm="pade",
-        )
-    return lf
-
-
-def continuous_lf_same_fg(sm, tree, names, bg_edges):
-    lf = sm.make_likelihood_function(
-        tree,
-        time_het="max",
-        loci=names,
-        expm="pade",
-        )
-    return lf
-
-
 def _get_no_init_hypothesis(aln):
     mc_result = get_no_init_model_coll(aln)
     result = generic_result(source=aln.info.source)
@@ -152,20 +137,3 @@ def _get_init_hypothesis(aln):
 get_init_hypothesis = user_function(
     _get_init_hypothesis, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
 )
-
-
-def get_fit_model_process(aln_id, length, num, init):
-    reader = io.load_db()
-
-    if init:
-        mc_result = get_init_hypothesis
-        path = f"~/repos/results/aim_2/microbial/{aln_id}/{length}bp/mcr-init.tinydb"
-    else:
-        mc_result = get_no_init_hypothesis
-        path = f"~/repos/results/aim_2/microbial/{aln_id}/{length}bp/mcr-ninit.tinydb"
-
-    writer = io.write_db(path, create=True, if_exists=io.RAISE)
-
-    process = reader + mc_result + writer
-
-    return process

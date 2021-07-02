@@ -64,14 +64,11 @@ def valid_rate_matrix(matrix):
 
 
 def fix_rounding_error(x, round_error=1e-14):
-    """If x is almost in the range 0-1, fixes it.
+    """If x is almost in the range 0, fixes it.
 
-    Specifically, if x is between -ROUND_ERROR and 0, returns 0.
-    If x is between 1 and 1+ROUND_ERROR, returns 1.
+    Specifically, if x is between -round_error and 0, returns 0.
     """
     if -round_error < x < 0:
         return 0
-    elif 1 < x < 1 + round_error:
-        return 1
     else:
         return x
