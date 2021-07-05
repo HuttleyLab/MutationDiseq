@@ -47,7 +47,7 @@ class T50:
         self.tau = minimise(
             self,
             xinit=self.tau,
-            bounds=([1], [1e10]),
+            bounds=([0], [1e10]),
             local=True,
             show_progress=False,
             tolerance=1e-9,

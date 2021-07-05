@@ -152,7 +152,7 @@ def test_T50_with_stationary_pi0(gtr_defined_t50):
     t50 = gtr_defined_t50.estimate_t50()
     print("t50 is", t50)
     numpy.testing.assert_almost_equal(
-        t50, 0, decimal=10, err_msg=f"{gtr_defined_t50.tau}"
+        t50, 0, decimal=7, err_msg=f"{gtr_defined_t50.tau}"
     )
 
 
