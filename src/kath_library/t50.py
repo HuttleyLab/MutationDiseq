@@ -3,8 +3,8 @@ from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
-
-from kath_library.stationary_pi import get_stat_pi_via_brute
+from cogent3.maths.matrix_exponentiation import RobustExponentiator
+from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -20,7 +20,7 @@ class T50:
     the expected number of substitution to the half way distribution
     """
 
-    def __init__(self, Q, pi_0, func=jsm):
+    def __init__(self, Q, pi_0, tau=1, func=jsm):
         """
         Parameters
         ----------
@@ -36,11 +36,13 @@ class T50:
         self.pi_0 = pi_0
         self.pi_inf = self.get_stat_pi()
         self.dist_halfway = func(self.pi_0, self.pi_inf) / 2
-        self.tau = 1
+        self.tau = tau
         self.dist_func = func
+        self.pi_tau = None
 
     def get_stat_pi(self):
-        return get_stat_pi_via_brute(expm(self.Q), self.pi_0)
+        P = RobustExponentiator(self.Q)
+        return get_stat_pi_via_brute(P(), self.pi_0)
 
     def estimate_t50(self):
         ens0 = expected_number_subs(self.pi_0, self.Q, self.tau)
@@ -60,5 +62,7 @@ class T50:
 
     def __call__(self, tau):
         pi_tau = dot(self.pi_0, expm(self.Q * tau))
-        dist = self.dist_func(self.pi_0, pi_tau)
-        return abs(self.dist_halfway - dist) ** 2
+        self.pi_tau = pi_tau # todo: I added this line for debugging, it doesnt need to stay
+        dist1 = self.dist_func(self.pi_0, pi_tau)
+        dist2 = self.dist_func(pi_tau, self.pi_inf)
+        return abs(self.dist_halfway - dist1) ** 2 + abs(self.dist_halfway - dist2) ** 2
