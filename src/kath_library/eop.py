@@ -7,7 +7,7 @@ from kath_library.jsd import get_jsd
 from kath_library.utils.numeric_utils import fix_rounding_error
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__version__ = "2021.07.01"
+__version__ = "2021.07.07"
 __maintainer__ = "Katherine Caley"
 __email__ = "katherine.caley@anu.edu.au"
 __status__ = "develop"

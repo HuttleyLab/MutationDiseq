@@ -8,7 +8,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_ei
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
-__version__ = "2021.07.01"
+__version__ = "2021.07.07"
 __maintainer__ = "Katherine Caley"
 __email__ = "katherine.caley@anu.edu.au"
 __status__ = "develop"
@@ -20,7 +20,7 @@ class T50:
     the expected number of substitution to the half way distribution
     """
 
-    def __init__(self, Q, pi_0, tau=1, func=jsm):
+    def __init__(self, Q, pi_0, func=jsm):
         """
         Parameters
         ----------
@@ -36,19 +36,19 @@ class T50:
         self.pi_0 = pi_0
         self.pi_inf = self.get_stat_pi()
         self.dist_halfway = func(self.pi_0, self.pi_inf) / 2
-        self.tau = tau
+        self.tau = 1
         self.dist_func = func
 
     def get_stat_pi(self):
         return get_stat_pi_via_brute(expm(self.Q), self.pi_0)
 
     def estimate_t50(self):
-        ens_curr = expected_number_subs(self.pi_0, self.Q, self.tau)
+        ens_curr = expected_number_subs(self.pi_0, self.Q, 1)
         self.tau = minimise(
             self,
             xinit=self.tau,
             bounds=([0], [1e10]),
-            local=None,
+            local=True,
             show_progress=False,
             tolerance=1e-8,
         )
