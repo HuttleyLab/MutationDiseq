@@ -25,7 +25,7 @@ class T50:
         Parameters
         ----------
         Q
-            a valid rate matrix
+            a valid uncalibrated rate matrix
         pi_0
             a valid probability vector representing the initial state freqs
         func
@@ -38,31 +38,28 @@ class T50:
         self.dist_halfway = func(self.pi_0, self.pi_inf) / 2
         self.tau = tau
         self.dist_func = func
-        self.pi_tau = None
 
     def get_stat_pi(self):
-        P = RobustExponentiator(self.Q)
-        return get_stat_pi_via_brute(P(), self.pi_0)
+        return get_stat_pi_via_brute(expm(self.Q), self.pi_0)
 
     def estimate_t50(self):
-        ens0 = expected_number_subs(self.pi_0, self.Q, self.tau)
+        ens_curr = expected_number_subs(self.pi_0, self.Q, self.tau)
         self.tau = minimise(
             self,
             xinit=self.tau,
             bounds=([0], [1e10]),
-            local=True,
+            local=None,
             show_progress=False,
-            tolerance=1e-9,
+            tolerance=1e-8,
         )
-        ens_total = expected_number_subs(self.pi_0, self.Q, self.tau)
-        return ens_total - ens0
+        ens_50 = expected_number_subs(self.pi_0, self.Q, self.tau)
+        return ens_50 - ens_curr
 
     def distance_from_pi_zero(self, pi):
         return self.dist_func(self.pi_0, pi)
 
     def __call__(self, tau):
         pi_tau = dot(self.pi_0, expm(self.Q * tau))
-        self.pi_tau = pi_tau # todo: I added this line for debugging, it doesnt need to stay
         dist1 = self.dist_func(self.pi_0, pi_tau)
         dist2 = self.dist_func(pi_tau, self.pi_inf)
-        return abs(self.dist_halfway - dist1) ** 2 + abs(self.dist_halfway - dist2) ** 2
+        return abs(dist1 - dist2) ** 2
