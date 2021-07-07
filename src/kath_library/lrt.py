@@ -25,7 +25,7 @@ def GS_mod():
 
 def get_no_init_model_coll(aln):
     """
-    creates a model_collection object without sequential fitting to be called with given aln.
+    creates a model_collection object without sequential fitting to be called with given alignment.
 
     Parameters
     ----------
