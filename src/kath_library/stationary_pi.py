@@ -39,7 +39,7 @@ def get_stat_pi_via_eigen(P, check_precision=True):
 
 
 def get_stat_pi_via_brute(
-    P, pi_zero, limit_action="raise", max_iterations=10000, threshold=1e-8
+    P, pi_zero, limit_action="raise", max_iterations=100000, threshold=1e-8
 ):
     """
     Obtain the stationary distribution via brute force
