@@ -3,6 +3,7 @@ from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 from cogent3.core.profile import safe_p_log_p
 from cogent3.util.dict_array import DictArray
+from cogent3.maths.measure import jsd as jsd_func
 from numpy import array as np_array
 
 from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
@@ -15,50 +16,51 @@ __email__ = "katherine.caley@anu.edu.au"
 __status__ = "develop"
 
 
-# todo change the terminology from ingroup in the cases where its not the ingroup, maybe change to pair?
-def get_jsd(aln, edge=None):
+def get_jsd(aln, edge=None, evaluate="ingroup"):
     """
-
-    Parameters
+     Parameters
     ----------
     aln : 3 sequence alignment
-    edge :  if None, defaults to the jsd of the ingroup, returned edge decided from highest jsd with the outgroup.
-            if "max", returns the maximum pairwise jsd, returned edge has highest average pairwise jsd.
-            if given an edge (as a string), will return the maximum pairwise jsd of that edge.
-
-    Returns
-    -------
-            edge: the foreground edge, unless edge="max" this is not guaranteed.
-            ingroup: tuple containing the names of edges from the jsd calculation.
-            jsd: the jsd value for the ingroup.
+    edge : str for which taxa is the primary edge to be used in this analysis
+            if None, defaults to foreground edge
+    evaluate : determines which comparison to return the jsd value
+                defaults to "ingroup", which returns the jsd of the ingroup,
+                "max" returns the maximum pairwise jsd,
+                "total" returns the total jsd
     """
-
     freqs = aln.counts_per_seq().to_freq_array()
-    pwise_jsd = freqs.pairwise_jsd()
-    darr = DictArray(pwise_jsd)
-    total_jsd = darr.row_sum().to_dict()
+    jsd_pwise = freqs.pairwise_jsd()
+    darr = DictArray(jsd_pwise)
+    jsd_totals = darr.row_sum().to_dict()
 
     if edge is None:
         tip_dists = aln.distance_matrix().to_dict()
         ingroup = min(tip_dists, key=lambda k: tip_dists[k])
-        jsd = pwise_jsd[ingroup]
-        total_jsd = {key: total_jsd[key] for key in ingroup}
-        edge = max(total_jsd, key=lambda k: total_jsd[k])
-
-    elif edge == "max":
-        ingroup = max(pwise_jsd, key=lambda k: pwise_jsd[k])
-        jsd = pwise_jsd[ingroup]
-        total_jsd = {key: total_jsd[key] for key in ingroup}
-        edge = max(total_jsd, key=lambda k: total_jsd[k])
-
+        jsd_totals = {key: jsd_totals[key] for key in ingroup}
+        edge = max(jsd_totals, key=lambda k: jsd_totals[k])
+        if evaluate == "ingroup":
+            jsd = jsd_pwise[ingroup]
+            return edge, ingroup, jsd
     else:
         assert edge in aln.names, "fg_edge input name is not included in alignment"
-        keys = [tup for tup in pwise_jsd.keys() if edge in tup]
-        pwise_jsd = {key: pwise_jsd[key] for key in keys}
-        ingroup = max(pwise_jsd, key=lambda k: pwise_jsd[k])
-        jsd = pwise_jsd[ingroup]
 
-    return edge, ingroup, jsd
+    if evaluate == "ingroup":
+        keys = [tup for tup in jsd_pwise.keys() if edge in tup]
+        jsd_pwise = {key: jsd_pwise[key] for key in keys}
+        ingroup = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        jsd = jsd_pwise[ingroup]
+        return edge, ingroup, jsd
+
+    elif evaluate == "total":
+        jsd = jsd_func(freqs[0], freqs[1], freqs[2])
+        return edge, (aln.names[0], aln.names[1], aln.names[2]), jsd
+
+    elif evaluate == "max":
+        keys = [tup for tup in jsd_pwise.keys() if edge in tup]
+        jsd_pwise = {key: jsd_pwise[key] for key in keys}
+        max_pair = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        jsd = jsd_pwise[max_pair]
+        return edge, max_pair, jsd
 
 
 def get_entropy(model_result, edge, stat_pi=True):
@@ -93,26 +95,3 @@ def get_entropy(model_result, edge, stat_pi=True):
 
     return entropy
 
-
-def _jsd_fg_edge(aln, fg_edge=None):
-    edge, ingroup, jsd = get_jsd(aln, edge=fg_edge)
-    result = generic_result(source=aln.info.source)
-    result.update([("jsd", jsd), ("foreground", edge)])
-    return result
-
-
-jsd_fg_edge = user_function(
-    _jsd_fg_edge, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
-)
-
-
-def _max_jsd_tree(aln):
-    edge, ingroup, jsd = get_jsd(aln, edge="max")
-    result = generic_result(source=aln.info.source)
-    result.update([("edge", edge), ("edges", ingroup), ("jsd", jsd)])
-    return result
-
-
-max_jsd_tree = user_function(
-    _max_jsd_tree, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
-)
