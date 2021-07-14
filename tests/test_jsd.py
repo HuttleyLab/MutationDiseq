@@ -83,6 +83,7 @@ def test_get_jsd_all(aln):
     assert edge in ingroup
     assert jsd["total_jsd"] >= jsd["ingroup_jsd"]
 
+
 def test_get_jsd_max(aln):
     """
     checks that get_jsd() with evaluate="all" returns a value for
@@ -93,8 +94,6 @@ def test_get_jsd_max(aln):
     edge, ingroup, jsd = get_jsd(aln, evaluate="max")
     assert 0 <= jsd < 1
     assert edge in ingroup
-
-
 
 
 def test_get_jsd_edge(aln):
