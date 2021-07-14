@@ -113,8 +113,9 @@ def test_jsd_single_nt(single_nt_aln):
 
 
 def test_jsd_diff_nt(diff_nt_aln):
-    edge, _, jsd = get_jsd(diff_nt_aln, evaluate="ingroup")
+    edge, ingroup, jsd = get_jsd(diff_nt_aln, evaluate="ingroup")
     assert jsd == 0.0
+    assert ingroup == ("Human", "Rhesus")
     _, _, jsd = get_jsd(diff_nt_aln, evaluate="total")
     assert jsd == 1.0
 
