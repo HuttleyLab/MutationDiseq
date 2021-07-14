@@ -83,6 +83,19 @@ def test_get_jsd_all(aln):
     assert edge in ingroup
     assert jsd["total_jsd"] >= jsd["ingroup_jsd"]
 
+def test_get_jsd_max(aln):
+    """
+    checks that get_jsd() with evaluate="all" returns a value for
+    JSD between 0 and 1, and that the foreground edge is in
+    the tuple from which the JSD is calculated.
+    checks that the jsd is >= then that of the ingroup.
+    """
+    edge, ingroup, jsd = get_jsd(aln, evaluate="max")
+    assert 0 <= jsd < 1
+    assert edge in ingroup
+
+
+
 
 def test_get_jsd_edge(aln):
     """
