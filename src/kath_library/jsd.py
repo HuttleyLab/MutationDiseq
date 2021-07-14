@@ -45,9 +45,11 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         assert edge in aln.names, "fg_edge input name is not included in alignment"
 
     if evaluate == "ingroup":
-        keys = [tup for tup in jsd_pwise.keys() if edge in tup]
-        jsd_pwise = {key: jsd_pwise[key] for key in keys}
-        ingroup = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        tip_dists = aln.distance_matrix().to_dict()
+        ingroup = min(tip_dists, key=lambda k: tip_dists[k])
+
+        assert edge in ingroup, "evaluate=\"ingroup\" is not valid if given edge is not in ingroup"
+
         jsd = jsd_pwise[ingroup]
         return edge, ingroup, jsd
 
@@ -55,14 +57,27 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         jsd = jsd_func(freqs[0], freqs[1], freqs[2])
         return edge, (aln.names[0], aln.names[1], aln.names[2]), jsd
 
-    elif evaluate == "all":
-        jsds = {}
+    elif evaluate == "max":
         keys = [tup for tup in jsd_pwise.keys() if edge in tup]
         jsd_pwise = {key: jsd_pwise[key] for key in keys}
-        ingroup = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        max_pair = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        jsd = jsd_pwise[max_pair]
+        return edge, max_pair, jsd
 
-        jsds["ingroup_jsd"] = jsd_pwise[ingroup]
+    elif evaluate == "all":
+        jsds = {}
+
         jsds["total_jsd"] = jsd_func(freqs[0], freqs[1], freqs[2])
+
+        tip_dists = aln.distance_matrix().to_dict()
+        ingroup = min(tip_dists, key=lambda k: tip_dists[k])
+        jsds["ingroup_jsd"] = jsd_pwise[ingroup]
+
+
+        keys = [tup for tup in jsd_pwise.keys() if edge in tup]
+        jsd_pwise = {key: jsd_pwise[key] for key in keys}
+        max_pair = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+        jsds["max_jsd"] = jsd_pwise[max_pair]
 
         return edge, ingroup, jsds
 
