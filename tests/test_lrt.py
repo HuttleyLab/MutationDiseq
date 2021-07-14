@@ -1,10 +1,17 @@
-import pytest
 import os
 from tempfile import TemporaryDirectory
+
+import pytest
 from cogent3 import make_aligned_seqs
-from cogent3.app.evo import model_collection_result
 from cogent3.app import io
-from kath_library.lrt import get_init_model_coll, get_no_init_model_coll, get_no_init_hypothesis, get_init_hypothesis
+from cogent3.app.evo import model_collection_result
+
+from kath_library.lrt import (
+    get_init_hypothesis,
+    get_init_model_coll,
+    get_no_init_hypothesis,
+    get_no_init_model_coll,
+)
 
 
 @pytest.fixture()
@@ -13,6 +20,7 @@ def dstore_instance():
         "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
     )
     return dstore
+
 
 @pytest.fixture()
 def get_aln():
@@ -24,6 +32,7 @@ def get_aln():
     aln = make_aligned_seqs(data=_data, moltype="dna")
     aln.info["fg_edge"] = "Human"
     return aln
+
 
 @pytest.fixture()
 def get_aln_no_fg():
@@ -64,6 +73,7 @@ def test_no_fg_throw_error(get_aln_no_fg):
     with pytest.raises(AttributeError):
         get_init_model_coll(get_aln_no_fg)
 
+
 def test_get_no_init_hypothesis_app_run(dstore_instance):
     with TemporaryDirectory(dir=".") as dirname:
 
@@ -76,6 +86,7 @@ def test_get_no_init_hypothesis_app_run(dstore_instance):
 
         assert len(process.data_store.summary_incomplete) == 0
 
+
 def test_get_init_hypothesis_app_run(dstore_instance):
     with TemporaryDirectory(dir=".") as dirname:
 
@@ -87,4 +98,3 @@ def test_get_init_hypothesis_app_run(dstore_instance):
         process.apply_to(dstore_instance[:1])
 
         assert len(process.data_store.summary_incomplete) == 0
-

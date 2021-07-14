@@ -2,9 +2,10 @@ import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree
 from cogent3.app import evo
-from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 from numpy import eye
 from numpy.testing import assert_allclose
+
+from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 
 @pytest.fixture()

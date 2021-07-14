@@ -1,6 +1,7 @@
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
+
 from kath_library.jsd import get_entropy, get_jsd
 
 
@@ -16,43 +17,47 @@ def aln():
     seqs = make_aligned_seqs(_seqs, moltype="dna")
     return seqs
 
+
 @pytest.fixture()
 def single_nt_aln():
 
     _seqs = {
-        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "Bandicoot":    "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Bandicoot": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Rhesus": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     }
 
     seqs = make_aligned_seqs(_seqs, moltype="dna")
     return seqs
+
 
 @pytest.fixture()
 def diff_nt_aln():
 
     _seqs = {
-        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "Bandicoot":    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
-        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Bandicoot": "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "Rhesus": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     }
 
     seqs = make_aligned_seqs(_seqs, moltype="dna")
     return seqs
 
+
 @pytest.fixture()
 def diff_nt_aln_with_fg():
 
     _seqs = {
-        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "Bandicoot":    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
-        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Bandicoot": "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "Rhesus": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     }
 
     seqs = make_aligned_seqs(_seqs, moltype="dna")
     seqs.info["fg_edge"] = "Human"
 
     return seqs
+
 
 def test_get_jsd_none_edge(aln):
     """
@@ -106,12 +111,12 @@ def test_jsd_single_nt(single_nt_aln):
     _, _, jsd = get_jsd(single_nt_aln, evaluate="total")
     assert jsd == 0.0
 
+
 def test_jsd_diff_nt(diff_nt_aln):
     edge, _, jsd = get_jsd(diff_nt_aln, evaluate="ingroup")
     assert jsd == 0.0
     _, _, jsd = get_jsd(diff_nt_aln, evaluate="total")
     assert jsd == 1.0
-
 
 
 def test_jsd_diff_nt_with_fg(diff_nt_aln_with_fg):
@@ -133,4 +138,3 @@ def test_get_entropy(aln):
     fitted = gn(aln)
     entropy = get_entropy(fitted, stat_pi=False, edge="Human")
     assert entropy > 0
-

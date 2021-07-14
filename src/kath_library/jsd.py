@@ -2,8 +2,8 @@ from accupy import fsum as sum
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 from cogent3.core.profile import safe_p_log_p
-from cogent3.util.dict_array import DictArray
 from cogent3.maths.measure import jsd as jsd_func
+from cogent3.util.dict_array import DictArray
 from numpy import array as np_array
 
 from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
@@ -56,7 +56,7 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         return edge, (aln.names[0], aln.names[1], aln.names[2]), jsd
 
     elif evaluate == "all":
-        jsds={}
+        jsds = {}
         keys = [tup for tup in jsd_pwise.keys() if edge in tup]
         jsd_pwise = {key: jsd_pwise[key] for key in keys}
         ingroup = max(jsd_pwise, key=lambda k: jsd_pwise[k])
@@ -98,4 +98,3 @@ def get_entropy(model_result, edge, stat_pi=True):
         entropy = sum(safe_p_log_p(np_array(list(lf.get_motif_probs()))))
 
     return entropy
-

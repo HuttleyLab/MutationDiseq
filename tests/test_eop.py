@@ -2,6 +2,7 @@ import numpy
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
+
 from kath_library.eop import EOP
 
 

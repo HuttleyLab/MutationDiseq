@@ -1,9 +1,10 @@
 from accupy import fdot as dot
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
+from cogent3.maths.matrix_exponentiation import RobustExponentiator
 from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
-from cogent3.maths.matrix_exponentiation import RobustExponentiator
+
 from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 __author__ = "Katherine Caley"
