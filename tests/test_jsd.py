@@ -28,6 +28,32 @@ def single_nt_aln():
     seqs = make_aligned_seqs(_seqs, moltype="dna")
     return seqs
 
+@pytest.fixture()
+def diff_nt_aln():
+
+    _seqs = {
+        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Bandicoot":    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    }
+
+    seqs = make_aligned_seqs(_seqs, moltype="dna")
+    return seqs
+
+@pytest.fixture()
+def diff_nt_aln_with_fg():
+
+    _seqs = {
+        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "Bandicoot":    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    }
+
+    seqs = make_aligned_seqs(_seqs, moltype="dna")
+    seqs.info["fg_edge"] = "Human"
+
+    return seqs
+
 def test_get_jsd_none_edge(aln):
     """
     checks that get_jsd() with edge=None returns a value for
@@ -39,19 +65,18 @@ def test_get_jsd_none_edge(aln):
     assert edge in ingroup
 
 
-def test_get_jsd_max(aln):
+def test_get_jsd_all(aln):
     """
-    checks that get_jsd() with edge="max" returns a value for
+    checks that get_jsd() with evaluate="all" returns a value for
     JSD between 0 and 1, and that the foreground edge is in
     the tuple from which the JSD is calculated.
     checks that the jsd is >= then that of the ingroup.
     """
-    edge, ingroup, jsd = get_jsd(aln, evaluate="max")
-    assert 0 <= jsd < 1
+    edge, ingroup, jsd = get_jsd(aln, evaluate="all")
+    assert 0 <= jsd["ingroup_jsd"] < 1
+    assert 0 <= jsd["total_jsd"] < 1
     assert edge in ingroup
-
-    _edge, _ingroup, _jsd = get_jsd(aln)
-    assert jsd >= _jsd
+    assert jsd["total_jsd"] >= jsd["ingroup_jsd"]
 
 
 def test_get_jsd_edge(aln):
@@ -78,29 +103,21 @@ def test_get_jsd_given_edge_exception(aln):
 def test_jsd_single_nt(single_nt_aln):
     _, _, jsd = get_jsd(single_nt_aln, evaluate="ingroup")
     assert jsd == 0.0
-    _, _, jsd = get_jsd(single_nt_aln, evaluate="max")
-    assert jsd == 0.0
     _, _, jsd = get_jsd(single_nt_aln, evaluate="total")
     assert jsd == 0.0
-
-@pytest.fixture()
-def diff_nt_aln():
-
-    _seqs = {
-        "Human":        "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "Bandicoot":    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
-        "Rhesus":       "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-    }
-
-    seqs = make_aligned_seqs(_seqs, moltype="dna")
-    return seqs
 
 def test_jsd_diff_nt(diff_nt_aln):
     edge, _, jsd = get_jsd(diff_nt_aln, evaluate="ingroup")
     assert jsd == 0.0
-    _, _, jsd = get_jsd(diff_nt_aln, evaluate="max")
-    assert jsd == 1.0
     _, _, jsd = get_jsd(diff_nt_aln, evaluate="total")
+    assert jsd == 1.0
+
+
+
+def test_jsd_diff_nt_with_fg(diff_nt_aln_with_fg):
+    edge, _, jsd = get_jsd(diff_nt_aln_with_fg, evaluate="ingroup")
+    assert jsd == 0.0
+    _, _, jsd = get_jsd(diff_nt_aln_with_fg, evaluate="total")
     assert jsd == 1.0
 
 

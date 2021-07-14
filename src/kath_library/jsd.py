@@ -25,8 +25,8 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
             if None, defaults to foreground edge
     evaluate : determines which comparison to return the jsd value
                 defaults to "ingroup", which returns the jsd of the ingroup,
-                "max" returns the maximum pairwise jsd,
                 "total" returns the total jsd
+                "all" return a dicts of all of the possible jsd evaluations
     """
     freqs = aln.counts_per_seq().to_freq_array()
     jsd_pwise = freqs.pairwise_jsd()
@@ -55,12 +55,16 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         jsd = jsd_func(freqs[0], freqs[1], freqs[2])
         return edge, (aln.names[0], aln.names[1], aln.names[2]), jsd
 
-    elif evaluate == "max":
+    elif evaluate == "all":
+        jsds={}
         keys = [tup for tup in jsd_pwise.keys() if edge in tup]
         jsd_pwise = {key: jsd_pwise[key] for key in keys}
-        max_pair = max(jsd_pwise, key=lambda k: jsd_pwise[k])
-        jsd = jsd_pwise[max_pair]
-        return edge, max_pair, jsd
+        ingroup = max(jsd_pwise, key=lambda k: jsd_pwise[k])
+
+        jsds["ingroup_jsd"] = jsd_pwise[ingroup]
+        jsds["total_jsd"] = jsd_func(freqs[0], freqs[1], freqs[2])
+
+        return edge, ingroup, jsds
 
 
 def get_entropy(model_result, edge, stat_pi=True):
