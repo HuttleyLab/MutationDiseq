@@ -48,7 +48,9 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         tip_dists = aln.distance_matrix().to_dict()
         ingroup = min(tip_dists, key=lambda k: tip_dists[k])
 
-        assert edge in ingroup, "evaluate=\"ingroup\" is not valid if given edge is not in ingroup"
+        assert (
+            edge in ingroup
+        ), 'evaluate="ingroup" is not valid if given edge is not in ingroup'
 
         jsd = jsd_pwise[ingroup]
         return edge, ingroup, jsd
@@ -72,7 +74,6 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         tip_dists = aln.distance_matrix().to_dict()
         ingroup = min(tip_dists, key=lambda k: tip_dists[k])
         jsds["ingroup_jsd"] = jsd_pwise[ingroup]
-
 
         keys = [tup for tup in jsd_pwise.keys() if edge in tup]
         jsd_pwise = {key: jsd_pwise[key] for key in keys}
