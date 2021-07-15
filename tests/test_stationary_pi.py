@@ -5,7 +5,12 @@ from cogent3.app import evo
 from numpy import eye
 from numpy.testing import assert_allclose
 
-from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from kath_library.jsd import get_jsd
+from kath_library.stationary_pi import (
+    OscillatingPiException,
+    get_stat_pi_via_brute,
+    get_stat_pi_via_eigen,
+)
 
 
 @pytest.fixture()
@@ -103,6 +108,21 @@ def identity():
     return P, pi
 
 
+@pytest.fixture()
+def non_converging_aln():
+    aln = load_aligned_seqs(
+        "/Users/katherine/repos/data/raw/microbial/100347_54583_202620.nexus",
+        moltype="dna",
+    )
+    edge, ingroup, jsds = get_jsd(aln, evaluate="all")
+
+    P = aln.lf.get_psub_for_edge(edge, calibrated=False).to_array()
+    pi_0 = aln.lf.get_motif_probs().to_array()
+
+    with pytest.raises(OscillatingPiException):
+        pi_inf = get_stat_pi_via_brute(P, pi_0)
+
+
 def test_return_same_stat_pi(likelihood_gtr):
     """
     given a Psub matrix and pi defined by GTR, should return the same pi
@@ -154,25 +174,15 @@ def test_throw_error():
         get_stat_pi_via_brute(P, pi_0)
 
 
-def test_eigen_with_almost_identity(almost_identity):
-    """
-    I expect this to fail at the minute
-    """
-    P, pi = almost_identity
-    get_stat_pi_via_eigen(P, pi)
-
-
 def test_brute_with_almost_identity(almost_identity):
     P, pi = almost_identity
     get_stat_pi_via_brute(P, pi)
 
 
 def test_eigen_with_identity(identity):
-    """
-    I expect this to fail at the minute
-    """
     P, pi = identity
-    get_stat_pi_via_eigen(P, pi)
+    with pytest.raises(ValueError):
+        get_stat_pi_via_eigen(P, pi)
 
 
 def test_brute_with_identity(identity):
