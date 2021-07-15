@@ -4,7 +4,11 @@ from cogent3.app import evo
 from cogent3.util.dict_array import DictArray
 from numpy import eye
 
-from kath_library.utils.numeric_utils import valid_rate_matrix, valid_stochastic_matrix, valid_probability_vector
+from kath_library.utils.numeric_utils import (
+    valid_probability_vector,
+    valid_rate_matrix,
+    valid_stochastic_matrix,
+)
 
 
 def test_valid_rate_matrix_DictArray():
@@ -26,18 +30,18 @@ def test_valid_psub_DictArray():
 
 
 def test_valid_probability_vector_DictArray():
-   seqs = {
+    seqs = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",
         "Bandicoot": "GACTCATTAATGCTTGAAACCAGCAGTTTATTGTCCAACACT",
         "Rhesus": "GCCAGCTCATTACAGCATGAGAACAGTTTGTTACTCACTATT",
     }
 
-   aln = make_aligned_seqs(seqs, moltype="dna")
+    aln = make_aligned_seqs(seqs, moltype="dna")
 
-   gn = evo.model("GN", show_progress=False)
-   fitted = gn(aln)
+    gn = evo.model("GN", show_progress=False)
+    fitted = gn(aln)
 
-   lf = fitted.lf
-   pi = lf.get_motif_probs()
+    lf = fitted.lf
+    pi = lf.get_motif_probs()
 
-   assert valid_probability_vector(pi)
+    assert valid_probability_vector(pi)

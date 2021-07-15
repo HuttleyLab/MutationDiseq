@@ -151,5 +151,3 @@ def test_get_entropy_stat_pi(aln):
     fitted = gn(aln)
     entropy = get_entropy(fitted, edge="Human", stat_pi=True)
     assert entropy > 0
-
-
