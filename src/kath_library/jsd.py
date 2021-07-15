@@ -99,15 +99,13 @@ def get_entropy(model_result, edge, stat_pi=True):
     ), "edge input name is not included in model_result"
 
     lf = model_result.lf
+    pi = lf.get_motif_probs().to_array()
 
     if stat_pi:
-        psub_fg = lf.get_psub_for_edge(edge)
-        try:
-            stat_pi_fg = get_stat_pi_via_eigen(psub_fg)
-        except ArithmeticError:
-            stat_pi_fg = get_stat_pi_via_brute(psub_fg, lf.get_motif_probs())
+        psub_fg = lf.get_psub_for_edge(edge).to_array()
+        stat_pi_fg = get_stat_pi_via_brute(psub_fg, pi)
         entropy = sum(safe_p_log_p(stat_pi_fg))
     else:
-        entropy = sum(safe_p_log_p(np_array(list(lf.get_motif_probs()))))
+        entropy = sum(safe_p_log_p(pi))
 
     return entropy

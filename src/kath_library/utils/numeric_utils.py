@@ -32,7 +32,8 @@ def valid_probability_vector(vector):
     """
     returns True if vector sums to 1 and all entries are valid probabilities
     """
-
+    if isinstance(vector, DictArray):
+        vector = vector.to_array()
     row_sum_one = math.isclose(sum(vector), 1, rel_tol=1e-10, abs_tol=1e-14)
     all_in_unit_interval = all(0 <= i <= 1 for i in vector)
 

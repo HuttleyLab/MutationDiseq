@@ -1,7 +1,7 @@
 import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree
-from cogent3.app import evo
+from cogent3.app import evo, io
 from numpy import eye
 from numpy.testing import assert_allclose
 
@@ -109,18 +109,23 @@ def identity():
 
 
 @pytest.fixture()
-def non_converging_aln():
-    aln = load_aligned_seqs(
-        "/Users/katherine/repos/data/raw/microbial/100347_54583_202620.nexus",
-        moltype="dna",
+def non_converging():
+    dstore = io.get_data_store(
+        "/Users/katherine/repos/results/aim_2/microbial/summary/gn_fits-het.tinydb"
     )
-    edge, ingroup, jsds = get_jsd(aln, evaluate="all")
+    loader = io.load_db()
+    aln = loader((dstore.filtered("100347_54583_202620*"))[0])
+    print(type(aln))
+    return aln
 
-    P = aln.lf.get_psub_for_edge(edge, calibrated=False).to_array()
-    pi_0 = aln.lf.get_motif_probs().to_array()
+
+def test_return_OscillatingPiExcpetion(non_converging):
+    edge, _, _ = get_jsd(non_converging.alignment, evaluate="ingroup")
+    P = non_converging.lf.get_psub_for_edge(edge, calibrated=False).to_array()
+    pi_0 = non_converging.lf.get_motif_probs().to_array()
 
     with pytest.raises(OscillatingPiException):
-        pi_inf = get_stat_pi_via_brute(P, pi_0)
+        get_stat_pi_via_brute(P, pi_0)
 
 
 def test_return_same_stat_pi(likelihood_gtr):

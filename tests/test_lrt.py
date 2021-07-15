@@ -42,6 +42,7 @@ def get_aln_no_fg():
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
     aln = make_aligned_seqs(data=_data, moltype="dna")
+
     return aln
 
 
@@ -67,7 +68,7 @@ def test_no_fg_throw_error(get_aln_no_fg):
         get_no_init_model_coll(get_aln_no_fg)
     with pytest.raises(AttributeError):
         get_init_model_coll(get_aln_no_fg)
-    get_aln_no_fg.info["fg_edge"] = None
+    get_aln_no_fg.info = None
     with pytest.raises(AttributeError):
         get_no_init_model_coll(get_aln_no_fg)
     with pytest.raises(AttributeError):

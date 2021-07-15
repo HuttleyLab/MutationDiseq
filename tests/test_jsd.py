@@ -139,15 +139,17 @@ def test_jsd_diff_nt_with_fg(diff_nt_aln_with_fg):
     assert jsd == 1.0
 
 
-def test_get_entropy_stat_pi(aln):
-    gn = evo.model("GN", show_progress=False)
-    fitted = gn(aln)
-    entropy = get_entropy(fitted, stat_pi=True, edge="Human")
-    assert entropy > 0
-
-
 def test_get_entropy(aln):
     gn = evo.model("GN", show_progress=False)
     fitted = gn(aln)
-    entropy = get_entropy(fitted, stat_pi=False, edge="Human")
+    entropy = get_entropy(fitted, edge="Human", stat_pi=False)
     assert entropy > 0
+
+
+def test_get_entropy_stat_pi(aln):
+    gn = evo.model("GN", show_progress=False)
+    fitted = gn(aln)
+    entropy = get_entropy(fitted, edge="Human", stat_pi=True)
+    assert entropy > 0
+
+
