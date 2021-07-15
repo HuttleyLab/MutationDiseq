@@ -15,6 +15,11 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.07"
 
 
+class OscillatingPiException(Exception):
+    """ Did not converge to a unique stationary distribution """
+    pass
+
+
 def get_stat_pi_via_eigen(P, check_precision=True):
     """
     This code was provided by Gavin Huttley
@@ -59,6 +64,6 @@ def get_stat_pi_via_brute(
         num_iterations += 1
 
     if num_iterations == max_iterations and limit_action == "raise":
-        raise RecursionError("Reached maximum iterations without convergence")
+        raise OscillatingPiException("Reached maximum iterations without convergence")
 
     return new_pi
