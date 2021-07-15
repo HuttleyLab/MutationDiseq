@@ -12,7 +12,6 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.07"
 
 
-
 class T50:
     """
     takes a rate matrix and a starting probability vector, and computes

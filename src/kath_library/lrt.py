@@ -9,7 +9,6 @@ __credits__ = ["Katherine Caley"]
 __version__ = "2021.07.07"
 
 
-
 def GS_mod():
     """
     A General Stationary Nucleotide substitution model instance.

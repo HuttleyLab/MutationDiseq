@@ -9,6 +9,7 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 __version__ = "2021.07.01"
 
+
 def valid_stochastic_matrix(matrix):
     """
     returns True if all rows sum to 1 and all entries are valid probabilities

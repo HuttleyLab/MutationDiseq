@@ -15,7 +15,6 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.07"
 
 
-
 def get_stat_pi_via_eigen(P, check_precision=True):
     """
     This code was provided by Gavin Huttley

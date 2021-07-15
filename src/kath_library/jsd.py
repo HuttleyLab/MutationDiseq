@@ -13,7 +13,6 @@ __credits__ = ["Katherine Caley"]
 __version__ = "2021.07.07"
 
 
-
 def get_jsd(aln, edge=None, evaluate="ingroup"):
     """
      Parameters
