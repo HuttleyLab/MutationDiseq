@@ -1,5 +1,9 @@
 from numpy.linalg import eig
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley"]
+__version__ = "2021.07.07"
+
 
 def convergence(Q):
     """
