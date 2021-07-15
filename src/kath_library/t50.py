@@ -10,9 +10,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_ei
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.07"
-__maintainer__ = "Katherine Caley"
-__email__ = "katherine.caley@anu.edu.au"
-__status__ = "develop"
+
 
 
 class T50:

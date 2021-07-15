@@ -13,9 +13,7 @@ from kath_library.utils.numeric_utils import (
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.07"
-__maintainer__ = "Katherine Caley"
-__email__ = "katherine.caley@anu.edu.au"
-__status__ = "develop"
+
 
 
 def get_stat_pi_via_eigen(P, check_precision=True):
@@ -39,7 +37,7 @@ def get_stat_pi_via_eigen(P, check_precision=True):
 
 
 def get_stat_pi_via_brute(
-    P, pi_zero, limit_action="raise", max_iterations=100000, threshold=1e-7
+    P, pi_zero, limit_action="raise", max_iterations=100000, threshold=1e-8
 ):
     """
     Obtain the stationary distribution via brute force
