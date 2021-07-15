@@ -17,6 +17,7 @@ __version__ = "2021.07.07"
 
 class OscillatingPiException(Exception):
     """ Did not converge to a unique stationary distribution """
+
     pass
 
 
