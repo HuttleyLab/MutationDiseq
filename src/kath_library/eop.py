@@ -11,6 +11,7 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 __version__ = "2021.07.17"
 
+
 class adjacent_EOP:
     def __init__(self, loci, mod="GN"):
         self.loci = {f"aln{index+1}": locus for index, locus in enumerate(loci)}

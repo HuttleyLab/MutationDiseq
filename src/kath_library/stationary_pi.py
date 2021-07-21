@@ -14,6 +14,7 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.17"
 
+
 class OscillatingPiException(Exception):
     """ Did not converge to a unique stationary distribution """
 
