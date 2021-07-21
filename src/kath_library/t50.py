@@ -1,4 +1,7 @@
+import numpy as np
 from accupy import fdot as dot
+from cogent3.app.composable import SERIALISABLE_TYPE, user_function
+from cogent3.app.result import generic_result
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
@@ -9,6 +12,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_ei
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 __version__ = "2021.07.17"
+
 
 class T50:
     """
@@ -59,3 +63,28 @@ class T50:
         dist1 = self.dist_func(self.pi_0, pi_tau)
         dist2 = self.dist_func(pi_tau, self.pi_inf)
         return abs(dist1 - dist2) ** 2
+
+
+def _get_t50(mc):
+
+    gn = mc["mcr"]["GN"]
+    fg_edge = mc["mcr"].source["fg_edge"]
+
+    Q_darray = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
+    pi_darray = gn.alignment.counts_per_seq().to_freq_array()[fg_edge]
+
+    pi = np.array([pi_darray[i] for i in Q_darray.keys()])
+    Q = Q_darray.to_array()
+
+    t50 = T50(Q, pi)
+    t50_val = t50.estimate_t50()
+
+    result = generic_result(source=mc.source)
+    result.update([("t50", t50_val), ("fg_edge", fg_edge), ("source", mc.source)])
+
+    return result
+
+
+get_t50 = user_function(
+    _get_t50, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
