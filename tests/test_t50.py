@@ -25,7 +25,6 @@ def t50_construction_random():
     Q[diag_indices] = 0
     row_sum = Q.sum(axis=1)
     Q[diag_indices] = -row_sum
-    print(Q)
 
     pi_0 = numpy.array([0.25] * 4)
 
