@@ -12,8 +12,7 @@ from kath_library.utils.numeric_utils import (
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
-__version__ = "2021.07.17"
-
+__version__ = "2021.07.23"
 
 class OscillatingPiException(Exception):
     """ Did not converge to a unique stationary distribution """
