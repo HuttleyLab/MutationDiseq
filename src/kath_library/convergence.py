@@ -1,10 +1,9 @@
-from numpy.linalg import eig
-from scipy.linalg import expm
-from numpy.linalg import norm
-from numpy import array
 from accupy import fdot as dot
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
+from numpy import array
+from numpy.linalg import eig, norm
+from scipy.linalg import expm
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
@@ -29,7 +28,7 @@ def convergence(pi_0, Q, t):
     """
     a measure of how fast pi(t) is changing
     """
-    pi_deriv = dot(pi_0, dot(Q, expm(Q*t)))
+    pi_deriv = dot(pi_0, dot(Q, expm(Q * t)))
     conv = norm(pi_deriv)
 
     return conv
