@@ -51,8 +51,8 @@ def gtr_defined_t50():
         show_progress=False, max_restart=5, tolerance=1e-10, limit_action="raise"
     )
 
-    Q = lf_gtr.get_rate_matrix_for_edge("TombBat", calibrated=False).to_array()
-    pi = lf_gtr.get_motif_probs().to_array()
+    Q_darray = lf_gtr.get_rate_matrix_for_edge("TombBat", calibrated=False)
+    pi_darray = aln.counts_per_seq().to_freq_array()["TombBat"]
 
     pi = numpy.array([pi_darray[i] for i in Q_darray.keys()])
     Q = Q_darray.to_array()
