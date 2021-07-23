@@ -8,6 +8,18 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 
 
+def hypothesis(mc):
+    hyp = mc["mcr"].get_hypothesis_result("GS", "GN")
+    hyp.source = hyp.source["source"]
+    return hyp
+
+get_lrt = user_function(
+    hypothesis,
+    input_types=SERIALISABLE_TYPE,
+    output_types=SERIALISABLE_TYPE
+)
+
+
 def GS_mod():
     """
     A General Stationary Nucleotide substitution model instance.
