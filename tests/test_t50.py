@@ -89,15 +89,12 @@ def test_construction():
     Q[diag_indices] = 0
     row_sum = Q.sum(axis=1)
     Q[diag_indices] = -row_sum
-    print(Q)
 
     pi_0 = numpy.array([0.25] * 4)
 
     calc_t50 = T50(Q, pi_0)
-    print(calc_t50(0.2))
 
     t50 = calc_t50.estimate_t50()
-    print(t50)
 
 
 def test_stat_pi_correct_construction(t50_construction_random):
