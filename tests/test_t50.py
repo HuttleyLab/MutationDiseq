@@ -1,6 +1,7 @@
 import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree
+from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.maths.measure import jsm
 from numpy.ma.core import dot
 from scipy.linalg import expm
