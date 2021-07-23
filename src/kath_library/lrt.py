@@ -13,10 +13,9 @@ def hypothesis(mc):
     hyp.source = hyp.source["source"]
     return hyp
 
+
 get_lrt = user_function(
-    hypothesis,
-    input_types=SERIALISABLE_TYPE,
-    output_types=SERIALISABLE_TYPE
+    hypothesis, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
 )
 
 
