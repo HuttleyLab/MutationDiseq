@@ -54,6 +54,8 @@ def gtr_defined_t50():
     Q = lf_gtr.get_rate_matrix_for_edge("TombBat", calibrated=False).to_array()
     pi = lf_gtr.get_motif_probs().to_array()
 
+    pi = numpy.array([pi_darray[i] for i in Q_darray.keys()])
+    Q = Q_darray.to_array()
     return T50(Q, pi)
 
 
