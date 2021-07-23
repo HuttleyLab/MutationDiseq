@@ -10,7 +10,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_ei
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__version__ = "2021.07.23"
+
 
 def get_jsd(aln, edge=None, evaluate="ingroup"):
     """

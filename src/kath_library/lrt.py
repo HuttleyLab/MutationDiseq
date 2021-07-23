@@ -6,7 +6,7 @@ from cogent3.evolve.ns_substitution_model import GeneralStationary
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__version__ = "2021.07.23"
+
 
 def GS_mod():
     """

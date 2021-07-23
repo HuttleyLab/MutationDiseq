@@ -11,7 +11,7 @@ from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_ei
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
-__version__ = "2021.07.23"
+
 
 class T50:
     """

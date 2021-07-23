@@ -9,7 +9,7 @@ from kath_library.utils.numeric_utils import fix_rounding_error
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__version__ = "2021.07.23"
+
 
 class adjacent_EOP:
     def __init__(self, loci, mod="GN"):
