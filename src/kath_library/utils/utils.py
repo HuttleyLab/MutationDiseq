@@ -1,4 +1,18 @@
 from cogent3.util.dict_array import DictArray
+from numpy import array
+
+
+def get_pi_0(model_result):
+    return model_result.lf.get_motif_probs().to_array()
+
+
+def get_pi_tip(model_result, fg_edge):
+    Q_darray = model_result.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
+    pi_darray = model_result.alignment.counts_per_seq().to_freq_array()[fg_edge]
+
+    pi = array([pi_darray[i] for i in Q_darray.keys()])
+
+    return pi
 
 
 def get_foreground(aln):

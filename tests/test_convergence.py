@@ -1,9 +1,72 @@
+import numpy
+import pytest
 from cogent3.app import evo, io
+from numpy import array
 
-from kath_library.convergence import convergence
+from kath_library.convergence import convergence, eigII
+from kath_library.utils.utils import get_pi_0, get_pi_tip
+
+loader = io.load_db()
 
 
-def test_convergence_construction():
+@pytest.fixture()
+def mcr_dstore():
+    dstore = io.get_data_store(
+        f"/Users/katherine/repos/results/aim_2/microbial/758_443154_73021/3000bp/mcr.tinydb"
+    )
+
+    return dstore
+
+
+def test_convergence_GN(mcr_dstore):
+    mc = loader(mcr_dstore[0])["mcr"]
+    gn = loader(mcr_dstore[0])["mcr"]["GN"]
+
+    fg_edge = mc.source["fg_edge"]
+
+    pi = get_pi_tip(gn, fg_edge)
+    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+
+    t = gn.lf.get_param_value("length", edge=fg_edge)
+    conv = convergence(pi, Q, t)
+
+    assert conv >= 0
+
+
+def test_convergence_non_zero(mcr_dstore):
+    mc = loader(mcr_dstore[0])["mcr"]
+    gn = loader(mcr_dstore[0])["mcr"]["GN"]
+
+    fg_edge = mc.source["fg_edge"]
+
+    pi = get_pi_tip(gn, fg_edge)
+    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+
+    new_pi = numpy.array([(pi[0] + pi[1]), pi[2] / 2, pi[2] / 2, pi[3]])
+    t = gn.lf.get_param_value("length", edge=fg_edge)
+
+    conv = convergence(new_pi, Q, t)
+
+    print(conv)
+    assert conv >= 0
+
+
+def test_convergence_GTR(mcr_dstore):
+    mc = loader(mcr_dstore[0])["mcr"]
+    gtr = loader(mcr_dstore[0])["mcr"]["GTR"]
+
+    fg_edge = mc.source["fg_edge"]
+
+    Q = gtr.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_0(gtr)
+
+    t = gtr.lf.get_param_value("length", edge=fg_edge)
+    conv = convergence(pi, Q, t)
+
+    numpy.testing.assert_almost_equal(conv, 0, decimal=10)
+
+
+def test_eigII():
 
     dstore = io.get_data_store(
         "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
@@ -28,4 +91,4 @@ def test_convergence_construction():
 
     Q = result.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
 
-    convergence(Q)
+    eigII(Q)

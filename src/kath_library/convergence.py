@@ -5,6 +5,8 @@ from numpy import array
 from numpy.linalg import eig, norm
 from scipy.linalg import expm
 
+from kath_library.utils.utils import get_pi_0, get_pi_tip
+
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 
@@ -38,12 +40,8 @@ def _get_convergence(mc):
     gn = mc["mcr"]["GN"]
     fg_edge = mc["mcr"].source["fg_edge"]
 
-    Q_darray = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
-    pi_darray = gn.alignment.counts_per_seq().to_freq_array()[fg_edge]
-
-    pi = array([pi_darray[i] for i in Q_darray.keys()])
-    Q = Q_darray.to_array()
-
+    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_tip(gn, fg_edge)
     t = gn.lf.get_param_value("length", edge=fg_edge)
 
     conv = convergence(pi, Q, t)
