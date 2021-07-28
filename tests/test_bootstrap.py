@@ -68,6 +68,14 @@ def test_confidence_interval_with_t50(aln):
     assert isinstance(c_int[2]["t50"], float)
     assert len(c_int.null_dist) == 1
 
+def test_confidence_interval_parallel(aln):
+    get_conf_int = confidence_interval(_get_t50, 2, parallel=True)
+    c_int = get_conf_int.run(aln)
+
+    assert isinstance(c_int["observed"]["t50"], float)
+    assert isinstance(c_int[2]["t50"], float)
+    assert len(c_int.null_dist) == 2
+
 
 def test_confidence_interval_app_composable(dstore_instance):
     with TemporaryDirectory(dir=".") as dirname:
