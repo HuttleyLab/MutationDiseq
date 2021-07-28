@@ -11,7 +11,8 @@ from cogent3.app.result import bootstrap_result, generic_result
 from cogent3.util import misc, parallel
 
 from kath_library.model import GN_sm, GS_instance, GS_sm
-from kath_library.result import confindence_interval_result
+from kath_library.result import confidence_interval_result
+from kath_library.stationary_pi import OscillatingPiException
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -79,8 +80,10 @@ class confidence_interval(ComposableHypothesis):
         self.alt_params = self.alt(aln)
         try:
             obs = self.stat_func(self.alt_params)
-        except ValueError as err:
-            result = NotCompleted("ERROR", str(self.stat_func), err.args[0])
+        except OscillatingPiException as err:
+            result = NotCompleted(
+                "ERROR - OscillatingPiException", str(self.stat_func), err.args[0]
+            )
             return result
         result.observed = obs
 
@@ -91,7 +94,6 @@ class confidence_interval(ComposableHypothesis):
         for sym_result in sym_results:
             if not sym_result:
                 continue
-
             result.add_to_null(sym_result)
 
         return result

@@ -17,7 +17,7 @@ def GS_instance():
 def GS_sm(discrete_edges=[]):
 
     GS = evo.model(
-        GS_mod(),
+        GS_instance(),
         sm_args=dict(optimise_motif_probs=True),
         opt_args=dict(max_restarts=5, tolerance=1e-8),
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
