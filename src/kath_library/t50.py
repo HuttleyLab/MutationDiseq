@@ -8,6 +8,7 @@ from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
 
 from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from kath_library.utils.utils import get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -64,16 +65,17 @@ class T50:
         return abs(dist1 - dist2) ** 2
 
 
-def _get_t50(mc):
+def _get_t50_mc(mc):
+    """
+    Wrapper function to return T50 estimate from a model collection that includes a GN fit.
+    Returns a generic_result
+    """
 
     gn = mc["mcr"]["GN"]
     fg_edge = mc["mcr"].source["fg_edge"]
 
-    Q_darray = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
-    pi_darray = gn.alignment.counts_per_seq().to_freq_array()[fg_edge]
-
-    pi = np.array([pi_darray[i] for i in Q_darray.keys()])
-    Q = Q_darray.to_array()
+    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_tip(gn, fg_edge)
 
     t50 = T50(Q, pi)
     t50_val = t50.estimate_t50()
@@ -81,6 +83,31 @@ def _get_t50(mc):
     result = generic_result(source=mc.source)
     result.update([("t50", t50_val), ("fg_edge", fg_edge), ("source", mc.source)])
 
+    return result
+
+
+get_t50_mc = user_function(
+    _get_t50_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
+
+
+def _get_t50(gn_sm):
+    """
+    Wrapper function to return T50 estimate from a GN fit.
+    Returns a generic_result
+    """
+
+    fg_edge = gn_sm.alignment.info.fg_edge
+
+    Q = gn_sm.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_tip(gn_sm, fg_edge)
+
+    t50 = T50(Q, pi)
+    t50_val = t50.estimate_t50()
+
+    result = generic_result(source=gn_sm.source)
+
+    result.update([("t50", t50_val)])
     return result
 
 

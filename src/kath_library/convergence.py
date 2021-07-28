@@ -13,7 +13,6 @@ __credits__ = ["Katherine Caley"]
 
 def eigII(Q):
     """
-    Returns the absolute value of the second largest eigenvalue from the rate matrix
     """
     v, r = eig(Q)
     v = v.flatten()
@@ -35,7 +34,11 @@ def convergence(pi_0, Q, t):
     return conv
 
 
-def _get_convergence(mc):
+def _get_convergence_mc(mc):
+    """
+    Wrapper function to return convergence estimate from a model collection that includes a GN fit.
+    Returns a generic_result
+    """
 
     gn = mc["mcr"]["GN"]
     fg_edge = mc["mcr"].source["fg_edge"]
@@ -48,6 +51,31 @@ def _get_convergence(mc):
 
     result = generic_result(source=mc.source)
     result.update([("convergence", conv), ("fg_edge", fg_edge), ("source", mc.source)])
+
+    return result
+
+
+get_convergence_mc = user_function(
+    _get_convergence_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
+
+
+def _get_convergence(gn_sm):
+    """
+    Wrapper function to return convergence estimate from a GN fit.
+    Returns a generic_result
+    """
+
+    fg_edge = gn_sm.alignment.info.fg_edge
+
+    Q = gn_sm.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_tip(gn_sm, fg_edge)
+    t = gn_sm.lf.get_param_value("length", edge=fg_edge)
+
+    conv = convergence(pi, Q, t)
+
+    result = generic_result(source=gn_sm.source)
+    result.update([("convergence", conv)])
 
     return result
 
