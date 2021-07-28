@@ -1,8 +1,10 @@
+import pytest
 from cogent3 import make_aligned_seqs
+
 from kath_library.bootstrap import confidence_interval
 from kath_library.convergence import _get_convergence
 from kath_library.t50 import _get_t50
-import pytest
+
 
 @pytest.fixture()
 def aln():

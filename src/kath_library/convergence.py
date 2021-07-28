@@ -12,8 +12,6 @@ __credits__ = ["Katherine Caley"]
 
 
 def eigII(Q):
-    """
-    """
     v, r = eig(Q)
     v = v.flatten()
     v.sort()

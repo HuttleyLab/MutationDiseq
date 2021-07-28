@@ -3,7 +3,6 @@ from cogent3.app import evo, io
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 
-
 from kath_library.model import GS_instance
 
 __author__ = "Katherine Caley"
