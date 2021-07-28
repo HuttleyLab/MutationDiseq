@@ -2,7 +2,9 @@ from cogent3 import get_moltype
 from cogent3.app import evo, io
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
-from cogent3.evolve.ns_substitution_model import GeneralStationary
+
+
+from kath_library.model import GS_instance
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
@@ -17,17 +19,6 @@ def hypothesis(mc):
 get_lrt = user_function(
     hypothesis, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
 )
-
-
-def GS_mod():
-    """
-    A General Stationary Nucleotide substitution model instance.
-    """
-    GS = GeneralStationary(
-        get_moltype("dna").alphabet, optimise_motif_probs=True, name="GS"
-    )
-
-    return GS
 
 
 def get_no_init_model_coll(aln):
@@ -54,7 +45,7 @@ def get_no_init_model_coll(aln):
     bg_edges = list({fg_edge} ^ set(aln.names))
 
     GS = evo.model(
-        GS_mod(),
+        GS_instance(),
         sm_args=dict(optimise_motif_probs=True),
         opt_args=dict(max_restarts=5, tolerance=1e-8),
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),
@@ -102,7 +93,7 @@ def get_init_model_coll(aln):
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),
     )
     GS = evo.model(
-        GS_mod(),
+        GS_instance(),
         sm_args=dict(optimise_motif_probs=True),
         opt_args=dict(max_restarts=5, tolerance=1e-8),
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),
