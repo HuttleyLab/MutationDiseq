@@ -1,24 +1,97 @@
 from cogent3.app import evo, io
+from cogent3.app.composable import (
+    ALIGNED_TYPE,
+    BOOTSTRAP_RESULT_TYPE,
+    RESULT_TYPE,
+    SERIALISABLE_TYPE,
+    ComposableHypothesis,
+    NotCompleted,
+)
+from cogent3.app.result import bootstrap_result, generic_result
+from cogent3.util import misc, parallel
 
-from kath_library.lrt import GS_mod
+from kath_library.model import GN_sm, GS_instance, GS_sm
+from kath_library.result import confindence_interval_result
+
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
-def create_bootstrap_app(num_reps=5):
-    GS = evo.model(
-        GS_mod(),
-        sm_args=dict(optimise_motif_probs=True),
-        opt_args=dict(max_restarts=5, tolerance=1e-8),
-        lf_args=dict(discrete_edges=["Chimp, Gorilla"], expm="pade"),
-    )
+def create_bootstrap_app(num_reps=5, discrete_edges=None):
+    """
+    wrapper of cogent3.app.evo.bootstrap with hypothesis of GS as the null and GN as the alternate
+    """
 
-    GN = evo.model(
-        "GN",
-        sm_args=dict(optimise_motif_probs=True),
-        opt_args=dict(max_restarts=5, tolerance=1e-8),
-        lf_args=dict(discrete_edges=["Chimp, Gorilla"], expm="pade"),
-    )
+    GS = GS_sm(discrete_edges)
+    GN = GN_sm(discrete_edges)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
-    bootie = evo.bootstrap(hyp, num_reps)
+    bstrap = evo.bootstrap(hyp, num_reps)
 
-    return bootie
+    return bstrap
+
+
+class confidence_interval(ComposableHypothesis):
+    """
+    Parametric bootstrap to give confidence intervals for a provided statistic.
+    Returns a confindence_interval_result.
+
+    Vendored with alterations from cogent3.evo.app.bootstrap - thanks Gavin!
+    """
+
+    _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
+    _output_types = (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE)
+    _data_types = ("ArrayAlignment", "Alignment")
+
+    def __init__(self, stat_func, num_reps, parallel=False, verbose=False):
+        super(confidence_interval, self).__init__(
+            input_types=self._input_types,
+            output_types=self._output_types,
+            data_types=self._data_types,
+        )
+        self.stat_func = stat_func
+        self._num_reps = num_reps
+        self._verbose = verbose
+        self._parallel = parallel
+        self.func = self.run
+
+    def fit_sim(self, rep_num):
+        sim_aln = self.alt_params.simulate_alignment()
+        sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
+        sim_aln.info.fg_edge = self.fg_edge
+
+        try:
+            sym_model_fit = self.alt(sim_aln)
+            sym_result = self.stat_func(sym_model_fit)
+        except ValueError:
+            sym_result = None
+        return sym_result
+
+    def run(self, aln):
+        result = confidence_interval_result(aln.info.source)
+
+        self.fg_edge = aln.info.fg_edge
+        self.bg_edges = list({self.fg_edge} ^ set(aln.names))
+
+        GN = GN_sm(discrete_edges=self.bg_edges)
+
+        self.alt = GN
+        self.alt_params = self.alt(aln)
+        try:
+            obs = self.stat_func(self.alt_params)
+        except ValueError as err:
+            result = NotCompleted("ERROR", str(self.stat_func), err.args[0])
+            return result
+        result.observed = obs
+
+        self._inpath = aln.info.source
+
+        map_fun = map if not self._parallel else parallel.imap
+        sym_results = [r for r in map_fun(self.fit_sim, range(self._num_reps)) if r]
+        for sym_result in sym_results:
+            if not sym_result:
+                continue
+
+            result.add_to_null(sym_result)
+
+        return result
