@@ -8,7 +8,7 @@ from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
 
 from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
-from kath_library.utils.utils import get_pi_0, get_pi_tip
+from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -97,7 +97,7 @@ def _get_t50(gn_sm):
     Returns a generic_result
     """
 
-    fg_edge = gn_sm.alignment.info.fg_edge
+    fg_edge = get_foreground(gn_sm.alignment)
 
     Q = gn_sm.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_tip(gn_sm, fg_edge)
