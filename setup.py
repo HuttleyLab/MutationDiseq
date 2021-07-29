@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
-__version__ = "2021.07.23"
+__version__ = "2021.07.29"
 if sys.version_info < (3, 6):
     py_version = ".".join([str(n) for n in sys.version_info])
     raise RuntimeError(
