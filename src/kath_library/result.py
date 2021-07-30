@@ -50,6 +50,12 @@ class confidence_interval_result(generic_result):
         """returns the statistics of interest corresponding to the synthetic data"""
         return [self[k].to_rich_dict()["items"][0][1] for k in self if k != "observed"]
 
+    def plot_null_dist(self):
+        import numpy as np
+        import plotly.express as px
+
+        return px.histogram(np.array(self.null_dist))
+
 
 def deserialise_confidence_interval_result(data):
     """
