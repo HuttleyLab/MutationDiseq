@@ -8,7 +8,6 @@ from cogent3.app.result import bootstrap_result
 
 from kath_library.bootstrap import confidence_interval, create_bootstrap_app
 from kath_library.convergence import _get_convergence
-from kath_library.result import confidence_interval_result
 from kath_library.t50 import _get_t50
 
 
@@ -55,9 +54,7 @@ def test_confidence_interval_with_convergence(aln):
     c_int = get_conf_int.run(aln)
 
     assert isinstance(c_int["observed"]["convergence"], float)
-    assert isinstance(c_int[2]["convergence"], float)
-    assert len(c_int.null_dist) == 1
-    assert len(c_int) == 2
+    assert isinstance(c_int["sym_1-result"]["convergence"], float)
 
 
 def test_confidence_interval_with_t50(aln):
@@ -65,16 +62,15 @@ def test_confidence_interval_with_t50(aln):
     c_int = get_conf_int.run(aln)
 
     assert isinstance(c_int["observed"]["t50"], float)
-    assert isinstance(c_int[2]["t50"], float)
-    assert len(c_int.null_dist) == 1
+    assert isinstance(c_int["sym_1-result"]["t50"], float)
+
 
 def test_confidence_interval_parallel(aln):
     get_conf_int = confidence_interval(_get_t50, 2, parallel=True)
     c_int = get_conf_int.run(aln)
 
     assert isinstance(c_int["observed"]["t50"], float)
-    assert isinstance(c_int[2]["t50"], float)
-    assert len(c_int.null_dist) == 2
+    assert isinstance(c_int["sym_1-result"]["t50"], float)
 
 
 def test_confidence_interval_app_composable(dstore_instance):
@@ -86,6 +82,4 @@ def test_confidence_interval_app_composable(dstore_instance):
         process = reader + c_int + writer
 
         process.apply_to(dstore_instance[:1])
-
-        print(confidence_interval_result(process.data_store[0].read()))
         assert len(process.data_store.summary_incomplete) == 0

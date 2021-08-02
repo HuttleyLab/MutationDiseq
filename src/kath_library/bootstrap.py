@@ -11,7 +11,6 @@ from cogent3.app.result import bootstrap_result, generic_result
 from cogent3.util import misc, parallel
 
 from kath_library.model import GN_sm, GS_instance, GS_sm
-from kath_library.result import confidence_interval_result
 from kath_library.stationary_pi import OscillatingPiException
 
 __author__ = "Katherine Caley"
@@ -37,11 +36,11 @@ class confidence_interval(ComposableHypothesis):
     Parametric bootstrap to give confidence intervals for a provided statistic.
     Returns a confindence_interval_result.
 
-    Vendored with alterations from cogent3.evo.app.bootstrap - thanks Gavin!
+    Vendored with alterations from cogent3.evo.app.bootstrap
     """
 
     _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
-    _output_types = (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE)
+    _output_types = SERIALISABLE_TYPE
     _data_types = ("ArrayAlignment", "Alignment")
 
     def __init__(self, stat_func, num_reps, parallel=False, verbose=False):
@@ -66,10 +65,10 @@ class confidence_interval(ComposableHypothesis):
             sym_result = self.stat_func(sym_model_fit)
         except ValueError:
             sym_result = None
-        return sym_result
+        return sym_result, sym_model_fit
 
     def run(self, aln):
-        result = confidence_interval_result(aln.info.source)
+        result = generic_result(aln.info.source)
 
         self.fg_edge = aln.info.fg_edge
         self.bg_edges = list({self.fg_edge} ^ set(aln.names))
@@ -81,19 +80,40 @@ class confidence_interval(ComposableHypothesis):
         try:
             obs = self.stat_func(self.alt_params)
         except OscillatingPiException as err:
-            result = NotCompleted(
+            obs = NotCompleted(
                 "ERROR - OscillatingPiException", str(self.stat_func), err.args[0]
             )
-            return result
-        result.observed = obs
-
+            return obs
+        result["observed"] = obs
         self._inpath = aln.info.source
 
         map_fun = map if not self._parallel else parallel.imap
         sym_results = [r for r in map_fun(self.fit_sim, range(self._num_reps)) if r]
-        for sym_result in sym_results:
+        null = {}
+        for i, (sym_result, sym_model_fit) in enumerate(sym_results):
             if not sym_result:
                 continue
-            result.add_to_null(sym_result)
+            null[f"sym_{i+1}-result"] = sym_result
+            null[f"sym_{i+1}-model_fit"] = sym_model_fit
 
+        result.update(dict(null))
         return result
+
+
+def null_distribution(gen_result):
+    return [
+        gen_result[k].to_rich_dict()["items"][0][1]
+        for k in gen_result.keys()
+        if k[-6:] == "result"
+    ]
+
+
+def null_models(gen_result):
+    return [gen_result[k] for k in gen_result.keys() if k[-3:] == "fit"]
+
+
+def plot_null_dist(gen_result):
+    import numpy as np
+    import plotly.express as px
+
+    return px.histogram(np.array(gen_result.null_dist))
