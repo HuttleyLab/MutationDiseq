@@ -8,7 +8,7 @@ from scipy.linalg import expm
 from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
+__credits__ = ["Katherine Caley", "Ben Kaehler"]
 
 
 def eigII(Q):
@@ -42,7 +42,7 @@ def _get_convergence_mc(mc):
     fg_edge = mc["mcr"].source["fg_edge"]
 
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_tip(gn, fg_edge)
+    pi = get_pi_0(gn)
     t = gn.lf.get_param_value("length", edge=fg_edge)
 
     conv = convergence(pi, Q, t)
@@ -67,7 +67,7 @@ def _get_convergence(gn_sm):
     fg_edge = get_foreground(gn_sm.alignment)
 
     Q = gn_sm.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_tip(gn_sm, fg_edge)
+    pi = get_pi_0(gn_sm)
     t = gn_sm.lf.get_param_value("length", edge=fg_edge)
 
     conv = convergence(pi, Q, t)
