@@ -1,3 +1,4 @@
+import numpy as np
 from cogent3.app import evo, io
 from cogent3.app.composable import (
     ALIGNED_TYPE,
@@ -85,6 +86,8 @@ class confidence_interval(ComposableHypothesis):
             )
             return obs
         result["observed"] = obs
+        result["observed-model_fit"] = self.alt_params
+
         self._inpath = aln.info.source
 
         map_fun = map if not self._parallel else parallel.imap
@@ -101,6 +104,12 @@ class confidence_interval(ComposableHypothesis):
 
 
 def null_distribution(gen_result):
+    """
+    gen_result
+              a generic_result instance created from the confidence_interval class
+    returns
+        a list specifying the null disitrbution from the paramteric bootstrap
+    """
     return [
         gen_result[k].to_rich_dict()["items"][0][1]
         for k in gen_result.keys()
@@ -109,11 +118,42 @@ def null_distribution(gen_result):
 
 
 def null_models(gen_result):
+    """
+    gen_result
+              a generic_result instance created from the confidence_interval class
+    returns
+        a list specifying the null model fits from the paramteric bootstrap
+    """
+
     return [gen_result[k] for k in gen_result.keys() if k[-3:] == "fit"]
 
 
-def plot_null_dist(gen_result):
+def plot_null_dist(gen_result, nbins=20):
+    """
+    gen_result
+              a generic_result instance created from the confidence_interval class
+    returns
+        a plotly express histogram displaying the null distirbution from the parametric bootstrap
+    """
+
     import numpy as np
     import plotly.express as px
 
-    return px.histogram(np.array(gen_result.null_dist))
+    return px.histogram(np.array(null_distribution(gen_result)), nbins=nbins)
+
+
+def get_interval(gen_result, interval=95):
+    """
+    gen_result
+            a generic_result instance created from the confidence_interval class
+    returns
+        the boudnaries of the specified interval
+    """
+    assert 0 <= interval <= 100, "interval must be a number between 0 and 100 inclusive"
+    lower = (100 - interval) / 2
+    upper = 100 - lower
+
+    return (
+        np.percentile(null_distribution(gen_result), lower),
+        np.percentile(null_distribution(gen_result), upper),
+    )
