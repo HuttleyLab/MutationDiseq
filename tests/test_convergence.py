@@ -12,7 +12,7 @@ loader = io.load_db()
 @pytest.fixture()
 def mcr_dstore():
     dstore = io.get_data_store(
-        f"/Users/katherine/repos/results/aim_2/microbial/758_443154_73021/3000bp/mcr.tinydb"
+        f"/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/3000bp/mcr.tinydb"
     )
 
     return dstore
