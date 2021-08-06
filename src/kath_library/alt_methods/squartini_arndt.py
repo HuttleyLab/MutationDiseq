@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 from cogent3 import make_table
+from cogent3.app.composable import SERIALISABLE_TYPE, user_function
+from cogent3.app.result import generic_result
 from cogent3.maths.stats import chisqprob
 from cogent3.util.dict_array import DictArray, DictArrayTemplate
 from scipy.linalg import expm
@@ -84,3 +86,24 @@ def chi_squared_test(model_result):
     )
 
     return table
+
+
+def _get_STIs_mc(mc):
+    """
+    Wrapper function to return STI estimate from a model collection that includes a GN fit.
+    Returns a generic_result
+    """
+
+    gn = mc["mcr"]["GN"]
+    STIs = stationarity_indices(gn)
+    chi_2 = chi_squared_test(gn)
+
+    result = generic_result(source=mc.source)
+    result.update([("STIs", STIs), ("chi_2", chi_2), ("source", mc.source)])
+
+    return result
+
+
+get_STIs_mc = user_function(
+    _get_STIs_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)

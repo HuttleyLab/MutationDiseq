@@ -1,4 +1,5 @@
 import pytest
+from cogent3 import get_model, load_aligned_seqs, make_tree
 from cogent3.app import io
 
 from kath_library.alt_methods.squartini_arndt import (
@@ -10,7 +11,7 @@ from kath_library.alt_methods.squartini_arndt import (
 @pytest.fixture()
 def mcr_dstore():
     dstore = io.get_data_store(
-        f"/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/3000bp/mcr.tinydb"
+        "/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/300bp/mcr-init.tinydb"
     )
 
     return dstore
@@ -24,14 +25,31 @@ def model_result(mcr_dstore):
     return result
 
 
+@pytest.fixture()
+def model_result_GTR(mcr_dstore):
+    loader = io.load_db()
+    result = loader(mcr_dstore[0])["mcr"]["GTR"]
+    return result
+
+
 def test_chi_squared_test(model_result):
-
     result = chi_squared_test(model_result)
-
     print(result)
 
 
 def test_stationarity_indices(model_result):
     result = stationarity_indices(model_result)
+
+    print(result)
+
+
+def test_chi_squared_test_GTR(model_result_GTR):
+
+    result = chi_squared_test(model_result_GTR)
+    assert result.to_dict(flatten=True)[(0, "p")] > 0.05
+
+
+def test_stationarity_indices_GTR(model_result_GTR):
+    result = stationarity_indices(model_result_GTR)
 
     print(result)
