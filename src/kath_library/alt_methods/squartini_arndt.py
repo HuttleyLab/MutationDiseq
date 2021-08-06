@@ -96,14 +96,41 @@ def _get_STIs_mc(mc):
 
     gn = mc["mcr"]["GN"]
     STIs = stationarity_indices(gn)
-    chi_2 = chi_squared_test(gn)
 
     result = generic_result(source=mc.source)
-    result.update([("STIs", STIs), ("chi_2", chi_2), ("source", mc.source)])
+    result.update(
+        [
+            ("STIs", STIs),
+            ("STI1", STIs[0]),
+            ("STI2", STIs[1]),
+            ("STI3", STIs[2]),
+            ("source", mc.source),
+        ]
+    )
 
     return result
 
 
 get_STIs_mc = user_function(
     _get_STIs_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
+
+
+def _get_chi2_mc(mc):
+    """
+    Wrapper function to return STI estimate from a model collection that includes a GN fit.
+    Returns a generic_result
+    """
+
+    gn = mc["mcr"]["GN"]
+    chi_2 = chi_squared_test(gn)
+
+    result = generic_result(source=mc.source)
+    result.update([("chi_2", chi_2), ("source", mc.source)])
+
+    return result
+
+
+get_chi2_mc = user_function(
+    _get_chi2_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
 )
