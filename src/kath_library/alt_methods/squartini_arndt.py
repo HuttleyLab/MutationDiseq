@@ -9,7 +9,7 @@ from cogent3.util.dict_array import DictArray, DictArrayTemplate
 from scipy.linalg import expm
 
 from kath_library.stationary_pi import get_stat_pi_via_brute
-from kath_library.utils.utils import get_foreground
+from kath_library.utils.utils import get_foreground, get_pi_tip
 
 
 def stationarity_indices(model_result):
@@ -28,13 +28,19 @@ def stationarity_indices(model_result):
     assert pi_0.keys() == Q.keys()
     nt_order = Q.keys()
 
-    pi_inf_array = get_stat_pi_via_brute(expm(Q.to_array()), pi_0.to_array())
+    pi_tip_unordered = model_result.alignment.counts_per_seq().to_freq_array()[fg_edge]
+
+    pi_tip_array = np.array([pi_tip_unordered[i] for i in Q.keys()])
+    pi_inf_array = get_stat_pi_via_brute(expm(Q.to_array()), np.array(pi_tip_array))
+
     template = DictArrayTemplate(nt_order)
+
+    pi_tip = template.wrap(pi_tip_array)
     pi_inf = template.wrap(pi_inf_array)
 
-    STI1 = (pi_0["C"] - pi_inf["C"]) + (pi_0["G"] - pi_inf["G"])
-    STI2 = (pi_0["A"] - pi_inf["A"]) - (pi_0["T"] - pi_inf["T"])
-    STI3 = (pi_0["C"] - pi_inf["C"]) - (pi_0["G"] - pi_inf["G"])
+    STI1 = (pi_tip["C"] - pi_inf["C"]) + (pi_tip["G"] - pi_inf["G"])
+    STI2 = (pi_tip["A"] - pi_inf["A"]) - (pi_tip["T"] - pi_inf["T"])
+    STI3 = (pi_tip["C"] - pi_inf["C"]) - (pi_tip["G"] - pi_inf["G"])
 
     return [STI1, STI2, STI3]
 
@@ -56,13 +62,19 @@ def chi_squared_test(model_result):
     assert pi_0.keys() == Q.keys()
     nt_order = Q.keys()
 
-    pi_inf_array = get_stat_pi_via_brute(expm(Q.to_array()), pi_0.to_array())
+    pi_tip_unordered = model_result.alignment.counts_per_seq().to_freq_array()[fg_edge]
+
+    pi_tip_array = np.array([pi_tip_unordered[i] for i in Q.keys()])
+    pi_inf_array = get_stat_pi_via_brute(expm(Q.to_array()), np.array(pi_tip_array))
+
     template = DictArrayTemplate(nt_order)
+
+    pi_tip = template.wrap(pi_tip_array)
     pi_inf = template.wrap(pi_inf_array)
 
     chi_counter = float(0.0)
     for nt in nt_order:
-        chi_counter += math.pow((pi_0[nt] - pi_inf[nt]), 2) / pi_inf[nt]
+        chi_counter += math.pow((pi_tip[nt] - pi_inf[nt]), 2) / pi_inf[nt]
 
     chi_2 = chi_counter * len(model_result.alignment)
 
