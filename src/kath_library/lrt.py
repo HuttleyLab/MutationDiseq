@@ -4,6 +4,7 @@ from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 
 from kath_library.model import GS_instance
+from kath_library.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
@@ -33,14 +34,7 @@ def get_no_init_model_coll(aln):
     model_collection_result containing GS and GN models (without sequential fitting)
     """
 
-    try:
-        fg_edge = aln.info.fg_edge
-    except AttributeError:
-        raise AttributeError("Alignment needs a info.fg_edge attribute")
-
-    if fg_edge is None:
-        raise AttributeError("Alignment needs a info.fg_edge attribute")
-
+    fg_edge = get_foreground(aln)
     bg_edges = list({fg_edge} ^ set(aln.names))
 
     GS = evo.model(
@@ -75,14 +69,7 @@ def get_init_model_coll(aln):
     model_collection_result containing GTR, GS and GN models (with sequential fitting)
     """
 
-    try:
-        fg_edge = aln.info.fg_edge
-    except AttributeError:
-        raise AttributeError("Alignment needs a info.fg_edge attribute")
-
-    if fg_edge is None:
-        raise AttributeError("Alignment needs a info.fg_edge attribute")
-
+    fg_edge = get_foreground(aln)
     bg_edges = list({fg_edge} ^ set(aln.names))
 
     GTR = evo.model(
