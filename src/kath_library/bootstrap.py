@@ -14,6 +14,7 @@ from cogent3.util import misc, parallel
 
 from kath_library.model import GN_sm, GS_instance, GS_sm
 from kath_library.stationary_pi import OscillatingPiException
+from kath_library.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
