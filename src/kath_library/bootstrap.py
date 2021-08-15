@@ -41,7 +41,10 @@ def _create_bootstrap_app_diff_trees(aln):
     fg = get_foreground(aln)
     bg = list({fg} ^ set(aln.names))
     bootstrap = create_bootstrap_app(100, discrete_edges=bg)
-    result = bootstrap(aln)
+    try:
+        result = bootstrap(aln)
+    except ValueError:
+        result = None
     return result
 
 
