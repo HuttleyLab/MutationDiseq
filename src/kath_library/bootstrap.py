@@ -7,6 +7,7 @@ from cogent3.app.composable import (
     SERIALISABLE_TYPE,
     ComposableHypothesis,
     NotCompleted,
+    user_function,
 )
 from cogent3.app.result import bootstrap_result, generic_result
 from cogent3.util import misc, parallel
@@ -15,7 +16,7 @@ from kath_library.model import GN_sm, GS_instance, GS_sm
 from kath_library.stationary_pi import OscillatingPiException
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
+__credits__ = ["Katherine Caley"]
 
 
 def create_bootstrap_app(num_reps=5, discrete_edges=None):
@@ -30,6 +31,24 @@ def create_bootstrap_app(num_reps=5, discrete_edges=None):
     bstrap = evo.bootstrap(hyp, num_reps)
 
     return bstrap
+
+
+def _create_bootstrap_app_diff_trees(aln):
+    """
+    wrapper of create_bootstrap_app for when the data to be applied to contains alignments of different taxa
+    """
+    fg = get_foreground(aln)
+    bg = list({fg} ^ set(aln.names))
+    bootstrap = create_bootstrap_app(100, discrete_edges=bg)
+    result = bootstrap(aln)
+    return result
+
+
+create_bootstrap_app_diff_trees = user_function(
+    _create_bootstrap_app_diff_trees,
+    input_types=SERIALISABLE_TYPE,
+    output_types=SERIALISABLE_TYPE,
+)
 
 
 class confidence_interval(ComposableHypothesis):
