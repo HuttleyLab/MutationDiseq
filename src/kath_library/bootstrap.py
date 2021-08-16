@@ -1,5 +1,5 @@
 import numpy as np
-from cogent3.app import evo, io
+from cogent3.app import evo
 from cogent3.app.composable import (
     ALIGNED_TYPE,
     BOOTSTRAP_RESULT_TYPE,
@@ -10,14 +10,65 @@ from cogent3.app.composable import (
     user_function,
 )
 from cogent3.app.result import bootstrap_result, generic_result
-from cogent3.util import misc, parallel
+from cogent3.util import parallel
 
-from kath_library.model import GN_sm, GS_instance, GS_sm
+from kath_library.model import GN_sm, GS_sm
 from kath_library.stationary_pi import OscillatingPiException
 from kath_library.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
+
+
+class bootstrap(ComposableHypothesis):
+    """Parametric bootstrap for a provided hypothesis. Returns a bootstrap_result."""
+
+    _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
+    _output_types = (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE)
+    _data_types = ("ArrayAlignment", "Alignment")
+
+    def __init__(self, hyp, num_reps, parallel=False, verbose=False):
+        super(bootstrap, self).__init__(
+            input_types=self._input_types,
+            output_types=self._output_types,
+            data_types=self._data_types,
+        )
+        self._formatted_params()
+        self._hyp = hyp
+        self._num_reps = num_reps
+        self._verbose = verbose
+        self._parallel = parallel
+        self.func = self.run
+
+    def _fit_sim(self, rep_num):
+        sim_aln = self._null.simulate_alignment()
+        sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
+
+        try:
+            sym_result = self._hyp(sim_aln).LR
+        except ValueError:
+            sym_result = None
+        return sym_result
+
+    def run(self, aln):
+        result = generic_result(aln.info.source)
+        try:
+            obs = self._hyp(aln)
+        except ValueError as err:
+            result = NotCompleted("ERROR", str(self._hyp), err.args[0])
+            return result
+        result["observed"] = obs
+        self._null = obs.null
+        self._inpath = aln.info.source
+
+        map_fun = map if not self._parallel else parallel.imap
+        sym_results = [r for r in map_fun(self._fit_sim, range(self._num_reps)) if r]
+        for i, sym_result in enumerate(sym_results):
+            if not sym_result:
+                continue
+            result[i + 1] = sym_result
+
+        return result
 
 
 def create_bootstrap_app(num_reps=5, discrete_edges=None):
@@ -29,7 +80,7 @@ def create_bootstrap_app(num_reps=5, discrete_edges=None):
     GN = GN_sm(discrete_edges)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
-    bstrap = evo.bootstrap(hyp, num_reps)
+    bstrap = bootstrap(hyp, num_reps)
 
     return bstrap
 
