@@ -106,6 +106,17 @@ create_bootstrap_app_diff_trees = user_function(
 )
 
 
+def estimate_pval(generic_result):
+    obs = generic_result["observed"].LR
+    null_dist = [generic_result[k] for k in generic_result.keys() if k != "observed"]
+    null_dist.sort()
+    null_dist.reverse()
+    for (count, value) in enumerate(null_dist):
+        if value <= obs:
+            return float(count) / len(null_dist)
+    return 1.0
+
+
 class confidence_interval(ComposableHypothesis):
     """
     Parametric bootstrap to give confidence intervals for a provided statistic.
