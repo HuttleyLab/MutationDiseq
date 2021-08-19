@@ -72,7 +72,10 @@ def _get_t50_mc(mc):
     """
 
     gn = mc["mcr"]["GN"]
-    fg_edge = mc["mcr"].source["fg_edge"]
+    try:
+        fg_edge = mc["mcr"].source["fg_edge"]
+    except KeyError:
+        fg_edge = get_foreground(mc["mcr"]["GN"].alignment)
 
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_tip(gn, fg_edge)
@@ -81,7 +84,7 @@ def _get_t50_mc(mc):
     t50_val = t50.estimate_t50()
 
     result = generic_result(source=mc.source)
-    result.update([("t50", t50_val), ("fg_edge", fg_edge), ("source", mc.source)])
+    result.update([("T50", t50_val), ("fg_edge", fg_edge), ("source", mc.source)])
 
     return result
 
@@ -107,7 +110,7 @@ def _get_t50(gn_sm):
 
     result = generic_result(source=gn_sm.source)
 
-    result.update([("t50", t50_val)])
+    result.update([("T50", t50_val)])
     return result
 
 

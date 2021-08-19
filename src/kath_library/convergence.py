@@ -39,7 +39,10 @@ def _get_convergence_mc(mc):
     """
 
     gn = mc["mcr"]["GN"]
-    fg_edge = mc["mcr"].source["fg_edge"]
+    try:
+        fg_edge = mc["mcr"].source["fg_edge"]
+    except KeyError:
+        fg_edge = get_foreground(mc["mcr"]["GN"].alignment)
 
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_0(gn)
