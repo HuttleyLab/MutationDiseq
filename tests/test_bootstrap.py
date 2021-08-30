@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 import pytest
 from cogent3 import load_aligned_seqs
 from cogent3.app import io
-from cogent3.app.result import bootstrap_result
+from cogent3.app.result import generic_result
 
 from kath_library.bootstrap import confidence_interval, create_bootstrap_app
 from kath_library.convergence import _get_convergence
@@ -33,7 +33,7 @@ def test_create_bootstrap_app(aln):
     bstrap = create_bootstrap_app(2)
     bootstrap = bstrap(aln)
 
-    assert isinstance(bootstrap, bootstrap_result)
+    assert isinstance(bootstrap, generic_result)
     assert len(bootstrap) == 3
 
 
@@ -54,23 +54,23 @@ def test_confidence_interval_with_convergence(aln):
     c_int = get_conf_int.run(aln)
 
     assert isinstance(c_int["observed"]["convergence"], float)
-    assert isinstance(c_int["sym_1-result"]["convergence"], float)
+    assert isinstance(c_int["sim_1-result"]["convergence"], float)
 
 
 def test_confidence_interval_with_t50(aln):
     get_conf_int = confidence_interval(_get_t50, 1)
     c_int = get_conf_int.run(aln)
 
-    assert isinstance(c_int["observed"]["t50"], float)
-    assert isinstance(c_int["sym_1-result"]["t50"], float)
+    assert isinstance(c_int["observed"]["T50"], float)
+    assert isinstance(c_int["sim_1-result"]["T50"], float)
 
 
 def test_confidence_interval_parallel(aln):
     get_conf_int = confidence_interval(_get_t50, 2, parallel=True)
     c_int = get_conf_int.run(aln)
 
-    assert isinstance(c_int["observed"]["t50"], float)
-    assert isinstance(c_int["sym_1-result"]["t50"], float)
+    assert isinstance(c_int["observed"]["T50"], float)
+    assert isinstance(c_int["sim_1-result"]["T50"], float)
 
 
 def test_confidence_interval_app_composable(dstore_instance):

@@ -19,7 +19,7 @@ def get_foreground(aln):
     try:
         fg_edge = aln.info.fg_edge
     except AttributeError:
-        pass
+        fg_edge = None
 
     if fg_edge is not None:
         return fg_edge
