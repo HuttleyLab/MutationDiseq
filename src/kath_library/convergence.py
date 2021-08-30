@@ -39,10 +39,9 @@ def _get_convergence_mc(mc):
     """
 
     gn = mc["mcr"]["GN"]
-    try:
-        fg_edge = mc["mcr"].source["fg_edge"]
-    except KeyError:
-        fg_edge = get_foreground(mc["mcr"]["GN"].alignment)
+
+    bg_edges = gn.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
+    (fg_edge,) = set(bg_edges) ^ set(gn.alignment.names)
 
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_0(gn)
@@ -63,9 +62,12 @@ get_convergence_mc = user_function(
 
 def _get_convergence(gn_sm):
     """
-    Wrapper function to return convergence estimate from a GN fit.
+    Wrapper function to return convergence estimate from a non-stationary model fit.
     Returns a generic_result
     """
+
+    bg_edges = gn_sm.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
+    (fg_edge,) = set(bg_edges) ^ set(gn_sm.alignment.names)
 
     fg_edge = get_foreground(gn_sm.alignment)
 
@@ -83,4 +85,36 @@ def _get_convergence(gn_sm):
 
 get_convergence = user_function(
     _get_convergence, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
+)
+
+
+def _get_convergence_bstrap(result):
+    """
+    Wrapper function to return convergence estimate from a generic_result generated from a bootstrap app..
+    Returns a generic_result
+    """
+
+    gn = result["observed"].alt
+
+    bg_edges = gn.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
+    (fg_edge,) = set(bg_edges) ^ set(gn.alignment.names)
+
+    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_0(gn)
+    t = gn.lf.get_param_value("length", edge=fg_edge)
+
+    conv = convergence(pi, Q, t)
+
+    result = generic_result(source=result.source)
+    result.update(
+        [("convergence", conv), ("fg_edge", fg_edge), ("source", result.source)]
+    )
+
+    return result
+
+
+get_convergence_bstrap = user_function(
+    _get_convergence_bstrap,
+    input_types=SERIALISABLE_TYPE,
+    output_types=SERIALISABLE_TYPE,
 )
