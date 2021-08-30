@@ -21,7 +21,11 @@ __credits__ = ["Katherine Caley"]
 
 
 class bootstrap(ComposableHypothesis):
-    """Parametric bootstrap for a provided hypothesis. Returns a generic_result."""
+    """
+    Parametric bootstrap for a provided hypothesis.
+    Only returns the LR for the null model fits (to avoid overloading the memory for use on nci)
+    Returns a generic_result
+    """
 
     _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
     _output_types = (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE)
@@ -45,10 +49,10 @@ class bootstrap(ComposableHypothesis):
         sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
 
         try:
-            sym_result = self._hyp(sim_aln).LR
+            sim_result = self._hyp(sim_aln).LR
         except ValueError:
-            sym_result = None
-        return sym_result
+            sim_result = None
+        return sim_result
 
     def run(self, aln):
         result = generic_result(aln.info.source)
@@ -62,16 +66,16 @@ class bootstrap(ComposableHypothesis):
         self._inpath = aln.info.source
 
         map_fun = map if not self._parallel else parallel.imap
-        sym_results = [r for r in map_fun(self._fit_sim, range(self._num_reps)) if r]
-        for i, sym_result in enumerate(sym_results):
-            if not sym_result:
+        sim_results = [r for r in map_fun(self._fit_sim, range(self._num_reps)) if r]
+        for i, sim_result in enumerate(sim_results):
+            if not sim_result:
                 continue
-            result[i + 1] = sym_result
+            result[i + 1] = sim_result
 
         return result
 
 
-def create_bootstrap_app(num_reps=5, discrete_edges=None):
+def create_bootstrap_app(num_reps=100, discrete_edges=None):
     """
     wrapper of cogent3.app.evo.bootstrap with hypothesis of GS as the null and GN as the alternate
     """
@@ -147,11 +151,11 @@ class confidence_interval(ComposableHypothesis):
         sim_aln.info.fg_edge = self.fg_edge
 
         try:
-            sym_model_fit = self.alt(sim_aln)
-            sym_result = self.stat_func(sym_model_fit)
+            sim_model_fit = self.alt(sim_aln)
+            sim_result = self.stat_func(sim_model_fit)
         except ValueError:
-            sym_result = None
-        return sym_result, sym_model_fit
+            sim_result = None
+        return sim_result, sim_model_fit
 
     def run(self, aln):
         result = generic_result(aln.info.source)
@@ -176,13 +180,13 @@ class confidence_interval(ComposableHypothesis):
         self._inpath = aln.info.source
 
         map_fun = map if not self._parallel else parallel.imap
-        sym_results = [r for r in map_fun(self.fit_sim, range(self._num_reps)) if r]
+        sim_results = [r for r in map_fun(self.fit_sim, range(self._num_reps)) if r]
         null = {}
-        for i, (sym_result, sym_model_fit) in enumerate(sym_results):
-            if not sym_result:
+        for i, (sim_result, sim_model_fit) in enumerate(sim_results):
+            if not sim_result:
                 continue
-            null[f"sym_{i+1}-result"] = sym_result
-            null[f"sym_{i+1}-model_fit"] = sym_model_fit
+            null[f"sim_{i+1}-result"] = sim_result
+            null[f"sim_{i+1}-model_fit"] = sim_model_fit
 
         result.update(dict(null))
         return result
@@ -242,3 +246,78 @@ def get_interval(gen_result, interval=95):
         np.percentile(null_distribution(gen_result), lower),
         np.percentile(null_distribution(gen_result), upper),
     )
+
+
+class expected_distributions(ComposableHypothesis):
+    """
+    bstrap_result
+        kath_library.bootstrap.bootstrap result (a specifically constructed generic_result type)
+
+    returns
+        a given statistic under the null hypothesis (a GNS process), and under the alternate process (a GN process)
+    """
+
+    _input_types = SERIALISABLE_TYPE
+    _output_types = SERIALISABLE_TYPE
+    _data_types = "generic_result"
+
+    def __init__(self, stat_func, fg_edge, parallel=False, verbose=False):
+        super(compare_to_null, self).__init__(
+            input_types=self._input_types,
+            output_types=self._output_types,
+            data_types=self._data_types,
+        )
+        self.stat_func = stat_func
+        self.fg_edge = fg_edge
+        self._verbose = verbose
+        self._parallel = parallel
+        self.func = self.run
+
+    def fit_null(self):
+        sim_aln = self.null_params.lf.simulate_alignment()
+        sim_aln.info.source = "%s - simalign - null" % (self._inpath)
+        sim_aln.info.fg_edge = self.fg_edge
+
+        try:
+            sim_model_fit = self.alt(sim_aln)
+            sim_result = self.stat_func(sim_model_fit)
+        except OscillatingPiException as err:
+            sim_result = NotCompleted(
+                "ERROR - OscillatingPiException", str(self.stat_func), err.args[0]
+            )
+        return sim_result, sim_model_fit
+
+    def fit_alt(self):
+        sim_aln = self.alt_params.lf.simulate_alignment()
+        sim_aln.info.source = "%s - simalign - alt" % (self._inpath)
+        sim_aln.info.fg_edge = self.fg_edge
+
+        try:
+            sim_model_fit = self.alt(sim_aln)
+            sim_result = self.stat_func(sim_model_fit)
+        except OscillatingPiException as err:
+            sim_result = NotCompleted(
+                "ERROR - OscillatingPiException", str(self.stat_func), err.args[0]
+            )
+        return sim_result, sim_model_fit
+
+    def run(self, bstrap_result):
+        result = generic_result(bstrap_result.source)
+        self._inpath = bstrap_result.source
+
+        taxa = bstrap_result["observed"].null.alignment.names
+        self.alt = GN_sm(list({self.fg_edge} ^ set(taxa)))
+
+        self.null_params = bstrap_result["observed"].null
+        self.alt_params = bstrap_result["observed"].alt
+
+        null_result, null_model_fit = self.fit_null()
+        alt_result, alt_model_fit = self.fit_alt()
+
+        result["null"] = null_result
+        result["null-model_fit"] = null_model_fit
+
+        result["alt"] = alt_result
+        result["alt-model_fit"] = alt_model_fit
+
+        return result
