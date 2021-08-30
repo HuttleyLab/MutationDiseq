@@ -9,6 +9,7 @@ from cogent3.app.evo import model_collection_result
 from kath_library.lrt import (
     get_init_hypothesis,
     get_init_model_coll,
+    get_lrt,
     get_no_init_hypothesis,
     get_no_init_model_coll,
 )
@@ -19,6 +20,15 @@ def dstore_instance():
     dstore = io.get_data_store(
         "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
     )
+    return dstore
+
+
+@pytest.fixture()
+def mcr_dstore():
+    dstore = io.get_data_store(
+        "/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/3000bp/mcr.tinydb"
+    )
+
     return dstore
 
 
@@ -63,16 +73,12 @@ def test_model_results_construction(no_init_mc, init_mc):
     assert isinstance(init_mc, model_collection_result)
 
 
-def test_no_fg_throw_error(get_aln_no_fg):
-    with pytest.raises(AttributeError):
-        get_no_init_model_coll(get_aln_no_fg)
-    with pytest.raises(AttributeError):
-        get_init_model_coll(get_aln_no_fg)
+def test_no_fg(get_aln_no_fg):
+    get_no_init_model_coll(get_aln_no_fg)
+    get_init_model_coll(get_aln_no_fg)
     get_aln_no_fg.info = None
-    with pytest.raises(AttributeError):
-        get_no_init_model_coll(get_aln_no_fg)
-    with pytest.raises(AttributeError):
-        get_init_model_coll(get_aln_no_fg)
+    get_no_init_model_coll(get_aln_no_fg)
+    get_init_model_coll(get_aln_no_fg)
 
 
 def test_get_no_init_hypothesis_app_run(dstore_instance):
@@ -99,3 +105,11 @@ def test_get_init_hypothesis_app_run(dstore_instance):
         process.apply_to(dstore_instance[:1])
 
         assert len(process.data_store.summary_incomplete) == 0
+
+
+def test_get_lrt(mcr_dstore):
+    loader = io.load_db()
+    gn_mc = loader(mcr_dstore[0])
+
+    hyp = get_lrt(gn_mc)
+    print(hyp)
