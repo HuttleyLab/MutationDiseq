@@ -1,12 +1,16 @@
+import os
+from tempfile import TemporaryDirectory
+
 import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree
-from cogent3.maths.matrix_exponential_integration import expected_number_subs
+from cogent3.app import io
 from cogent3.maths.measure import jsm
 from numpy.ma.core import dot
 from scipy.linalg import expm
 
-from kath_library.t50 import T50
+from kath_library.bootstrap import create_bootstrap_app
+from kath_library.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
 from kath_library.utils.numeric_utils import (
     valid_probability_vector,
     valid_rate_matrix,
@@ -81,6 +85,15 @@ def non_stationary_t50():
     new_pi = numpy.array([(pi[0] + pi[1]), pi[2] / 2, pi[2] / 2, pi[3]])
 
     return T50(Q, new_pi)
+
+
+@pytest.fixture()
+def mcr_dstore():
+    dstore = io.get_data_store(
+        "/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/3000bp/mcr.tinydb"
+    )
+
+    return dstore
 
 
 def test_construction():
@@ -201,3 +214,56 @@ def test_t50_number_precision():
     get = T50(Q, pi)
     t50 = get.estimate_t50()
     print(t50)
+
+
+def test_get_t50(mcr_dstore):
+    loader = io.load_db()
+    gn = loader(mcr_dstore[0])["mcr"]["GN"]
+
+    t50 = get_t50(gn)
+    assert t50["T50"] >= 0
+
+
+def test_get_t50_mc(mcr_dstore):
+    loader = io.load_db()
+    gn_mc = loader(mcr_dstore[0])
+    t50 = get_t50_mc(gn_mc)
+
+    assert t50["T50"] >= 0
+
+
+def test_get_t50_mc_composable(mcr_dstore):
+    with TemporaryDirectory(dir=".") as dirname:
+
+        reader = io.load_db()
+
+        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
+        writer = io.write_db(outpath)
+
+        process = reader + get_t50_mc + writer
+
+        process.apply_to(mcr_dstore[:1])
+        assert len(process.data_store.summary_incomplete) == 0
+
+
+def test_get_t50_bstrap():
+    with TemporaryDirectory(dir=".") as dirname:
+        dstore = io.get_data_store(
+            "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
+        )
+        reader = io.load_db()
+        boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
+        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
+        writer1 = io.write_db(outpath)
+
+        process = reader + boostrap + writer1
+        process.apply_to(dstore[:1])
+
+        loader = io.load_db()
+        dstore2 = io.get_data_store(outpath)
+        t50 = get_t50_bstrap(loader(dstore2[0]))
+
+        assert isinstance(t50["T50"], float)
+        assert isinstance(t50["fg_edge"], str)
+        assert t50["source"] == reader(dstore[0]).info.source
+        assert len(process.data_store.summary_incomplete) == 0
