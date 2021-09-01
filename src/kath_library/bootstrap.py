@@ -335,7 +335,7 @@ class expected_dist_hyp(ComposableHypothesis):
     _data_types = ("ArrayAlignment", "Alignment")
 
     def __init__(self, hyp, num_reps, parallel=False, verbose=False):
-        super(expected_distributions_bstrapped, self).__init__(
+        super(expected_dist_hyp, self).__init__(
             input_types=self._input_types,
             output_types=self._output_types,
             data_types=self._data_types,
