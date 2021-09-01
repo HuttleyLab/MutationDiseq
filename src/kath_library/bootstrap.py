@@ -428,6 +428,6 @@ def expected_dists_hyp_app(num_reps=100, discrete_edges=None):
     GN = GN_sm(discrete_edges)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
-    bstrap = expected_distributions_bstrapped(hyp, num_reps)
+    bstrap = expected_dist_hyp(hyp, num_reps)
 
     return bstrap
