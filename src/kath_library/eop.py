@@ -12,16 +12,9 @@ __credits__ = ["Katherine Caley"]
 
 
 class adjacent_EOP:
-    def __init__(self, loci, mod="GN"):
+    def __init__(self, loci, fg, mod="GN"):
         self.loci = {f"aln{index+1}": locus for index, locus in enumerate(loci)}
         self.mod = mod
-
-        if self.loci["aln1"].info.fg_edge is None:
-            fg, _, _ = get_jsd(self.loci["aln1"])
-            for locus in self.loci.values():
-                locus.info["fg_edge"] = fg
-        else:
-            fg = self.loci["aln1"].info.fg_edge
 
         bg_edges = list({fg} ^ set(self.loci["aln1"].names))
 
