@@ -6,7 +6,11 @@ from cogent3 import load_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import generic_result
 
-from kath_library.bootstrap import confidence_interval, create_bootstrap_app
+from kath_library.bootstrap import (
+    confidence_interval,
+    create_bootstrap_app,
+    estimate_pval,
+)
 from kath_library.convergence import _get_convergence
 from kath_library.t50 import _get_t50
 
@@ -64,14 +68,6 @@ def test_confidence_interval_with_t50(aln):
     assert isinstance(c_int["sim_1-result"]["T50"], float)
 
 
-def test_confidence_interval_parallel(aln):
-    get_conf_int = confidence_interval(_get_t50, 2, parallel=True)
-    c_int = get_conf_int.run(aln)
-
-    assert isinstance(c_int["observed"]["T50"], float)
-    assert isinstance(c_int["sim_1-result"]["T50"], float)
-
-
 def test_confidence_interval_app_composable(dstore_instance):
     with TemporaryDirectory(dir=".") as dirname:
         reader = io.load_db()
@@ -82,3 +78,15 @@ def test_confidence_interval_app_composable(dstore_instance):
 
         process.apply_to(dstore_instance[:1])
         assert len(process.data_store.summary_incomplete) == 0
+
+
+def test_estimate_pval(aln):
+    bstrap = create_bootstrap_app(2, discrete_edges=["443154", "73021"])
+    bootstrap = bstrap(aln)
+    assert estimate_pval(bootstrap) == 0
+
+    bootstrap[3] = 100
+    assert estimate_pval(bootstrap) == 1 / 3
+
+    bootstrap[4] = 100
+    assert estimate_pval(bootstrap) == 1 / 2
