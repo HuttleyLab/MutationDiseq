@@ -41,6 +41,7 @@ def _expected_dists_eop(alns):
             ("alt_eop", alt_eop_stats),
         ]
     )
+
     return result
 
 
