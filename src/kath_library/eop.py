@@ -124,7 +124,7 @@ class edge_EOP:
         df = self.alt_lf.nfp - self.null_lf.nfp
 
         LR = 2 * fsum(numpy.array([alt, -null]))
-        LR = fix_rounding_error(LR, round_error=1e-2)
+        LR = fix_rounding_error(LR, round_error=1e-1)
 
         table = make_table(
             header=["LR", "df", "p"],
