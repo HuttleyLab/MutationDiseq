@@ -115,7 +115,7 @@ def test_get_convergence(mcr_dstore):
 
 def test_get_convergence_mc(mcr_dstore):
     loader = io.load_db()
-    gn_mc = loader(mcr_dstore[0])
+    gn_mc = loader(mcr_dstore[2])
     conv = get_convergence_mc(gn_mc)
     assert conv["convergence"] >= 0
 
