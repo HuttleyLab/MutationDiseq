@@ -150,6 +150,7 @@ def test_get_convergence_bstrap():
         loader = io.load_db()
         dstore2 = io.get_data_store(outpath)
         conv = get_convergence_bstrap(loader(dstore2[0]))
+        print(conv)
 
         assert isinstance(conv["convergence"], float)
         assert isinstance(conv["fg_edge"], str)

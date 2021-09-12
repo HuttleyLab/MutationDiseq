@@ -5,7 +5,7 @@ from numpy import array, std
 from numpy.linalg import eig, norm
 from scipy.linalg import expm
 
-from kath_library.model import GN_sm
+from kath_library.model import GN_sm, GS_sm
 from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
@@ -77,7 +77,6 @@ def _get_convergence_mc(mc):
 
     conv_normalised = (observed_conv - neutral_mean) / neutral_std
 
-    print("normalised convergnece is: ", conv_normalised)
     result = generic_result(source=mc.source)
     result.update(
         [
@@ -111,8 +110,37 @@ def _get_convergence(gn_sm):
 
     conv = convergence(pi, Q, t)
 
+    GS = GS_sm(bg_edges)
+    GN = GN_sm(bg_edges)
+
+    null = GN(gn_sm.alignment)
+    neutral_convs = []
+
+    for i in range(1, 21):
+        sim_aln = null.lf.simulate_alignment()
+        sim_aln.info.source = "simalign %d" % (i)
+        sim_aln.info.fg_edge = fg_edge
+
+        try:
+            sim_model_fit = GN(sim_aln)
+            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
+                fg_edge, calibrated=False
+            ).to_array()
+            sim_pi = get_pi_0(sim_model_fit)
+            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
+
+            sim_conv = convergence(sim_pi, sim_Q, sim_t)
+            neutral_convs.append(sim_conv)
+        except ValueError:
+            sim_result = None
+
+    neutral_mean = array(neutral_convs).mean()
+    neutral_std = std(array(neutral_convs), ddof=1)
+
+    conv_normalised = (conv - neutral_mean) / neutral_std
+
     result = generic_result(source=gn_sm.source)
-    result.update([("convergence", conv)])
+    result.update([("convergence", conv), ("convergence_noramlised", conv_normalised)])
 
     return result
 
@@ -128,20 +156,52 @@ def _get_convergence_bstrap(result):
     Returns a generic_result
     """
 
-    gn = result["observed"].alt
+    alt = result["observed"].alt
+    null = result["observed"].null
 
-    bg_edges = gn.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
-    (fg_edge,) = set(bg_edges) ^ set(gn.alignment.names)
+    bg_edges = alt.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
+    (fg_edge,) = set(bg_edges) ^ set(alt.alignment.names)
 
-    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_0(gn)
-    t = gn.lf.get_param_value("length", edge=fg_edge)
+    Q = alt.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_0(alt)
+    t = alt.lf.get_param_value("length", edge=fg_edge)
 
     conv = convergence(pi, Q, t)
 
+    GN = GN_sm(bg_edges)
+    neutral_convs = []
+
+    for i in range(1, 11):
+        sim_aln = null.lf.simulate_alignment()
+        sim_aln.info.source = "%s - simalign %d" % (result.source, i)
+        sim_aln.info.fg_edge = fg_edge
+
+        try:
+            sim_model_fit = GN(sim_aln)
+            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
+                fg_edge, calibrated=False
+            ).to_array()
+            sim_pi = get_pi_0(sim_model_fit)
+            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
+
+            sim_conv = convergence(sim_pi, sim_Q, sim_t)
+            neutral_convs.append(sim_conv)
+        except ValueError:
+            sim_result = None
+
+    neutral_mean = array(neutral_convs).mean()
+    neutral_std = std(array(neutral_convs), ddof=1)
+
+    conv_normalised = (conv - neutral_mean) / neutral_std
+
     result = generic_result(source=result.source)
     result.update(
-        [("convergence", conv), ("fg_edge", fg_edge), ("source", result.source)]
+        [
+            ("convergence_noramlised", conv_normalised),
+            ("convergence", conv),
+            ("fg_edge", fg_edge),
+            ("source", result.source),
+        ]
     )
 
     return result
