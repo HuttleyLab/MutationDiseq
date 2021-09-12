@@ -80,7 +80,7 @@ def _get_convergence_mc(mc):
     result = generic_result(source=mc.source)
     result.update(
         [
-            ("convergence_noramlised", conv_normalised),
+            ("convergence_normalised", conv_normalised),
             ("convergence", observed_conv),
             ("fg_edge", fg_edge),
             ("source", mc.source),
@@ -140,7 +140,7 @@ def _get_convergence(gn_sm):
     conv_normalised = (conv - neutral_mean) / neutral_std
 
     result = generic_result(source=gn_sm.source)
-    result.update([("convergence", conv), ("convergence_noramlised", conv_normalised)])
+    result.update([("convergence", conv), ("convergence_normalised", conv_normalised)])
 
     return result
 
@@ -197,7 +197,7 @@ def _get_convergence_bstrap(result):
     result = generic_result(source=result.source)
     result.update(
         [
-            ("convergence_noramlised", conv_normalised),
+            ("convergence_normalised", conv_normalised),
             ("convergence", conv),
             ("fg_edge", fg_edge),
             ("source", result.source),
