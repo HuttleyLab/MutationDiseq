@@ -5,10 +5,6 @@ from accupy import fdot as dot
 from accupy import fsum as sum
 from cogent3.util.dict_array import DictArray
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
-__version__ = "2021.07.01"
-
 
 def valid_stochastic_matrix(matrix):
     """
