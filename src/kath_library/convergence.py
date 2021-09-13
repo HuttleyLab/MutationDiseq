@@ -54,7 +54,7 @@ def _get_convergence_mc(mc):
     GN = GN_sm(bg_edges)
     neutral_convs = []
 
-    for i in range(1, 11):
+    while len(neutral_convs < 10):
         sim_aln = null.lf.simulate_alignment()
         sim_aln.info.source = "%s - simalign %d" % (mc.source, i)
         sim_aln.info.fg_edge = fg_edge
@@ -116,7 +116,7 @@ def _get_convergence(gn_sm):
     null = GN(gn_sm.alignment)
     neutral_convs = []
 
-    for i in range(1, 11):
+    while len(neutral_convs < 10):
         sim_aln = null.lf.simulate_alignment()
         sim_aln.info.source = "simalign %d" % (i)
         sim_aln.info.fg_edge = fg_edge
@@ -171,7 +171,7 @@ def _get_convergence_bstrap(result):
     GN = GN_sm(bg_edges)
     neutral_convs = []
 
-    for i in range(1, 11):
+    while len(neutral_convs < 10):
         sim_aln = null.lf.simulate_alignment()
         sim_aln.info.source = "%s - simalign %d" % (result.source, i)
         sim_aln.info.fg_edge = fg_edge
