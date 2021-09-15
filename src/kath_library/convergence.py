@@ -85,6 +85,7 @@ def _get_convergence_mc(mc):
             ("convergence", observed_conv),
             ("fg_edge", fg_edge),
             ("source", mc.source),
+            ("model_fit", alt),
         ]
     )
 
