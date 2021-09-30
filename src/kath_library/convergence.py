@@ -233,7 +233,7 @@ def _get_delta_convergence_mc(mc):
     pi = get_pi_0(alt)
     t = alt.lf.get_param_value("length", edge=fg_edge)
 
-    observed_conv = convergence(pi, Q, t)
+    conv = convergence(pi, Q, t)
 
     null = mc["mcr"]["GS"]
     GN = GN_sm(bg_edges)
