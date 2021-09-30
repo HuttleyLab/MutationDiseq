@@ -263,7 +263,7 @@ def _get_delta_convergence_mc(mc):
         delta_conv = conv - null_mean
         z_conv = delta_conv / null_std
 
-        result = generic_result(source=result.source)
+        result = generic_result(source=mc.source)
         result.update(
             [
                 ("z-convergence", z_conv),
