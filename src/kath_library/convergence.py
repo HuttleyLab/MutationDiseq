@@ -218,6 +218,72 @@ get_convergence_bstrap = user_function(
 )
 
 
+def _get_delta_convergence_mc(mc):
+    """
+    Wrapper function to return convergence estimate from a model collection that includes a GN fit.
+    Returns a generic_result
+    """
+
+    alt = mc["mcr"]["GN"]
+
+    bg_edges = alt.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
+    (fg_edge,) = set(bg_edges) ^ set(alt.alignment.names)
+
+    Q = alt.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
+    pi = get_pi_0(alt)
+    t = alt.lf.get_param_value("length", edge=fg_edge)
+
+    observed_conv = convergence(pi, Q, t)
+
+    null = mc["mcr"]["GS"]
+    GN = GN_sm(bg_edges)
+    null_convs = []
+
+    while len(null_convs) < 30:
+        i = len(null_convs) + 1
+        sim_aln = null.lf.simulate_alignment()
+        sim_aln.info.source = "%s - simalign %d" % (mc.source, i)
+        sim_aln.info.fg_edge = fg_edge
+
+        try:
+            sim_model_fit = GN(sim_aln)
+            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
+                fg_edge, calibrated=False
+            ).to_array()
+            sim_pi = get_pi_0(sim_model_fit)
+            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
+
+            sim_conv = convergence(sim_pi, sim_Q, sim_t)
+            null_convs.append(sim_conv)
+        except ValueError:
+            sim_result = None
+
+        null_mean = array(null_convs).mean()
+        null_std = std(array(null_convs), ddof=1)
+        delta_conv = conv - null_mean
+        z_conv = delta_conv / null_std
+
+        result = generic_result(source=result.source)
+        result.update(
+            [
+                ("z-convergence", z_conv),
+                ("d-convergence", delta_conv),
+                ("convergence", conv),
+                ("fg_edge", fg_edge),
+                ("source", result.source),
+            ]
+        )
+
+    return result
+
+
+get_delta_convergence_mc = user_function(
+    _get_delta_convergence_mc,
+    input_types=SERIALISABLE_TYPE,
+    output_types=SERIALISABLE_TYPE,
+)
+
+
 def _get_delta_convergence(gn_sm):
     """
     Wrapper function to return convergence estimate from a non-stationary model fit.
@@ -267,7 +333,8 @@ def _get_delta_convergence(gn_sm):
     result.update(
         [
             ("z-convergence", z_conv),
-            ("d-convergence", delta_conv)("convergence", conv),
+            ("d-convergence", delta_conv),
+            ("convergence", conv),
             ("fg_edge", fg_edge),
             ("source", result.source),
         ]
@@ -332,7 +399,8 @@ def _get_delta_convergence_bstrap(result):
     result.update(
         [
             ("z-convergence", z_conv),
-            ("d-convergence", delta_conv)("convergence", conv),
+            ("d-convergence", delta_conv),
+            ("convergence", conv),
             ("fg_edge", fg_edge),
             ("source", result.source),
         ]
