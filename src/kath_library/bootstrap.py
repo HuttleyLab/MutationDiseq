@@ -85,27 +85,6 @@ def create_bootstrap_app(num_reps=100, discrete_edges=None):
     return bstrap
 
 
-def _create_bootstrap_app_diff_trees(aln):
-    """
-    wrapper of create_bootstrap_app for when the data to be applied to contains alignments of different taxa
-    """
-    fg = get_foreground(aln)
-    bg = list({fg} ^ set(aln.names))
-    bstrap = create_bootstrap_app(100, discrete_edges=bg)
-    try:
-        result = bstrap(aln)
-    except ValueError:
-        result = None
-    return result
-
-
-create_bootstrap_app_diff_trees = user_function(
-    _create_bootstrap_app_diff_trees,
-    input_types=SERIALISABLE_TYPE,
-    output_types=SERIALISABLE_TYPE,
-)
-
-
 def estimate_pval(generic_result):
     obs = generic_result["observed"].LR
     null_dist = [generic_result[k] for k in generic_result.keys() if k != "observed"]
