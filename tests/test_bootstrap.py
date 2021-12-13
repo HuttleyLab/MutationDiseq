@@ -9,7 +9,6 @@ from cogent3.app.result import generic_result
 from kath_library.bootstrap import (
     confidence_interval,
     create_bootstrap_app,
-    create_bootstrap_app_diff_trees,
     estimate_pval,
 )
 from kath_library.convergence import _get_convergence

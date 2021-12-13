@@ -103,7 +103,7 @@ def test_get_rel_entropies_same_aln(dstore_instance):
     eop = adjacent_EOP([aln1, aln2], "758")
     re = list(eop.get_relative_entropies().values())
 
-    numpy.testing.assert_almost_equal(re[0], re[1], decimal=4)
+    numpy.testing.assert_almost_equal(re[0], re[1], decimal=2)
 
 
 def test_adjacent_EOP_three_alns(multiple_alns):
