@@ -67,7 +67,7 @@ def test_adjacent_EOP_construction(dstore_instance):
     aln1 = loader(dstore_instance[0])
     aln2 = loader(dstore_instance[1])
 
-    eop = adjacent_EOP([aln1, aln2])
+    eop = adjacent_EOP([aln1, aln2], "758")
 
     assert isinstance(eop.LR, float)
     assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
@@ -89,7 +89,7 @@ def test_adjacent_EOP_same_aln(dstore_instance):
     aln1 = loader(dstore_instance[1])
     aln2 = loader(dstore_instance[1])
 
-    lr = adjacent_EOP([aln1, aln2]).LR
+    lr = adjacent_EOP([aln1, aln2], "758").LR
     numpy.testing.assert_almost_equal(lr, 0, decimal=5)
 
 
@@ -100,21 +100,21 @@ def test_get_rel_entropies_same_aln(dstore_instance):
     aln1 = loader(dstore_instance[1])
     aln2 = loader(dstore_instance[1])
 
-    eop = adjacent_EOP([aln1, aln2])
+    eop = adjacent_EOP([aln1, aln2], "758")
     re = list(eop.get_relative_entropies().values())
 
     numpy.testing.assert_almost_equal(re[0], re[1], decimal=4)
 
 
 def test_adjacent_EOP_three_alns(multiple_alns):
-    eop = adjacent_EOP(multiple_alns)
+    eop = adjacent_EOP(multiple_alns, "Human")
     assert isinstance(eop.LR, float)
     assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
     eop.get_relative_entropies()
 
 
 def test_adjacent_EOP_different_lengths(diff_length_alns):
-    eop = adjacent_EOP(diff_length_alns)
+    eop = adjacent_EOP(diff_length_alns, "Human")
     assert isinstance(eop.LR, float)
     assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
     eop.get_relative_entropies()
@@ -128,4 +128,4 @@ def test_adjacent_EOP_short_seq():
     aln1 = loader(dstore[9])
     aln2 = loader(dstore[10])
 
-    adjacent_EOP([aln1, aln2])
+    adjacent_EOP([aln1, aln2], "758")
