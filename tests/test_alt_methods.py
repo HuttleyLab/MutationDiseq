@@ -1,8 +1,6 @@
 import pytest
-from cogent3 import get_model, load_aligned_seqs, make_tree
 from cogent3.app import io
-
-from kath_library.alt_methods.squartini_arndt import (
+from kath_analysis.alt_methods.squartini_arndt import (
     chi_squared_test,
     stationarity_indices,
 )
