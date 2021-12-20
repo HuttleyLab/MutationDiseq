@@ -1,1 +1,2 @@
-__version__ = "2021.09.14"
+"""mdeq: mutation disequilibrium analysis tools"""
+__version__ = "2021.12.20"
