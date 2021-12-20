@@ -4,8 +4,8 @@ from cogent3 import get_model, make_table, make_tree
 from cogent3.app import evo
 from cogent3.maths.stats import chisqprob
 
-from kath_library.jsd import get_jsd
-from kath_library.utils.numeric_utils import fix_rounding_error
+from mdeq.jsd import get_jsd
+from mdeq.utils.numeric_utils import fix_rounding_error
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

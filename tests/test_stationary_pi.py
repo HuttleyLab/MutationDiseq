@@ -5,8 +5,8 @@ from cogent3.app import evo, io
 from numpy import eye
 from numpy.testing import assert_allclose
 
-from kath_library.jsd import get_jsd
-from kath_library.stationary_pi import (
+from mdeq.jsd import get_jsd
+from mdeq.stationary_pi import (
     OscillatingPiException,
     get_stat_pi_via_brute,
     get_stat_pi_via_eigen,

@@ -2,7 +2,7 @@ import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 
-from kath_library.jsd import get_entropy, get_jsd
+from mdeq.jsd import get_entropy, get_jsd
 
 
 @pytest.fixture()

@@ -6,7 +6,7 @@ from cogent3.maths.measure import jsd as jsd_func
 from cogent3.util.dict_array import DictArray
 from numpy import array as np_array
 
-from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from mdeq.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

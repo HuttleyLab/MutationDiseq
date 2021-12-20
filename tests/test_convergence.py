@@ -5,16 +5,16 @@ import numpy
 import pytest
 from cogent3.app import io
 
-from kath_library.bootstrap import create_bootstrap_app
-from kath_library.convergence import (
+from mdeq.bootstrap import create_bootstrap_app
+from mdeq.convergence import (
     convergence,
     eigII,
     get_convergence,
     get_convergence_bstrap,
     get_convergence_mc,
 )
-from kath_library.model import GN_sm
-from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
+from mdeq.model import GN_sm
+from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 loader = io.load_db()
 

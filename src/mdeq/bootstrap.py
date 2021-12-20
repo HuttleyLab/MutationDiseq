@@ -12,9 +12,9 @@ from cogent3.app.composable import (
 from cogent3.app.result import bootstrap_result, generic_result
 from cogent3.util import parallel
 
-from kath_library.model import GN_sm, GS_sm
-from kath_library.stationary_pi import OscillatingPiException
-from kath_library.utils.utils import get_foreground
+from mdeq.model import GN_sm, GS_sm
+from mdeq.stationary_pi import OscillatingPiException
+from mdeq.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

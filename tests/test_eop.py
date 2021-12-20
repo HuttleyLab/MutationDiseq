@@ -3,7 +3,7 @@ import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
 
-from kath_library.eop import adjacent_EOP, edge_EOP
+from mdeq.eop import adjacent_EOP, edge_EOP
 
 
 @pytest.fixture()

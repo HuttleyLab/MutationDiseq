@@ -5,8 +5,8 @@ from numpy import array, std
 from numpy.linalg import eig, norm
 from scipy.linalg import expm
 
-from kath_library.model import GN_sm, GS_sm
-from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
+from mdeq.model import GN_sm, GS_sm
+from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler"]

@@ -9,14 +9,14 @@ from cogent3.maths.measure import jsm
 from numpy.ma.core import dot
 from scipy.linalg import expm
 
-from kath_library.bootstrap import create_bootstrap_app
-from kath_library.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
-from kath_library.utils.numeric_utils import (
+from mdeq.bootstrap import create_bootstrap_app
+from mdeq.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
+from mdeq.utils.numeric_utils import (
     valid_probability_vector,
     valid_rate_matrix,
     valid_stochastic_matrix,
 )
-from kath_library.utils.utils import get_pi_0
+from mdeq.utils.utils import get_pi_0
 
 
 @pytest.fixture()

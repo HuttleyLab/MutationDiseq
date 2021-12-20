@@ -7,8 +7,8 @@ from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
 
-from kath_library.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
-from kath_library.utils.utils import get_foreground, get_pi_0, get_pi_tip
+from mdeq.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]

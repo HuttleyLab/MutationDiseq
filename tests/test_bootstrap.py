@@ -6,13 +6,13 @@ from cogent3 import load_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import generic_result
 
-from kath_library.bootstrap import (
+from mdeq.bootstrap import (
     confidence_interval,
     create_bootstrap_app,
     estimate_pval,
 )
-from kath_library.convergence import _get_convergence
-from kath_library.t50 import _get_t50
+from mdeq.convergence import _get_convergence
+from mdeq.t50 import _get_t50
 
 
 @pytest.fixture()

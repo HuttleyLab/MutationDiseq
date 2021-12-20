@@ -1,7 +1,7 @@
 import pytest
 from cogent3 import make_aligned_seqs
 
-from kath_library.utils.utils import get_foreground
+from mdeq.utils.utils import get_foreground
 
 
 @pytest.fixture()

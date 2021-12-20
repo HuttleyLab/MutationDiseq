@@ -3,8 +3,8 @@ from cogent3.app import evo, io
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 
-from kath_library.model import GS_instance
-from kath_library.utils.utils import get_foreground
+from mdeq.model import GS_instance
+from mdeq.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

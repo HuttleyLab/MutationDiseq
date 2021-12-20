@@ -6,7 +6,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.evo import model_collection_result
 
-from kath_library.lrt import (
+from mdeq.lrt import (
     get_init_hypothesis,
     get_init_model_coll,
     get_lrt,
