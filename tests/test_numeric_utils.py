@@ -1,4 +1,5 @@
 import numpy
+
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 from cogent3.util.dict_array import DictArray

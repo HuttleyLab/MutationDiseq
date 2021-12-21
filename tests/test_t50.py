@@ -45,8 +45,7 @@ def t50_construction_random():
 
     pi_0 = numpy.array([0.25] * 4)
 
-    calc_t50 = T50(Q, pi_0, jsm)
-    return calc_t50
+    return T50(Q, pi_0, jsm)
 
 
 @pytest.fixture()

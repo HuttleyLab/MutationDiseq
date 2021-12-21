@@ -1,4 +1,5 @@
 import pytest
+
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 
@@ -27,8 +28,7 @@ def single_nt_aln():
         "Rhesus": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     }
 
-    seqs = make_aligned_seqs(_seqs, moltype="dna")
-    return seqs
+    return make_aligned_seqs(_seqs, moltype="dna")
 
 
 @pytest.fixture()
@@ -40,8 +40,7 @@ def diff_nt_aln():
         "Rhesus": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     }
 
-    seqs = make_aligned_seqs(_seqs, moltype="dna")
-    return seqs
+    return make_aligned_seqs(_seqs, moltype="dna")
 
 
 @pytest.fixture()

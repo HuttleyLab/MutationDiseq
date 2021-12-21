@@ -1,18 +1,20 @@
 import pathlib
+
 import numpy
 import pytest
+
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
 
 from mdeq.eop import adjacent_EOP, edge_EOP
+
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture()
 def dstore_instance():
-    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
-    return dstore
+    return io.get_data_store(DATADIR / "3000bp.tinydb")
 
 
 @pytest.fixture()

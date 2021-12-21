@@ -1,6 +1,7 @@
 import pathlib
 
 import pytest
+
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.evo import model_collection_result
@@ -19,8 +20,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture()
 def dstore_instance():
-    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
-    return dstore
+    return io.get_data_store(DATADIR / "3000bp.tinydb")
 
 
 @pytest.fixture()
@@ -47,21 +47,17 @@ def get_aln_no_fg():
         "Mouse": "ATGCCCGGCGCCAAGGCAGCGCTGGCGGAG",
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
-    aln = make_aligned_seqs(data=_data, moltype="dna")
-
-    return aln
+    return make_aligned_seqs(data=_data, moltype="dna")
 
 
 @pytest.fixture()
 def no_init_mc(get_aln):
-    mc = get_no_init_model_coll(get_aln)
-    return mc
+    return get_no_init_model_coll(get_aln)
 
 
 @pytest.fixture()
 def init_mc(get_aln):
-    mc = get_init_model_coll(get_aln)
-    return mc
+    return get_init_model_coll(get_aln)
 
 
 def test_model_results_construction(no_init_mc, init_mc):

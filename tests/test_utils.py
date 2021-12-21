@@ -1,4 +1,5 @@
 import pytest
+
 from cogent3 import make_aligned_seqs
 
 from mdeq.utils.utils import get_foreground
@@ -13,8 +14,7 @@ def aln():
         "Rhesus": "GCCAGCTCATTACAGCATGAGAACAGTTTGTTACTCACTATT",
     }
 
-    seqs = make_aligned_seqs(_seqs, moltype="dna")
-    return seqs
+    return make_aligned_seqs(_seqs, moltype="dna")
 
 
 def test_doesnt_fail(aln):

@@ -118,8 +118,7 @@ def identity():
 def non_converging():
     dstore = io.get_data_store(DATADIR / "non_converging.tinydb")
     loader = io.load_db()
-    result = loader(dstore[0])
-    return result
+    return loader(dstore[0])
 
 
 def test_return_OscillatingPiExcpetion(non_converging):
