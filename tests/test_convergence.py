@@ -1,10 +1,8 @@
-import os
 import pathlib
-
-from tempfile import TemporaryDirectory
 
 import numpy
 import pytest
+
 from cogent3.app import io
 
 from mdeq.bootstrap import create_bootstrap_app
@@ -17,6 +15,7 @@ from mdeq.convergence import (
 )
 from mdeq.model import GN_sm
 from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
+
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
@@ -116,37 +115,34 @@ def test_get_convergence_mc(mcr_dstore):
     assert conv["convergence"] >= 0
 
 
-def test_get_convergence_mc_composable(mcr_dstore):
-    with TemporaryDirectory(dir=".") as dirname:
+def test_get_convergence_mc_composable(tmp_path, mcr_dstore):
+    reader = io.load_db()
 
-        reader = io.load_db()
+    outpath = tmp_path / "tempdir.tinydb"
+    writer = io.write_db(outpath)
 
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer = io.write_db(outpath)
+    process = reader + get_convergence_mc + writer
 
-        process = reader + get_convergence_mc + writer
-
-        process.apply_to(mcr_dstore[:1])
-        assert len(process.data_store.summary_incomplete) == 0
+    process.apply_to(mcr_dstore[:1])
+    assert len(process.data_store.summary_incomplete) == 0
 
 
-def test_get_convergence_bstrap():
-    with TemporaryDirectory(dir=".") as dirname:
-        dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
-        reader = io.load_db()
-        boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer1 = io.write_db(outpath)
+def test_get_convergence_bstrap(tmp_path):
+    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
+    reader = io.load_db()
+    boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
+    outpath = tmp_path / "tempdir.tinydb"
+    writer1 = io.write_db(outpath)
 
-        process = reader + boostrap + writer1
-        process.apply_to(dstore[:1])
+    process = reader + boostrap + writer1
+    process.apply_to(dstore[:1])
 
-        loader = io.load_db()
-        dstore2 = io.get_data_store(outpath)
-        conv = get_convergence_bstrap(loader(dstore2[0]))
-        print(conv)
+    loader = io.load_db()
+    dstore2 = io.get_data_store(outpath)
+    conv = get_convergence_bstrap(loader(dstore2[0]))
+    print(conv)
 
-        assert isinstance(conv["convergence"], float)
-        assert isinstance(conv["fg_edge"], str)
-        assert conv["source"] == reader(dstore[0]).info.source
-        assert len(process.data_store.summary_incomplete) == 0
+    assert isinstance(conv["convergence"], float)
+    assert isinstance(conv["fg_edge"], str)
+    assert conv["source"] == reader(dstore[0]).info.source
+    assert len(process.data_store.summary_incomplete) == 0

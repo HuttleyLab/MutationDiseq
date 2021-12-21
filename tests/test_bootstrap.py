@@ -1,9 +1,7 @@
-import os
 import pathlib
 
-from tempfile import TemporaryDirectory
-
 import pytest
+
 from cogent3 import load_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import generic_result
@@ -43,16 +41,15 @@ def test_create_bootstrap_app(aln):
     assert len(bootstrap) == 3
 
 
-def test_create_bootstrap_app_composable(dstore_instance):
-    with TemporaryDirectory(dir=".") as dirname:
-        reader = io.load_db()
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer = io.write_db(outpath)
-        bstrap = create_bootstrap_app(2)
-        process = reader + bstrap + writer
+def test_create_bootstrap_app_composable(tmp_path, dstore_instance):
+    reader = io.load_db()
+    outpath = tmp_path / "tempdir.tinydb"
+    writer = io.write_db(outpath)
+    bstrap = create_bootstrap_app(2)
+    process = reader + bstrap + writer
 
-        process.apply_to(dstore_instance[:1])
-        assert len(process.data_store.summary_incomplete) == 0
+    process.apply_to(dstore_instance[:1])
+    assert len(process.data_store.summary_incomplete) == 0
 
 
 def test_confidence_interval_with_convergence(aln):
@@ -71,16 +68,15 @@ def test_confidence_interval_with_t50(aln):
     assert isinstance(c_int["sim_1-result"]["T50"], float)
 
 
-def test_confidence_interval_app_composable(dstore_instance):
-    with TemporaryDirectory(dir=".") as dirname:
-        reader = io.load_db()
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer = io.write_db(outpath)
-        c_int = confidence_interval(_get_t50, 1)
-        process = reader + c_int + writer
+def test_confidence_interval_app_composable(tmp_path, dstore_instance):
+    reader = io.load_db()
+    outpath = tmp_path / "tempdir.tinydb"
+    writer = io.write_db(outpath)
+    c_int = confidence_interval(_get_t50, 1)
+    process = reader + c_int + writer
 
-        process.apply_to(dstore_instance[:1])
-        assert len(process.data_store.summary_incomplete) == 0
+    process.apply_to(dstore_instance[:1])
+    assert len(process.data_store.summary_incomplete) == 0
 
 
 def test_estimate_pval(aln):

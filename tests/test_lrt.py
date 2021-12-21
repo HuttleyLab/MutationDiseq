@@ -1,6 +1,4 @@
-import os
 import pathlib
-from tempfile import TemporaryDirectory
 
 import pytest
 from cogent3 import make_aligned_seqs
@@ -79,30 +77,26 @@ def test_no_fg(get_aln_no_fg):
     get_init_model_coll(get_aln_no_fg)
 
 
-def test_get_no_init_hypothesis_app_run(dstore_instance):
-    with TemporaryDirectory(dir=".") as dirname:
+def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance):
+    reader = io.load_db()
+    outpath = tmp_path / "tempdir.tinydb"
+    writer = io.write_db(outpath)
+    process = reader + get_no_init_hypothesis + writer
 
-        reader = io.load_db()
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer = io.write_db(outpath)
-        process = reader + get_no_init_hypothesis + writer
+    process.apply_to(dstore_instance[:1])
 
-        process.apply_to(dstore_instance[:1])
-
-        assert len(process.data_store.summary_incomplete) == 0
+    assert len(process.data_store.summary_incomplete) == 0
 
 
-def test_get_init_hypothesis_app_run(dstore_instance):
-    with TemporaryDirectory(dir=".") as dirname:
+def test_get_init_hypothesis_app_run(tmp_path, dstore_instance):
+    reader = io.load_db()
+    outpath = tmp_path / "tempdir.tinydb"
+    writer = io.write_db(outpath)
+    process = reader + get_init_hypothesis + writer
 
-        reader = io.load_db()
-        outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")
-        writer = io.write_db(outpath)
-        process = reader + get_init_hypothesis + writer
+    process.apply_to(dstore_instance[:1])
 
-        process.apply_to(dstore_instance[:1])
-
-        assert len(process.data_store.summary_incomplete) == 0
+    assert len(process.data_store.summary_incomplete) == 0
 
 
 def test_get_lrt(mcr_dstore):
