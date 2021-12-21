@@ -1,5 +1,8 @@
+import pathlib
+
 import numpy
 import pytest
+
 from cogent3 import get_model, load_aligned_seqs, make_tree
 from cogent3.app import evo, io
 from numpy import eye
@@ -11,6 +14,9 @@ from mdeq.stationary_pi import (
     get_stat_pi_via_brute,
     get_stat_pi_via_eigen,
 )
+
+
+DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture()
@@ -110,13 +116,10 @@ def identity():
 
 @pytest.fixture()
 def non_converging():
-    dstore = io.get_data_store(
-        "/Users/katherine/repos/results/aim_2/microbial/summary/gn_fits-het.tinydb"
-    )
+    dstore = io.get_data_store(DATADIR / "non_converging.tinydb")
     loader = io.load_db()
-    aln = loader((dstore.filtered("100347_54583_202620*"))[0])
-    print(type(aln))
-    return aln
+    result = loader(dstore[0])
+    return result
 
 
 def test_return_OscillatingPiExcpetion(non_converging):
