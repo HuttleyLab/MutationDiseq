@@ -32,10 +32,9 @@ def test_convergence_GN(mcr_dstore):
     """
     Convergence for a GN process should be greater or equal to zero.
     """
-    mc = loader(mcr_dstore[0])["mcr"]
-    gn = loader(mcr_dstore[0])["mcr"]["GN"]
-
-    fg_edge = mc.source["fg_edge"]
+    result = loader(mcr_dstore[0])
+    fg_edge = result["fg_edge"]
+    gn = result["mcr"]["GN"]
 
     pi = get_pi_tip(gn, fg_edge)
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
@@ -50,10 +49,9 @@ def test_convergence_non_zero(mcr_dstore):
     """
     Convergence of a non-stationary process should be greater than 0
     """
-    mc = loader(mcr_dstore[0])["mcr"]
-    gn = loader(mcr_dstore[0])["mcr"]["GN"]
-
-    fg_edge = mc.source["fg_edge"]
+    result = loader(mcr_dstore[0])
+    fg_edge = result["fg_edge"]
+    gn = result["mcr"]["GN"]
 
     pi = get_pi_tip(gn, fg_edge)
     Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
@@ -70,11 +68,9 @@ def test_convergence_GTR(mcr_dstore):
     """
     The Convergence of a stationary process should be 0
     """
-
-    mc = loader(mcr_dstore[0])["mcr"]
-    gtr = loader(mcr_dstore[0])["mcr"]["GTR"]
-
-    fg_edge = mc.source["fg_edge"]
+    result = loader(mcr_dstore[0])
+    fg_edge = result["fg_edge"]
+    gtr = result["mcr"]["GTR"]
 
     Q = gtr.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_0(gtr)
