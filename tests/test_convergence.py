@@ -1,4 +1,6 @@
 import os
+import pathlib
+
 from tempfile import TemporaryDirectory
 
 import numpy
@@ -15,6 +17,8 @@ from mdeq.convergence import (
 )
 from mdeq.model import GN_sm
 from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
+
+DATADIR = pathlib.Path(__file__).parent / "data"
 
 loader = io.load_db()
 
@@ -85,9 +89,7 @@ def test_convergence_GTR(mcr_dstore):
 
 def test_eigII():
 
-    dstore = io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
-    )
+    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
     loader = io.load_db()
     aln1 = loader(dstore[0])
     fg_edge = get_foreground(aln1)
@@ -136,9 +138,7 @@ def test_get_convergence_mc_composable(mcr_dstore):
 
 def test_get_convergence_bstrap():
     with TemporaryDirectory(dir=".") as dirname:
-        dstore = io.get_data_store(
-            "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
-        )
+        dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
         reader = io.load_db()
         boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
         outpath = os.path.join(os.getcwd(), dirname, "tempdir.tinydb")

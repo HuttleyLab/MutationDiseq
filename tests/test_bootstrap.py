@@ -32,9 +32,7 @@ def aln():
 
 @pytest.fixture()
 def dstore_instance():
-    return io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
-    )
+    return io.get_data_store(DATADIR / "3000bp.tinydb")
 
 
 def test_create_bootstrap_app(aln):

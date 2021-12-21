@@ -1,4 +1,5 @@
 import os
+import pathlib
 from tempfile import TemporaryDirectory
 
 import pytest
@@ -15,11 +16,12 @@ from mdeq.lrt import (
 )
 
 
+DATADIR = pathlib.Path(__file__).parent / "data"
+
+
 @pytest.fixture()
 def dstore_instance():
-    dstore = io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/3000bp.tinydb"
-    )
+    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
     return dstore
 
 
