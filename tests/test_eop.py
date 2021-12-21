@@ -1,9 +1,12 @@
+import pathlib
 import numpy
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
 
 from mdeq.eop import adjacent_EOP, edge_EOP
+
+DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture()
@@ -119,9 +122,7 @@ def test_adjacent_EOP_different_lengths(diff_length_alns):
 
 
 def test_adjacent_EOP_short_seq():
-    dstore = io.get_data_store(
-        "~/repos/data/microbial/synthetic/758_443154_73021/300bp.tinydb"
-    )
+    dstore = io.get_data_store(DATADIR / "300bp.tinydb")
     loader = io.load_db()
     aln1 = loader(dstore[9])
     aln2 = loader(dstore[10])
