@@ -1,4 +1,6 @@
 import os
+import pathlib
+
 from tempfile import TemporaryDirectory
 
 import numpy
@@ -17,6 +19,17 @@ from mdeq.utils.numeric_utils import (
     valid_stochastic_matrix,
 )
 from mdeq.utils.utils import get_pi_0
+
+
+DATADIR = pathlib.Path(__file__).parent / "data"
+
+
+@pytest.fixture()
+def aln():
+    aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
+    aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
+    aln = aln.no_degenerates(motif_length=3)
+    return aln
 
 
 @pytest.fixture()
@@ -39,11 +52,10 @@ def t50_construction_random():
 
 
 @pytest.fixture()
-def gtr_defined_t50():
+def gtr_defined_t50(aln):
     """
     T50 object constructed by stationary process (Q and pi defined GTR)
     """
-    aln = load_aligned_seqs("~/repos/cogent3/tests/data/brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
 
@@ -63,11 +75,10 @@ def gtr_defined_t50():
 
 
 @pytest.fixture()
-def non_stationary_t50():
+def non_stationary_t50(aln):
     """
     T50 object constructed by stationary process (Q and pi defined GTR)
     """
-    aln = load_aligned_seqs("~/repos/cogent3/tests/data/brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
 

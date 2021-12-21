@@ -1,4 +1,6 @@
 import os
+import pathlib
+
 from tempfile import TemporaryDirectory
 
 import pytest
@@ -15,9 +17,12 @@ from mdeq.convergence import _get_convergence
 from mdeq.t50 import _get_t50
 
 
+DATADIR = pathlib.Path(__file__).parent / "data"
+
+
 @pytest.fixture()
 def aln():
-    aln = load_aligned_seqs("~/repos/cogent3/tests/data/brca1.fasta", moltype="dna")
+    aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
     aln.info["fg_edge"] = "TombBat"

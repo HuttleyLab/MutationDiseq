@@ -21,7 +21,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture()
 def brca1_alignment():
-    aln = load_aligned_seqs("~/repos/cogent3/tests/data/brca1.fasta", moltype="dna")
+    aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
     return aln
