@@ -27,11 +27,7 @@ def dstore_instance():
 
 @pytest.fixture()
 def mcr_dstore():
-    dstore = io.get_data_store(
-        "/Users/katherine/repos/results/aim_2/synthetic/758_443154_73021/3000bp/mcr.tinydb"
-    )
-
-    return dstore
+    return io.get_data_store(DATADIR / "mcr.tinydb")
 
 
 @pytest.fixture()
