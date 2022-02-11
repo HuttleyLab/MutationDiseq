@@ -4,6 +4,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 
 from mdeq.jsd import get_entropy, get_jsd
+from numpy import allclose
 
 
 @pytest.fixture()
@@ -128,14 +129,16 @@ def test_jsd_diff_nt(diff_nt_aln):
     assert jsd == 0.0
     assert ingroup == ("Human", "Rhesus")
     _, _, jsd = get_jsd(diff_nt_aln, evaluate="total")
-    assert jsd == 1.0
+    # expected value computed manually
+    assert allclose(jsd, 0.9182958340544896)
 
 
 def test_jsd_diff_nt_with_fg(diff_nt_aln_with_fg):
     edge, _, jsd = get_jsd(diff_nt_aln_with_fg, evaluate="ingroup")
     assert jsd == 0.0
     _, _, jsd = get_jsd(diff_nt_aln_with_fg, evaluate="total")
-    assert jsd == 1.0
+    # expected value computed manually
+    assert allclose(jsd, 0.9182958340544896)
 
 
 def test_get_entropy(aln):
