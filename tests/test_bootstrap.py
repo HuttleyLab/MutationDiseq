@@ -5,6 +5,7 @@ import pytest
 from cogent3 import load_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import generic_result
+from cogent3.util.deserialise import deserialise_object
 
 from mdeq.bootstrap import (
     confidence_interval,
@@ -34,11 +35,24 @@ def dstore_instance():
 
 
 def test_create_bootstrap_app(aln):
-    bstrap = create_bootstrap_app(2)
+    bstrap = create_bootstrap_app(1)
     bootstrap = bstrap(aln)
 
-    assert isinstance(bootstrap, generic_result)
-    assert len(bootstrap) == 3
+    # assert isinstance(bootstrap, generic_result)
+    assert len(bootstrap) == 2
+    rd = bootstrap.to_rich_dict()
+
+
+def test_deserialise_compact_boostrap_result(aln):
+    import json
+
+    bstrap = create_bootstrap_app(1)
+    result = bstrap(aln)
+    txt = result.to_json()
+    d = json.loads(txt)
+    got = deserialise_object(txt)
+
+    assert len(result) == 2
 
 
 def test_create_bootstrap_app_composable(tmp_path, dstore_instance):
@@ -83,9 +97,3 @@ def test_estimate_pval(aln):
     bstrap = create_bootstrap_app(2, discrete_edges=["443154", "73021"])
     bootstrap = bstrap(aln)
     assert estimate_pval(bootstrap) == 0
-
-    bootstrap[3] = 100
-    assert estimate_pval(bootstrap) == 1 / 3
-
-    bootstrap[4] = 100
-    assert estimate_pval(bootstrap) == 1 / 2

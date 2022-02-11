@@ -1,4 +1,5 @@
-import numpy as np
+from copy import deepcopy
+
 from cogent3.app import evo
 from cogent3.app.composable import (
     ALIGNED_TYPE,
@@ -10,14 +11,76 @@ from cogent3.app.composable import (
     user_function,
 )
 from cogent3.app.result import bootstrap_result, generic_result
-from cogent3.util import parallel
+from cogent3.util import deserialise
 
 from mdeq.model import GN_sm, GS_sm
 from mdeq.stationary_pi import OscillatingPiException
-from mdeq.utils.utils import get_foreground
+
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
+_aln_key = "alignment"
+
+
+def _reconstitute_collection(data):
+    """injects a top-level alignment into all individual model dicts"""
+    aln = data.pop(_aln_key)
+    # inject alignment into each model dict
+    for _, mr in data["items"]:
+        for _, m in mr["items"]:
+            m[_aln_key] = deepcopy(aln)
+    return data
+
+
+@deserialise.register_deserialiser("compact_bootstrap_result")
+def deserialise_compact(data):
+    """returns a model_collection_result"""
+    result_obj = compact_bootstrap_result(**data["result_construction"])
+
+    for key, item in data["items"]:
+        item = _reconstitute_collection(item)
+        item = deserialise.deserialise_object(item)
+        result_obj[key] = item
+
+    return result_obj
+
+
+def _eliminated_redundant_aln_in_place(hyp_result):
+    """eliminates multiple definitions of alignment
+
+    Parameters
+    ----------
+    hyp_result : hypothesis_result
+        has two models, split_codons disallowed
+
+    Returns
+    -------
+    dict
+        alignment is moved to the top-level
+    """
+    aln = None
+    for _, item in hyp_result["items"]:
+        # this is a single hypothesis result will be individual
+        r = item["items"][0][1].pop(_aln_key)
+        if aln:
+            assert aln == r, "mismatched alignments!"
+        aln = r
+    hyp_result[_aln_key] = aln
+    return
+
+
+class compact_bootstrap_result(bootstrap_result):
+    """removes redundant alignments from individual model results"""
+
+    def to_rich_dict(self):
+        rd = super(self.__class__, self).to_rich_dict()
+        # dict is modified within _eliminated_redundant_aln_in_place(
+        for item in rd["items"]:
+            _eliminated_redundant_aln_in_place(item[1])
+
+        return rd
 
 
 class bootstrap(ComposableHypothesis):
@@ -46,27 +109,23 @@ class bootstrap(ComposableHypothesis):
     def _fit_sim(self, rep_num):
         sim_aln = self._null.simulate_alignment()
         sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
-
-        try:
-            sim_result = self._hyp(sim_aln).LR
-        except ValueError:
-            sim_result = None
-        return sim_result
+        return self._hyp(sim_aln)
 
     def run(self, aln):
-        result = generic_result(aln.info.source)
+        result = compact_bootstrap_result(aln.info.source)
         try:
             obs = self._hyp(aln)
         except ValueError as err:
             result = NotCompleted("ERROR", str(self._hyp), err.args[0])
             return result
-        result["observed"] = obs
+
+        result.observed = obs
         self._null = obs.null
         self._inpath = aln.info.source
 
         sim_results = [r for r in map(self._fit_sim, range(self._num_reps)) if r]
-        for i, sim_result in enumerate(sim_results):
-            result[i + 1] = sim_result
+        for sim_result in sim_results:
+            result.add_to_null(sim_result)
 
         return result
 
@@ -80,20 +139,13 @@ def create_bootstrap_app(num_reps=100, discrete_edges=None):
     GN = GN_sm(discrete_edges)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
-    bstrap = bootstrap(hyp, num_reps)
-
-    return bstrap
+    return bootstrap(hyp, num_reps)
 
 
-def estimate_pval(generic_result):
-    obs = generic_result["observed"].LR
-    null_dist = [generic_result[k] for k in generic_result.keys() if k != "observed"]
-    null_dist.sort()
-    null_dist.reverse()
-    for (count, value) in enumerate(null_dist):
-        if value <= obs:
-            return float(count) / len(null_dist)
-    return 1.0
+def estimate_pval(result):
+    obs = result.observed.LR
+    num_ge = sum(v >= obs for v in result.null_dist)
+    return num_ge / len(result.null_dist)
 
 
 class confidence_interval(ComposableHypothesis):

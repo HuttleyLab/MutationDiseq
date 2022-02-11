@@ -1,6 +1,7 @@
 import math
 
 import numpy
+
 from accupy import fdot as dot
 from accupy import fsum as sum
 from cogent3.util.dict_array import DictArray

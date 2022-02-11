@@ -6,6 +6,7 @@ from cogent3.app.result import generic_result
 from mdeq.model import GSN
 from mdeq.utils.utils import get_foreground
 
+
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 
