@@ -3,7 +3,7 @@ from cogent3.app import evo, io
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 
-from mdeq.model import GS_instance
+from mdeq.model import GSN
 from mdeq.utils.utils import get_foreground
 
 __author__ = "Katherine Caley"
@@ -11,7 +11,7 @@ __credits__ = ["Katherine Caley"]
 
 
 def hypothesis(mc):
-    hyp = mc["mcr"].get_hypothesis_result("GS", "GN")
+    hyp = mc["mcr"].get_hypothesis_result("GSN", "GN")
     hyp.source = hyp.source["source"]
     return hyp
 
@@ -38,7 +38,7 @@ def get_no_init_model_coll(aln):
     bg_edges = list({fg_edge} ^ set(aln.names))
 
     GS = evo.model(
-        GS_instance(),
+        GSN(),
         sm_args=dict(optimise_motif_probs=True),
         opt_args=dict(max_restarts=5, tolerance=1e-8),
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),
@@ -79,7 +79,7 @@ def get_init_model_coll(aln):
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),
     )
     GS = evo.model(
-        GS_instance(),
+        GSN(),
         sm_args=dict(optimise_motif_probs=True),
         opt_args=dict(max_restarts=5, tolerance=1e-8),
         lf_args=dict(discrete_edges=bg_edges, expm="pade"),

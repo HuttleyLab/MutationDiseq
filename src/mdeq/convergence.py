@@ -53,7 +53,7 @@ def _get_convergence_mc(mc):
 
     observed_conv = convergence(pi, Q, t)
 
-    null = mc["mcr"]["GS"]
+    null = mc["mcr"]["GSN"]
     GN = GN_sm(bg_edges)
     neutral_convs = []
 
