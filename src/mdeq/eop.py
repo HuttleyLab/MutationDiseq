@@ -4,6 +4,8 @@ from accupy import fsum
 from cogent3 import get_model, make_table, make_tree
 from cogent3.app import evo
 from cogent3.maths.stats import chisqprob
+from typing import Sequence
+
 
 from mdeq.jsd import get_jsd
 from mdeq.utils.numeric_utils import fix_rounding_error
@@ -12,9 +14,9 @@ from mdeq.utils.numeric_utils import fix_rounding_error
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 
-
+# usage example
 class adjacent_EOP:
-    def __init__(self, loci, fg, mod="GN"):
+    def __init__(self, loci: Sequence, fg, mod="GN"):
         self.loci = {f"aln{index+1}": locus for index, locus in enumerate(loci)}
         self.mod = mod
 
@@ -78,6 +80,7 @@ class adjacent_EOP:
     def get_LR(self):
         return self.LRT.to_dict(flatten=True)[(0, "LR")]
 
+    # can be deleted, not used
     def get_relative_entropies(self):
         rel_entropies = {}
 
@@ -90,7 +93,7 @@ class adjacent_EOP:
             rel_entropies[locus] = rel_entropy
         return rel_entropies
 
-
+# todo usage example
 class edge_EOP:
     def __init__(self, locus, edges, mod="GN"):
         assert len(edges) == 2

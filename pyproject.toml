@@ -27,6 +27,9 @@ classifiers = [
 include = ["doc/", "requirements.txt", "src/*", "pyproject.toml"]
 exclude = ["doc/*.html"]
 
+[tool.flit.scripts]
+mdeq = "mdeq:main"
+
 
 [tool.black]
 line-length = 88
