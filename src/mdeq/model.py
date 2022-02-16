@@ -12,21 +12,25 @@ def GSN(**kwargs):
     return GeneralStationary(get_moltype("dna").alphabet, **kwargs)
 
 
-def GS_sm(discrete_edges=None):
+def GS_sm(discrete_edges=None, opt_args=None):
+    opt_args = opt_args or {}
+    opt_args = dict(max_restarts=5, tolerance=1e-8, **opt_args)
 
     return evo.model(
         GSN(),
         sm_args=dict(optimise_motif_probs=True),
-        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
     )
 
 
-def GN_sm(discrete_edges=None):
+def GN_sm(discrete_edges=None, opt_args=None):
+    opt_args = opt_args or {}
+    opt_args = dict(max_restarts=5, tolerance=1e-8, **opt_args)
 
     return evo.model(
         "GN",
         sm_args=dict(optimise_motif_probs=True),
-        opt_args=dict(max_restarts=5, tolerance=1e-8),
+        opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
     )
