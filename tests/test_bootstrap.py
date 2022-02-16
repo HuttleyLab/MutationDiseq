@@ -71,8 +71,9 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
     assert len(process.data_store.summary_incomplete) == 0
 
 
-def test_confidence_interval_with_convergence(aln):
-    get_conf_int = confidence_interval(_get_convergence, 1)
+def test_confidence_interval_with_convergence(aln, opt_args):
+    opt_args["max_evaluations"] = 500
+    get_conf_int = confidence_interval(_get_convergence, 1, opt_args=opt_args)
     c_int = get_conf_int.run(aln)
 
     assert isinstance(c_int["observed"]["convergence"], float)

@@ -98,12 +98,14 @@ get_convergence_mc = user_function(
 )
 
 
-def _get_convergence(gn_sm):
+def _get_convergence(gn_sm, opt_args=None):
     """Wrapper function to return convergence estimate from a non-stationary
     model fit.
 
     Returns a generic_result
     """
+    opt_args = opt_args or {}
+    opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
 
     bg_edges = gn_sm.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
     (fg_edge,) = set(bg_edges) ^ set(gn_sm.alignment.names)
@@ -114,8 +116,8 @@ def _get_convergence(gn_sm):
 
     conv = convergence(pi, Q, t)
 
-    GS = GS_sm(bg_edges)
-    GN = GN_sm(bg_edges)
+    GS = GS_sm(bg_edges, opt_args=opt_args)
+    GN = GN_sm(bg_edges, opt_args=opt_args)
 
     null = GN(gn_sm.alignment)
     neutral_convs = []

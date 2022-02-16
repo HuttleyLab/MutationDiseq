@@ -160,7 +160,7 @@ class confidence_interval(ComposableHypothesis):
     _output_types = SERIALISABLE_TYPE
     _data_types = ("ArrayAlignment", "Alignment")
 
-    def __init__(self, stat_func, num_reps, verbose=False):
+    def __init__(self, stat_func, num_reps, verbose=False, opt_args=None):
         super(confidence_interval, self).__init__(
             input_types=self._input_types,
             output_types=self._output_types,
@@ -170,6 +170,8 @@ class confidence_interval(ComposableHypothesis):
         self._num_reps = num_reps
         self._verbose = verbose
         self.func = self.run
+
+        self._opt_args = opt_args or {}
 
     def fit_sim(self, rep_num):
         sim_aln = self.alt_params.simulate_alignment()
@@ -189,7 +191,7 @@ class confidence_interval(ComposableHypothesis):
         self.fg_edge = aln.info.fg_edge
         self.bg_edges = list({self.fg_edge} ^ set(aln.names))
 
-        GN = GN_sm(discrete_edges=self.bg_edges)
+        GN = GN_sm(discrete_edges=self.bg_edges, opt_args=self._opt_args)
 
         self.alt = GN
         self.alt_params = self.alt(aln)
