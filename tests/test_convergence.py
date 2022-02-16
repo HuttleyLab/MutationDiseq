@@ -28,9 +28,7 @@ def mcr_dstore():
 
 
 def test_convergence_GN(mcr_dstore):
-    """
-    Convergence for a GN process should be greater or equal to zero.
-    """
+    """Convergence for a GN process should be greater or equal to zero."""
     result = loader(mcr_dstore[0])
     fg_edge = result["fg_edge"]
     gn = result["mcr"]["GN"]
@@ -45,9 +43,7 @@ def test_convergence_GN(mcr_dstore):
 
 
 def test_convergence_non_zero(mcr_dstore):
-    """
-    Convergence of a non-stationary process should be greater than 0
-    """
+    """Convergence of a non-stationary process should be greater than 0."""
     result = loader(mcr_dstore[0])
     fg_edge = result["fg_edge"]
     gn = result["mcr"]["GN"]
@@ -64,9 +60,7 @@ def test_convergence_non_zero(mcr_dstore):
 
 
 def test_convergence_GTR(mcr_dstore):
-    """
-    The Convergence of a stationary process should be 0
-    """
+    """The Convergence of a stationary process should be 0."""
     result = loader(mcr_dstore[0])
     fg_edge = result["fg_edge"]
     gtr = result["mcr"]["GTR"]

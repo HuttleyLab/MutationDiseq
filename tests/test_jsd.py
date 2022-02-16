@@ -60,21 +60,19 @@ def diff_nt_aln_with_fg():
 
 
 def test_get_jsd_none_edge(aln):
-    """
-    checks that get_jsd() with edge=None returns a value for
-    JSD between 0 and 1, and that the foreground edge is in
-    the tuple from which the JSD is calculated, the ingroup.
-    """
+    """checks that get_jsd() with edge=None returns a value for JSD between 0
+    and 1, and that the foreground edge is in the tuple from which the JSD is
+    calculated, the ingroup."""
     edge, ingroup, jsd = get_jsd(aln, edge=None)
     assert 0 <= jsd < 1
     assert edge in ingroup
 
 
 def test_get_jsd_all(aln):
-    """
-    checks that get_jsd() with evaluate="all" returns a value for
-    JSD between 0 and 1, and that the foreground edge is in
-    the tuple from which the JSD is calculated.
+    """checks that get_jsd() with evaluate="all" returns a value for JSD
+    between 0 and 1, and that the foreground edge is in the tuple from which
+    the JSD is calculated.
+
     checks that the jsd is >= then that of the ingroup.
     """
     edge, ingroup, jsd = get_jsd(aln, evaluate="all")
@@ -85,10 +83,10 @@ def test_get_jsd_all(aln):
 
 
 def test_get_jsd_max(aln):
-    """
-    checks that get_jsd() with evaluate="all" returns a value for
-    JSD between 0 and 1, and that the foreground edge is in
-    the tuple from which the JSD is calculated.
+    """checks that get_jsd() with evaluate="all" returns a value for JSD
+    between 0 and 1, and that the foreground edge is in the tuple from which
+    the JSD is calculated.
+
     checks that the jsd is >= then that of the ingroup.
     """
     edge, ingroup, jsd = get_jsd(aln, evaluate="max")
@@ -97,22 +95,18 @@ def test_get_jsd_max(aln):
 
 
 def test_get_jsd_edge(aln):
-    """
-    checks that get_jsd() with edge=None returns a value for
-    JSD between 0 and 1, and that the foreground edge is in
-    the tuple from which the JSD is calculated, the ingroup.
-    """
+    """checks that get_jsd() with edge=None returns a value for JSD between 0
+    and 1, and that the foreground edge is in the tuple from which the JSD is
+    calculated, the ingroup."""
     edge, ingroup, jsd = get_jsd(aln, edge="Human")
     assert 0 <= jsd < 1
     assert edge in ingroup
 
 
 def test_get_jsd_given_edge_exception(aln):
-    """
-    checks that get_jsd() with edge=None returns a value for
-    JSD between 0 and 1, and that the foreground edge is in
-    the tuple from which the JSD is calculated, the ingroup.
-    """
+    """checks that get_jsd() with edge=None returns a value for JSD between 0
+    and 1, and that the foreground edge is in the tuple from which the JSD is
+    calculated, the ingroup."""
     with pytest.raises(AssertionError):
         _, _, _ = get_jsd(aln, edge="Katherine")
 

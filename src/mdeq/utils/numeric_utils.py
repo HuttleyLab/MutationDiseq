@@ -8,9 +8,8 @@ from cogent3.util.dict_array import DictArray
 
 
 def valid_stochastic_matrix(matrix):
-    """
-    returns True if all rows sum to 1 and all entries are valid probabilities
-    """
+    """returns True if all rows sum to 1 and all entries are valid
+    probabilities."""
     if isinstance(matrix, DictArray):
         matrix = matrix.to_array()
 
@@ -26,9 +25,8 @@ def valid_stochastic_matrix(matrix):
 
 
 def valid_probability_vector(vector):
-    """
-    returns True if vector sums to 1 and all entries are valid probabilities
-    """
+    """returns True if vector sums to 1 and all entries are valid
+    probabilities."""
     if isinstance(vector, DictArray):
         vector = vector.to_array()
     row_sum_one = math.isclose(sum(vector), 1, rel_tol=1e-10, abs_tol=1e-14)
@@ -38,9 +36,8 @@ def valid_probability_vector(vector):
 
 
 def valid_rate_matrix(matrix):
-    """
-    returns True if off-diagonal elements are positive and row sums are 0
-    """
+    """returns True if off-diagonal elements are positive and row sums are
+    0."""
 
     if isinstance(matrix, DictArray):
         matrix = matrix.to_array()

@@ -1,8 +1,7 @@
-"""
-this module is to prevent over-subscription of CPUs when using codon models
+"""this module is to prevent over-subscription of CPUs when using codon models.
 
-It arises because BLAS, relied on by numpy for linalg, auto-threads for some
-problems
+It arises because BLAS, relied on by numpy for linalg, auto-threads for
+some problems
 """
 
 import os

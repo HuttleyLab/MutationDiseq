@@ -16,16 +16,14 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
 class OscillatingPiException(Exception):
-    """Did not converge to a unique stationary distribution"""
+    """Did not converge to a unique stationary distribution."""
 
     pass
 
 
 def get_stat_pi_via_eigen(P, check_precision=True):
-    """
-    This code was provided by Gavin Huttley
-    Obtain stationary distribution via EigenValue decomposition
-    """
+    """This code was provided by Gavin Huttley Obtain stationary distribution
+    via EigenValue decomposition."""
     P = array(P).T
     eva, eve = eig(P)
 
@@ -44,9 +42,7 @@ def get_stat_pi_via_eigen(P, check_precision=True):
 def get_stat_pi_via_brute(
     P, pi_zero, limit_action="raise", max_iterations=100000, threshold=1e-8
 ):
-    """
-    Obtain the stationary distribution via brute force
-    """
+    """Obtain the stationary distribution via brute force."""
 
     delta = 10
     num_iterations = 0

@@ -1,11 +1,11 @@
+from typing import Sequence
+
 import numpy
 
 from accupy import fsum
 from cogent3 import get_model, make_table, make_tree
 from cogent3.app import evo
 from cogent3.maths.stats import chisqprob
-from typing import Sequence
-
 
 from mdeq.jsd import get_jsd
 from mdeq.utils.numeric_utils import fix_rounding_error
@@ -92,6 +92,7 @@ class adjacent_EOP:
             rel_entropy = ((2 * (alt - lfll)) / self.LR) / 2 * length
             rel_entropies[locus] = rel_entropy
         return rel_entropies
+
 
 # todo usage example
 class edge_EOP:

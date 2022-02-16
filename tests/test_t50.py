@@ -50,9 +50,7 @@ def t50_construction_random():
 
 @pytest.fixture()
 def gtr_defined_t50(aln):
-    """
-    T50 object constructed by stationary process (Q and pi defined GTR)
-    """
+    """T50 object constructed by stationary process (Q and pi defined GTR)"""
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
 
@@ -73,9 +71,7 @@ def gtr_defined_t50(aln):
 
 @pytest.fixture()
 def non_stationary_t50(aln):
-    """
-    T50 object constructed by stationary process (Q and pi defined GTR)
-    """
+    """T50 object constructed by stationary process (Q and pi defined GTR)"""
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
 
@@ -129,25 +125,19 @@ def test_Q_correct_construction(t50_construction_random):
 
 
 def test_expm_Q_valid_stochastic_matrix(t50_construction_random):
-    """
-    the matrix exponential of Q is a valid stochastic matrix
-    """
+    """the matrix exponential of Q is a valid stochastic matrix."""
     assert valid_stochastic_matrix(expm(t50_construction_random.Q))
 
 
 def test_dist_with_stationary_pi0(gtr_defined_t50):
-    """
-    distance to stationary pi given a stationary pi should be 0
-    """
+    """distance to stationary pi given a stationary pi should be 0."""
     dist = gtr_defined_t50.distance_from_pi_zero(gtr_defined_t50.pi_0)
     numpy.testing.assert_almost_equal(dist, 0, decimal=6)
 
 
 def test_pi0_for_stationary_process(gtr_defined_t50):
-    """
-    for a stationary process, tau should scale Q such that the dot product between pi_0 and
-    the resulting P matrix gives pi_0 (or extremely close).
-    """
+    """for a stationary process, tau should scale Q such that the dot product
+    between pi_0 and the resulting P matrix gives pi_0 (or extremely close)."""
 
     Q = gtr_defined_t50.Q
     pi_0 = gtr_defined_t50.pi_0
@@ -161,9 +151,7 @@ def test_pi0_for_stationary_process(gtr_defined_t50):
 
 
 def test_T50_with_stationary_pi0(gtr_defined_t50):
-    """
-    T50 given a stationary pi should be 0
-    """
+    """T50 given a stationary pi should be 0."""
     t50 = gtr_defined_t50.estimate_t50()
     print("t50 is", t50)
     numpy.testing.assert_almost_equal(

@@ -6,9 +6,7 @@ from cogent3.evolve.ns_substitution_model import GeneralStationary
 
 @register_model("nucleotide")
 def GSN(**kwargs):
-    """
-    A General Stationary Nucleotide substitution model instance.
-    """
+    """A General Stationary Nucleotide substitution model instance."""
     kwargs["optimise_motif_probs"] = kwargs.get("optimise_motif_probs", True)
     kwargs["name"] = kwargs.get("name", "GSN")
     return GeneralStationary(get_moltype("dna").alphabet, **kwargs)

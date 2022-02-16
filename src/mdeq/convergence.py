@@ -14,9 +14,7 @@ __credits__ = ["Katherine Caley", "Ben Kaehler"]
 
 
 def eigII(Q):
-    """
-    returns the dominant eigenvalue
-    """
+    """returns the dominant eigenvalue."""
     v, r = eig(Q)
     v = v.flatten()
     v.sort()
@@ -28,9 +26,7 @@ def eigII(Q):
 
 
 def convergence(pi_0, Q, t):
-    """
-    a measure of how fast pi(t) is changing
-    """
+    """a measure of how fast pi(t) is changing."""
     pi_deriv = dot(pi_0, dot(Q, expm(Q * t)))
     conv = norm(pi_deriv)
 
@@ -38,8 +34,9 @@ def convergence(pi_0, Q, t):
 
 
 def _get_convergence_mc(mc):
-    """
-    Wrapper function to return convergence estimate from a model collection that includes a GN fit.
+    """Wrapper function to return convergence estimate from a model collection
+    that includes a GN fit.
+
     Returns a generic_result
     """
 
@@ -102,8 +99,9 @@ get_convergence_mc = user_function(
 
 
 def _get_convergence(gn_sm):
-    """
-    Wrapper function to return convergence estimate from a non-stationary model fit.
+    """Wrapper function to return convergence estimate from a non-stationary
+    model fit.
+
     Returns a generic_result
     """
 
@@ -158,8 +156,9 @@ get_convergence = user_function(
 
 
 def _get_convergence_bstrap(result):
-    """
-    Wrapper function to return convergence estimate from a generic_result generated from a bootstrap app..
+    """Wrapper function to return convergence estimate from a generic_result
+    generated from a bootstrap app..
+
     Returns a generic_result
     """
 

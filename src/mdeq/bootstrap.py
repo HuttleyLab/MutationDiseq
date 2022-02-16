@@ -25,7 +25,7 @@ _aln_key = "alignment"
 
 
 def _reconstitute_collection(data):
-    """injects a top-level alignment into all individual model dicts"""
+    """injects a top-level alignment into all individual model dicts."""
     aln = data.pop(_aln_key)
     # inject alignment into each model dict
     for _, mr in data["items"]:
@@ -36,7 +36,7 @@ def _reconstitute_collection(data):
 
 @deserialise.register_deserialiser("compact_bootstrap_result")
 def deserialise_compact(data):
-    """returns a model_collection_result"""
+    """returns a model_collection_result."""
     result_obj = compact_bootstrap_result(**data["result_construction"])
 
     for key, item in data["items"]:
@@ -48,7 +48,7 @@ def deserialise_compact(data):
 
 
 def _eliminated_redundant_aln_in_place(hyp_result):
-    """eliminates multiple definitions of alignment
+    """eliminates multiple definitions of alignment.
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def _eliminated_redundant_aln_in_place(hyp_result):
 
 
 class compact_bootstrap_result(bootstrap_result):
-    """removes redundant alignments from individual model results"""
+    """removes redundant alignments from individual model results."""
 
     def to_rich_dict(self):
         rd = super(self.__class__, self).to_rich_dict()
@@ -84,10 +84,10 @@ class compact_bootstrap_result(bootstrap_result):
 
 
 class bootstrap(ComposableHypothesis):
-    """
-    Parametric bootstrap for a provided hypothesis.
-    Only returns the LR for the boostrapped models (to avoid overloading memory for use on nci)
-    Returns a generic_result
+    """Parametric bootstrap for a provided hypothesis.
+
+    Only returns the LR for the boostrapped models (to avoid overloading
+    memory for use on nci) Returns a generic_result
     """
 
     _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
@@ -131,9 +131,8 @@ class bootstrap(ComposableHypothesis):
 
 
 def create_bootstrap_app(num_reps=100, discrete_edges=None):
-    """
-    wrapper of cogent3.app.evo.bootstrap with hypothesis of GS as the null and GN as the alternate
-    """
+    """wrapper of cogent3.app.evo.bootstrap with hypothesis of GS as the null
+    and GN as the alternate."""
 
     GS = GS_sm(discrete_edges)
     GN = GN_sm(discrete_edges)
@@ -149,9 +148,8 @@ def estimate_pval(result):
 
 
 class confidence_interval(ComposableHypothesis):
-    """
-    Parametric bootstrap to give confidence intervals for a provided statistic.
-    Returns a confindence_interval_result.
+    """Parametric bootstrap to give confidence intervals for a provided
+    statistic. Returns a confindence_interval_result.
 
     Fits a General Nucleotide (GN) model to derive statistics.
 

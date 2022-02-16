@@ -52,7 +52,7 @@ def _valid_tinydb_output(*args):
 
 
 def valid_result_types(dstore, types):
-    """fail if the record type in dstore is not within types"""
+    """fail if the record type in dstore is not within types."""
     from cogent3.app import data_store
 
     _, data, _ = data_store.load_record_from_json(dstore[0].read())
@@ -112,7 +112,7 @@ def toe(
     overwrite,
     verbose,
 ):
-    """test of existence of mutation equilibrium"""
+    """test of existence of mutation equilibrium."""
     from cogent3.app import io
 
     # or check alignment.info for a fg_edge key -- all synthetic data
@@ -144,7 +144,7 @@ def toe(
 @_verbose
 @_testrun
 def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
-    """test of equivalence of mutation equilibrium between branches"""
+    """test of equivalence of mutation equilibrium between branches."""
     from .eop import adjacent_EOP, edge_EOP
 
     LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
@@ -160,7 +160,7 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
 @_verbose
 @_testrun
 def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
-    """test of equivalence of mutation equilibrium between loci"""
+    """test of equivalence of mutation equilibrium between loci."""
     from .eop import adjacent_EOP, edge_EOP
 
     LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
@@ -175,13 +175,10 @@ def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
 @_overwrite
 @_verbose
 @_testrun
-def convergence(
-    inpath, outpath, num_reps, limit, overwrite, verbose, testrun
-):
-    """fits GN/GSN to observed, simulates under GSN and fits only GN"""
+def convergence(inpath, outpath, num_reps, limit, overwrite, verbose, testrun):
+    """fits GN/GSN to observed, simulates under GSN and fits only GN."""
     LOGGER.log_file_path = outpath.parent / "mdeq-bootstrap_convergence.log"
     LOGGER.log_args()
-
 
 
 @main.command()
@@ -200,8 +197,11 @@ def convergence(
 def make_controls(
     inpath, outpath, controls, num_reps, limit, overwrite, verbose, testrun
 ):
-    """simulate negative and positive controls. Note the input here MUST be
-    hypothesis_result OR model_result in a tinydb"""
+    """simulate negative and positive controls.
+
+    Note the input here MUST be hypothesis_result OR model_result in a
+    tinydb
+    """
     # todo the positive controls
     LOGGER.log_file_path = outpath.parent / "mdeq-make_controls.log"
     LOGGER.log_args()

@@ -17,10 +17,8 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
 class T50:
-    """
-    takes a rate matrix and a starting probability vector, and computes
-    the expected number of substitution to the half way distribution
-    """
+    """takes a rate matrix and a starting probability vector, and computes the
+    expected number of substitution to the half way distribution."""
 
     def __init__(self, Q, pi_0, func=jsm):
         """
@@ -68,8 +66,9 @@ class T50:
 
 
 def _get_t50_mc(mc):
-    """
-    Wrapper function to return T50 estimate from a model collection that includes a GN fit.
+    """Wrapper function to return T50 estimate from a model collection that
+    includes a GN fit.
+
     Returns a generic_result
     """
 
@@ -96,8 +95,8 @@ get_t50_mc = user_function(
 
 
 def _get_t50(gn_sm):
-    """
-    Wrapper function to return T50 estimate from a GN fit.
+    """Wrapper function to return T50 estimate from a GN fit.
+
     Returns a generic_result
     """
 
@@ -122,8 +121,9 @@ get_t50 = user_function(
 
 
 def _get_t50_bstrap(result):
-    """
-    Wrapper function to return convergence estimate from a generic_result generated from a bootstrap app.
+    """Wrapper function to return convergence estimate from a generic_result
+    generated from a bootstrap app.
+
     Returns a generic_result
     """
 

@@ -29,9 +29,7 @@ def brca1_alignment():
 
 @pytest.fixture()
 def likelihood_gtr(brca1_alignment):
-    """
-    optimised GTR likelihood object
-    """
+    """optimised GTR likelihood object."""
     model_gtr = get_model("GTR", optimise_motif_probs=True)
     tree = make_tree(tip_names=brca1_alignment.names)
 
@@ -45,9 +43,7 @@ def likelihood_gtr(brca1_alignment):
 
 @pytest.fixture()
 def likelihood_gn(brca1_alignment, likelihood_gtr):
-    """
-    optimised GS likelihood object initialised from GTR
-    """
+    """optimised GS likelihood object initialised from GTR."""
 
     gn = evo.model("GN", sm_args=dict(optimise_motif_probs=True), time_het="max")
     fitted_gn = gn(brca1_alignment)
@@ -131,9 +127,7 @@ def test_return_OscillatingPiExcpetion(non_converging):
 
 
 def test_return_same_stat_pi(likelihood_gtr):
-    """
-    given a Psub matrix and pi defined by GTR, should return the same pi
-    """
+    """given a Psub matrix and pi defined by GTR, should return the same pi."""
     pi = likelihood_gtr.get_motif_probs().to_array()
     psubs = likelihood_gtr.get_all_psubs().values()
 
@@ -143,10 +137,8 @@ def test_return_same_stat_pi(likelihood_gtr):
 
 
 def test_get_stat_pi(likelihood_gtr):
-    """
-    given a Psub matrix defined by GTR, and a pi that is logically not the stationary distribution,
-    should return the pi that was defined by GTR
-    """
+    """given a Psub matrix defined by GTR, and a pi that is logically not the
+    stationary distribution, should return the pi that was defined by GTR."""
     pi = likelihood_gtr.get_motif_probs().to_array()
     psubs = likelihood_gtr.get_all_psubs().values()
 
@@ -159,10 +151,8 @@ def test_get_stat_pi(likelihood_gtr):
 
 
 def test_eigen_numerical_same_pi(likelihood_gn):
-    """
-    Given the same P matrix both the numerical calculation and EigenValue
-    decomposition return the same value for pi_inf
-    """
+    """Given the same P matrix both the numerical calculation and EigenValue
+    decomposition return the same value for pi_inf."""
 
     pi = likelihood_gn.get_motif_probs().to_array()
     psubs = likelihood_gn.get_all_psubs().values()
