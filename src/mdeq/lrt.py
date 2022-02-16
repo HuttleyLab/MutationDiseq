@@ -1,5 +1,4 @@
-from cogent3 import get_moltype
-from cogent3.app import evo, io
+from cogent3.app import evo
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
 
@@ -52,9 +51,7 @@ def get_no_init_model_coll(aln):
     )
     mc = evo.model_collection(GS, GN, sequential=False)
 
-    mc_result = mc(aln)
-
-    return mc_result
+    return mc(aln)
 
 
 def get_init_model_coll(aln):
@@ -93,9 +90,7 @@ def get_init_model_coll(aln):
     )
     mc = evo.model_collection(GTR, GS, GN, sequential=True)
 
-    mc_result = mc(aln)
-
-    return mc_result
+    return mc(aln)
 
 
 def _get_no_init_hypothesis(aln):
