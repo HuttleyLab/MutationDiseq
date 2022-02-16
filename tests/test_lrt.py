@@ -19,6 +19,11 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture()
+def opt_args():
+    return {"max_evaluations": 1000, "limit_action": "ignore"}
+
+
+@pytest.fixture()
 def dstore_instance():
     return io.get_data_store(DATADIR / "3000bp.tinydb")
 
@@ -51,13 +56,13 @@ def get_aln_no_fg():
 
 
 @pytest.fixture()
-def no_init_mc(get_aln):
-    return get_no_init_model_coll(get_aln)
+def no_init_mc(get_aln, opt_args):
+    return get_no_init_model_coll(get_aln, opt_args=opt_args)
 
 
 @pytest.fixture()
-def init_mc(get_aln):
-    return get_init_model_coll(get_aln)
+def init_mc(get_aln, opt_args):
+    return get_init_model_coll(get_aln, opt_args=opt_args)
 
 
 def test_model_results_construction(no_init_mc, init_mc):
@@ -65,30 +70,30 @@ def test_model_results_construction(no_init_mc, init_mc):
     assert isinstance(init_mc, model_collection_result)
 
 
-def test_no_fg(get_aln_no_fg):
-    get_no_init_model_coll(get_aln_no_fg)
-    get_init_model_coll(get_aln_no_fg)
+def test_no_fg(get_aln_no_fg, opt_args):
+    get_no_init_model_coll(get_aln_no_fg, opt_args=opt_args)
+    get_init_model_coll(get_aln_no_fg, opt_args=opt_args)
     get_aln_no_fg.info = None
-    get_no_init_model_coll(get_aln_no_fg)
-    get_init_model_coll(get_aln_no_fg)
+    get_no_init_model_coll(get_aln_no_fg, opt_args=opt_args)
+    get_init_model_coll(get_aln_no_fg, opt_args=opt_args)
 
 
-def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance):
+def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
-    process = reader + get_no_init_hypothesis + writer
+    process = reader + get_no_init_hypothesis(opt_args=opt_args) + writer
 
     process.apply_to(dstore_instance[:1])
 
     assert len(process.data_store.summary_incomplete) == 0
 
 
-def test_get_init_hypothesis_app_run(tmp_path, dstore_instance):
+def test_get_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
-    process = reader + get_init_hypothesis + writer
+    process = reader + get_init_hypothesis(opt_args=opt_args) + writer
 
     process.apply_to(dstore_instance[:1])
 
