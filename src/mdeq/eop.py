@@ -80,19 +80,6 @@ class adjacent_EOP:
     def get_LR(self):
         return self.LRT.to_dict(flatten=True)[(0, "LR")]
 
-    # can be deleted, not used
-    def get_relative_entropies(self):
-        rel_entropies = {}
-
-        for locus, lf in self.alt_lf.items():
-            fll = self.null_lf.get_full_length_likelihoods(locus=locus)
-            lfll = numpy.log(fll).sum()
-            alt = lf.lnL
-            length = len(self.loci[locus])
-            rel_entropy = ((2 * (alt - lfll)) / self.LR) / 2 * length
-            rel_entropies[locus] = rel_entropy
-        return rel_entropies
-
 
 # todo usage example
 class edge_EOP:
