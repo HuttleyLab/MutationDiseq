@@ -30,6 +30,12 @@ exclude = ["doc/*.html"]
 [tool.flit.scripts]
 mdeq = "mdeq:main"
 
+[tool.flit.metadata.requires-extra]
+dev = ["black",
+       "click",
+       "docformatter",
+       "flit",
+       "isort"]
 
 [tool.black]
 line-length = 88
