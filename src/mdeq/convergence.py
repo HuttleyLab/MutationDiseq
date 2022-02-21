@@ -28,9 +28,7 @@ def eigII(Q):
 def convergence(pi_0, Q, t):
     """a measure of how fast pi(t) is changing."""
     pi_deriv = dot(pi_0, dot(Q, expm(Q * t)))
-    conv = norm(pi_deriv)
-
-    return conv
+    return norm(pi_deriv)
 
 
 def _get_convergence_mc(mc):
