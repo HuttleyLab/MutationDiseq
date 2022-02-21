@@ -19,8 +19,7 @@ def get_lrt(mc):
 
 
 def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
-    """returns a hypothesis app to test for equilibrium with a dynamically
-    defined background edge.
+    """make app to test for equilibrium with a dynamically defined background edge.
 
     Parameters
     ----------
@@ -43,7 +42,7 @@ def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
 
     Returns
     -------
-    model_collection_result
+    model_collection
     """
     model_names = ["GTR"] if with_gtr else []
     model_names.extend(["GSN", "GN"])
@@ -59,8 +58,7 @@ def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
         evo.model(mn, sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
         for mn in model_names
     ]
-    mc = evo.model_collection(*models, sequential=sequential)
-    return mc(aln)
+    return evo.model_collection(*models, sequential=sequential)
 
 
 def get_no_init_model_coll(aln, opt_args=None):
@@ -75,7 +73,7 @@ def get_no_init_model_coll(aln, opt_args=None):
     -------
     model_collection_result containing GS and GN models (without sequential fitting)
     """
-    return toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)
+    return toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)(aln)
 
 
 def get_init_model_coll(aln, opt_args=None):
@@ -90,12 +88,14 @@ def get_init_model_coll(aln, opt_args=None):
     -------
     model_collection_result containing GTR, GS and GN models (with sequential fitting)
     """
-    return toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)
+    return toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)(aln)
 
 
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_no_init_hypothesis(aln, opt_args=None):
-    mc_result = toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)
+    mc_result = toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)(
+        aln
+    )
     result = generic_result(source=aln.info.source)
     result.update([("mcr", mc_result)])
     return result
@@ -104,7 +104,7 @@ def get_no_init_hypothesis(aln, opt_args=None):
 @extend_docstring_from(toe_on_edge)
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_init_hypothesis(aln, opt_args=None):
-    mc_result = toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)
+    mc_result = toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)(aln)
     result = generic_result(source=aln.info.source)
     result.update([("mcr", mc_result)])
     return result
