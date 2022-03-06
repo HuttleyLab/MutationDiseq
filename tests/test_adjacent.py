@@ -6,6 +6,7 @@ from cogent3 import make_unaligned_seqs
 
 from mdeq.adjacent import (
     grouped_data,
+    load_data_group,
     make_identifier,
     sequential_groups,
 )
@@ -71,4 +72,31 @@ def test_grouped_data():
     with pytest.raises(AssertionError):
         grouped_data((a, c), source="a--c")
 
+
+def test_load_data_group():
+    from random import choice, shuffle
+
+    from cogent3.app import io
+
+    def eval_input(pair):
+        got = group_loader(pair)
+        assert len(got.elements) == 2
+        source = "--".join(e.replace(".json", "") for e in pair)
+        assert got.source == source
+        for i, n in enumerate(pair):
+            o = got.elements[i]
+            assert o.info.name == n.replace(".json", "")
+
+    path = DATADIR / "300bp.tinydb"
+    dstore = io.get_data_store(path)
+    names = [m.name for m in dstore]
+    shuffle(names)
+
+    paired = sequential_groups(names, 2)
+    group_loader = load_data_group(str(path))
+    # pair elements endwith json
+    pair = choice(paired)
+    # pair elements does not end with json
+    eval_input(pair)
+    eval_input(tuple(e.replace(".json", "") for e in pair))
 

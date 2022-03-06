@@ -53,3 +53,41 @@ class grouped_data:
         names = set(self.elements[0].names)
         for e in self.elements:
             assert set(e.names) == names, f"names {e.names} != {names}"
+
+
+_loader = load_db()
+
+
+@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
+def load_data_group(data_store_path, data_identifiers=None) -> grouped_data:
+    """
+
+    Parameters
+    ----------
+    data_store_path : str
+        path to a tinydb
+    data_identifiers : tuple[str, ...]
+        series of identifiers
+
+    Notes
+    -----
+    Each data object has its identifier assigned to info.name attribute
+    """
+    dstore = get_data_store(data_store_path)
+    data_objs = []
+    for identifier in data_identifiers:
+        identifier = (
+            identifier if identifier.endswith(".json") else f"{identifier}.json"
+        )
+        m = dstore.filtered(identifier)
+        assert len(m) == 1
+        obj = _loader(m[0])
+        if not obj:  # probably not completed error
+            return obj
+        data_objs.append(obj)
+
+    identifier = make_identifier(data_objs)
+    for n, obj in zip(identifier.split("--"), data_objs):
+        obj.info.name = n
+
+    return grouped_data(elements=tuple(data_objs), source=identifier)
