@@ -36,6 +36,24 @@ def _process_comma_seq(*args):
     return val.split(",") if val else val
 
 
+def _gene_order_table(*args):
+    """returns a cogent3 Table with required columns
+
+    Raises
+    ------
+    ValueError if required column names are not present
+    """
+    from cogent3 import load_table
+
+    table = load_table(args[-1])
+    required = {"name", "coord_name", "start"}
+    missing = required - set(table.header)
+    if missing:
+        raise ValueError(f"missing {missing!r} columns from gene order table")
+
+    return table[:, list(required)]
+
+
 def _valid_path(path, exists):
     path = pathlib.Path(path)
     if exists and not path.exists():
@@ -151,23 +169,38 @@ def toe(
 @_testrun
 def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between branches."""
-    from .eop import adjacent_EOP, edge_EOP
+    from .eop import adjacent_eop, edge_EOP
 
     LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
     LOGGER.log_args()
 
 
-# todo inoput for ordewred list of alignment names
+# todo add strict option, limit analysis to genes that are actually adjacent in reference
 @main.command()
 @_inpath
+@click.option(
+    "-go",
+    "--gene_order",
+    required=True,
+    callback=_gene_order_table,
+    help="path to gene order table, note must contain"
+    " 'name', 'coord_name' and 'start' columns",
+)
 @_outpath
+@click.option(
+    "-s",
+    "--strict",
+    is_flag=True,
+    help="only genes physically adjacent in gene_order are considered,"
+    " this requires the gene order file be genomically complete",
+)
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
-    """test of equivalence of mutation equilibrium between loci."""
-    from .eop import adjacent_EOP, edge_EOP
+def aeop(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
+    """test of equivalence of mutation equilibrium between adjacent loci."""
+    from .eop import adjacent_eop, edge_EOP
 
     LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
     LOGGER.log_args()
