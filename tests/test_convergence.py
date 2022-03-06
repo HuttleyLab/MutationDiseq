@@ -8,7 +8,6 @@ from cogent3.app import io
 from mdeq.bootstrap import create_bootstrap_app
 from mdeq.convergence import (
     convergence,
-    eigII,
     get_convergence,
     get_convergence_bstrap,
     get_convergence_mc,
@@ -74,24 +73,11 @@ def test_convergence_GTR(mcr_dstore):
     numpy.testing.assert_almost_equal(conv, 0, decimal=10)
 
 
-def test_eigII():
 
-    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
-    loader = io.load_db()
-    aln1 = loader(dstore[0])
-    fg_edge = get_foreground(aln1)
 
-    if fg_edge is None:
-        raise TypeError("Alignment needs a info.fg_edge attribute")
 
-    bg_edges = list({fg_edge} ^ set(aln1.names))
-    GN = GN_sm(discrete_edges=bg_edges)
 
-    result = GN(aln1)
 
-    Q = result.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False)
-
-    eigII(Q)
 
 
 def test_get_convergence(mcr_dstore):

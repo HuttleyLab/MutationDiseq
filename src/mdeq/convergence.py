@@ -13,16 +13,6 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler"]
 
 
-def eigII(Q):
-    """returns the dominant eigenvalue."""
-    v, r = eig(Q)
-    v = v.flatten()
-    v.sort()
-    eigII = v[-2]
-    if isinstance(eigII, complex):
-        eigII = eigII.real
-
-    return eigII
 
 
 def convergence(pi_0, Q, t):
