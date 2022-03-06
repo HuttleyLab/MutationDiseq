@@ -33,4 +33,4 @@ junit-*.xml
 doc/draw*
 dist/*
 working/*
-hg_old/*
+hg_old*
