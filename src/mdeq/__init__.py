@@ -87,7 +87,12 @@ _seed = click.option("-s", "--seed", type=int, help="seed for random number gene
 _verbose = click.option("-v", "--verbose", count=True)
 _limit = click.option("-L", "--limit", type=int, default=None)
 _overwrite = click.option("-O", "--overwrite", is_flag=True)
-_testrun = click.option("-t", "--testrun", is_flag=True, help="don't write anything")
+_testrun = click.option(
+    "-t",
+    "--testrun",
+    is_flag=True,
+    help="don't write anything, quick (but inaccurate) optimisation",
+)
 _fg_edge = click.option(
     "-fg", "--foreground_edge", help="foreground edge to test for equilibrium"
 )
@@ -107,18 +112,11 @@ _bg_edge = click.option(
 @_limit
 @_overwrite
 @_verbose
+@_testrun
 def toe(
-    inpath,
-    outpath,
-    background_edges,
-    num_reps,
-    limit,
-    overwrite,
-    verbose,
+    inpath, outpath, background_edges, num_reps, limit, overwrite, verbose, testrun
 ):
     """test of existence of mutation equilibrium."""
-    from cogent3.app import io
-
     # or check alignment.info for a fg_edge key -- all synthetic data
     LOGGER.log_file_path = outpath.parent / "mdeq-toe.log"
     LOGGER.log_args()
@@ -130,7 +128,11 @@ def toe(
         exit()
 
     loader = io.load_db()
-    bstrapper = create_bootstrap_app(num_reps=num_reps, discrete_edges=background_edges)
+    if testrun:
+        opt_args = {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
+    else:
+        opt_args = None
+    bstrapper = bootstrap_toe(num_reps=num_reps, opt_args=opt_args)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
@@ -174,7 +176,6 @@ def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
 @main.command()
 @_inpath
 @_outpath
-@_num_reps
 @_limit
 @_overwrite
 @_verbose
