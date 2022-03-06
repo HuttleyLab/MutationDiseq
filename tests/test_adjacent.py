@@ -128,10 +128,11 @@ def test_new_adjacent_eop():
     )
     got = eop(data)
     assert len(got["null"]) == 1
-    assert len(got["alts"]) == 2
+    assert len(got["alt"]) == 2
     for k in got:
         assert isinstance(got[k].lnL, float)
         assert isinstance(got[k].nfp, int)
 
     # alt has more parameters than null
-    assert got["alts"].nfp > got["null"].nfp
+    assert got["alt"].nfp > got["null"].nfp
+
