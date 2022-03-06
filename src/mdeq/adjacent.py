@@ -4,11 +4,37 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar
 
+from cogent3 import _Table as Table
 from cogent3.app.composable import SERIALISABLE_TYPE, appify
 from cogent3.app.io import get_data_store, load_db
 
 
 T = TypeVar("T")
+
+
+def physically_adjacent(
+    table: Table, sample_ids: set[str]
+) -> tuple[tuple[str, ...], ...]:
+    """identifiers members of id_set that are adjacent in table
+
+    Parameters
+    ----------
+    table
+        cogent3 Table of all genes in a genome
+    sample_ids
+        sample ID's
+    """
+    adjacent = []
+    for coord_name in table.distinct_values("coord_name"):
+        sub_table = table.filtered(lambda x: x == coord_name, columns="coord_name")
+        num_rows = sub_table.shape[0]
+        if num_rows == 1:
+            continue
+        for i in range(1, num_rows):
+            names = [sub_table[j, "name"] for j in range(i - 1, i + 1)]
+            if set(names).issubset(sample_ids):
+                adjacent.append(tuple(names))
+    return tuple(adjacent)
 
 
 def sequential_groups(data, num: int) -> tuple[tuple[T, ...], ...]:

@@ -8,6 +8,7 @@ from mdeq.adjacent import (
     grouped_data,
     load_data_group,
     make_identifier,
+    physically_adjacent,
     sequential_groups,
 )
 from mdeq.eop import adjacent_eop
@@ -136,3 +137,22 @@ def test_new_adjacent_eop():
     # alt has more parameters than null
     assert got["alt"].nfp > got["null"].nfp
 
+
+def test_physically_adjacent():
+    from cogent3 import load_table
+
+    path = DATADIR / "gene_order.tsv"
+    table = load_table(path)
+    sample_ids = {
+        "ENSG00000142657",
+        "ENSG00000184677",
+        "ENSG00000184454",  # follows above, but on separate chromosome
+        "ENSG00000283761",
+        "ENSG00000158477",
+        "ENSG00000162739",
+    }
+    got = physically_adjacent(table, sample_ids)
+    assert set(got) == {
+        ("ENSG00000142657", "ENSG00000184677"),
+        ("ENSG00000158477", "ENSG00000162739"),
+    }
