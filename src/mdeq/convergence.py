@@ -5,16 +5,16 @@ from functools import lru_cache, singledispatch
 from types import NoneType
 
 from accupy import fdot as dot
-from cogent3.app.composable import SERIALISABLE_TYPE, user_function
-from cogent3.app.result import generic_result
-from numpy import array, std
-from numpy.linalg import eig, norm
+from accupy import fsum as sum
+from cogent3.app.composable import SERIALISABLE_TYPE, appify
+from cogent3.maths.matrix_exponential_integration import expected_number_subs
+from cogent3.recalculation.scope import InvalidScopeError
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
+from numpy import allclose, diag_indices, mean, ndarray, std
+from numpy.linalg import norm
 from scipy.linalg import expm
-
-from mdeq.model import GN_sm, GS_sm
-from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
+from scipy.optimize import minimize_scalar
 
 
 __author__ = "Katherine Caley"
@@ -31,18 +31,50 @@ def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
     return Q
 
 
+def unit_nonstationary_Q(pi_0: ndarray, Q: ndarray):
+    """returns Q with ENS==1 given pi_0"""
+    result = minimize_scalar(
+        lambda x: (1.0 - expected_number_subs(pi_0, Q, x)) ** 2,
+        method="brent",
+        tol=1e-8,
+    )
+    if not result.success:
+        raise RuntimeError(result.message)
+
+    Q *= result.x
+    return Q
 
 
+def convergence(pi_0: ndarray, Q: ndarray, t: float, wrt_nstat=False) -> float:
+    """measure of how fast pi is changing
 
-def convergence(pi_0, Q, t):
-    """a measure of how fast pi(t) is changing."""
+    Parameters
+    ----------
+    pi_0 : 1D array
+        a valid probability vector representing the initial state freqs
+    Q : 2D array
+        a valid rate matrix
+    t : float
+        tau, scalar of unit-Q for the non-stationary process
+    wrt_nstat : bool
+        If True, Q is calibrated such that as a non-stationary process,
+        i.e. ENS(pi_0, Q) == 1, otherwise it will calibrated as a stationary
+        process, i.e. -sum(pi_0_j * Q[j, j])==1
+
+    Returns
+    -------
+    float
+
+    Notes
+    -----
+    See Kaehler et al (2015) Systematic Biology for details
+    """
+    # make sure Q is scaled relative to pi_0
+    Q = unit_nonstationary_Q(pi_0, Q) if wrt_nstat else unit_stationary_Q(pi_0, Q)
     pi_deriv = dot(pi_0, dot(Q, expm(Q * t)))
     return norm(pi_deriv)
 
 
-def _get_convergence_mc(mc):
-    """Wrapper function to return convergence estimate from a model collection
-    that includes a GN fit.
 @dataclass(eq=True)
 class delta_nabla:
     obs_nabla: float
@@ -50,67 +82,32 @@ class delta_nabla:
     size_null: int = None
     source: str = None
 
-    Returns a generic_result
-    """
-
-    alt = mc["mcr"]["GN"]
-
-    bg_edges = alt.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
-    (fg_edge,) = set(bg_edges) ^ set(alt.alignment.names)
     def __post_init__(self):
         if len(self.null_nabla) <= 1:
             raise ValueError("len null distribution must be > 1")
 
-    Q = alt.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_0(alt)
-    t = alt.lf.get_param_value("length", edge=fg_edge)
         self.null_nabla = tuple(self.null_nabla)
         self.size_null = len(self.null_nabla)
 
-    observed_conv = convergence(pi, Q, t)
     def __hash__(self):
         return id((self.obs_nabla, self.null_nabla))
 
-    null = mc["mcr"]["GSN"]
-    GN = GN_sm(bg_edges)
-    neutral_convs = []
     @property
     @lru_cache()
     def mean_null(self):
         return mean(self.null_nabla)
 
-    while len(neutral_convs) < 10:
-        i = len(neutral_convs) + 1
-        sim_aln = null.lf.simulate_alignment()
-        sim_aln.info.source = "%s - simalign %d" % (mc.source, i)
-        sim_aln.info.fg_edge = fg_edge
     @property
     @lru_cache()
     def std_null(self):
         return std(self.null_nabla, ddof=1)
 
-        try:
-            sim_model_fit = GN(sim_aln)
-            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
-                fg_edge, calibrated=False
-            ).to_array()
-            sim_pi = get_pi_0(sim_model_fit)
-            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
-
-            sim_conv = convergence(sim_pi, sim_Q, sim_t)
-            neutral_convs.append(sim_conv)
-        except ValueError:
-            sim_result = None
     @property
     @lru_cache()
     def delta_nabla(self):
         """returns observed nabla minus mean of the null nabla distribution"""
         return self.obs_nabla - self.mean_null
 
-    neutral_mean = array(neutral_convs).mean()
-    neutral_std = std(array(neutral_convs), ddof=1)
-
-    conv_normalised = (observed_conv - neutral_mean) / neutral_std
     def to_rich_dict(self):
         return {
             "obs_nabla": self.obs_nabla,
@@ -120,20 +117,9 @@ class delta_nabla:
             "source": self.source,
         }
 
-    result = generic_result(source=mc.source)
-    result.update(
-        [
-            ("convergence_normalised", conv_normalised),
-            ("convergence", observed_conv),
-            ("fg_edge", fg_edge),
-            ("source", mc.source),
-            ("model_fit", alt),
-        ]
-    )
     def to_json(self):
         return json.dumps(self.to_rich_dict())
 
-    return result
     @classmethod
     def from_json(cls, data):
         """constructor from json data"""
@@ -146,138 +132,123 @@ class delta_nabla:
         return cls(**data)
 
 
-get_convergence_mc = user_function(
-    _get_convergence_mc, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
-)
 @deserialise.register_deserialiser("delta_nabla")
 def deserialise_delta_nabla(data: dict):
     """recreates delta_nabla instance from dict"""
     return delta_nabla.from_dict(data)
 
 
-def _get_convergence(gn_sm, opt_args=None):
-    """Wrapper function to return convergence estimate from a non-stationary
-    model fit.
-
-    Returns a generic_result
-    """
-    opt_args = opt_args or {}
-    opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
-
-    bg_edges = gn_sm.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
-    (fg_edge,) = set(bg_edges) ^ set(gn_sm.alignment.names)
-
-    Q = gn_sm.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_0(gn_sm)
-    t = gn_sm.lf.get_param_value("length", edge=fg_edge)
-
-    conv = convergence(pi, Q, t)
-
-    GS = GS_sm(bg_edges, opt_args=opt_args)
-    GN = GN_sm(bg_edges, opt_args=opt_args)
-
-    null = GN(gn_sm.alignment)
-    neutral_convs = []
 @singledispatch
 def get_nabla(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
     """returns the convergence statistic from a model_result object
 
-    while len(neutral_convs) < 10:
-        i = len(neutral_convs) + 1
-        sim_aln = null.lf.simulate_alignment()
-        sim_aln.info.source = "simalign %d" % (i)
-        sim_aln.info.fg_edge = fg_edge
+    Parameters
+    ----------
+    fg_edge : str or None
+        a designated edge to compute nabla for, by default None. If not
+        specified, identifies the single edge that is continuous time.
+        In the latter case, we assume a time-homogeneous process and
+        derive nabla from a rate matrix calibrated for a given expected
+        number of substitutions. If all edges are continuous-time,
+        employs the time_delta.
+    gn_result : model_result
+        for a general Markov nucleotide model
+    time_delta : float, optional
+        when fg_edge is None, interpreted as the scalar to multiply the
+        calibrated matrix default 0.1
+    wrt_nstat : bool
+        argument to convergence function, triggers calibration for
+        a non-stationary process
 
-        try:
-            sim_model_fit = GN(sim_aln)
-            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
-                fg_edge, calibrated=False
-            ).to_array()
-            sim_pi = get_pi_0(sim_model_fit)
-            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
-
-            sim_conv = convergence(sim_pi, sim_Q, sim_t)
-            neutral_convs.append(sim_conv)
-        except ValueError:
-            sim_result = None
-
-    neutral_mean = array(neutral_convs).mean()
-    neutral_std = std(array(neutral_convs), ddof=1)
-
-    conv_normalised = (conv - neutral_mean) / neutral_std
-
-    result = generic_result(source=gn_sm.source)
-    result.update([("convergence", conv), ("convergence_normalised", conv_normalised)])
-
-    return result
-
-
-get_convergence = user_function(
-    _get_convergence, input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE
-)
-
-
-def _get_convergence_bstrap(result):
-    """Wrapper function to return convergence estimate from a generic_result
-    generated from a bootstrap app..
-
-    Returns a generic_result
+    Notes
+    -----
+    Either all edges are continuous-time or one edge is continuous time.
     """
+    raise NotImplementedError("Implement get_nabla")
 
-    alt = result["observed"].alt
-    null = result["observed"].null
 
-    bg_edges = alt.lf.to_rich_dict()["likelihood_construction"]["discrete_edges"]
-    (fg_edge,) = set(bg_edges) ^ set(alt.alignment.names)
+@get_nabla.register(str)
+def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
+    # this is triggered when a fg_edge IS specified as a str
+    # we infer the time_delta from that edge if it wasn't provided
+    assert isinstance(time_delta, (NoneType, float))
+    pi_0 = gn_result.lf.get_param_value("mprobs")
+    time_delta = time_delta or gn_result.lf.get_param_value("length", edge=fg_edge)
+    Q = gn_result.lf.get_rate_matrix_for_edge(fg_edge).to_array()
+    return convergence(pi_0, Q, time_delta, wrt_nstat=wrt_nstat)
 
-    Q = alt.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_0(alt)
-    t = alt.lf.get_param_value("length", edge=fg_edge)
 
-    conv = convergence(pi, Q, t)
-
-    GN = GN_sm(bg_edges)
-    neutral_convs = []
-
-    while len(neutral_convs) < 10:
-        i = len(neutral_convs) + 1
-        sim_aln = null.lf.simulate_alignment()
-        sim_aln.info.source = "%s - simalign %d" % (result.source, i)
-        sim_aln.info.fg_edge = fg_edge
-
+@get_nabla.register(NoneType)
+def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
+    # this is triggered when fg_edge is None (i.e. not specified), in which
+    # case we need to identify whether there's a clear fg_edge candidate or
+    # select an edge as a representative
+    # todo assumes time-homogeneous process
+    assert isinstance(time_delta, (NoneType, float))
+    tree = gn_result.lf.tree
+    names = [e.name for e in tree.get_edge_vector(include_root=False)]
+    num_Q = 0
+    for name in names:
         try:
-            sim_model_fit = GN(sim_aln)
-            sim_Q = sim_model_fit.lf.get_rate_matrix_for_edge(
-                fg_edge, calibrated=False
-            ).to_array()
-            sim_pi = get_pi_0(sim_model_fit)
-            sim_t = sim_model_fit.lf.get_param_value("length", edge=fg_edge)
+            # is this edge modelled using discrete-time process
+            gn_result.lf.get_param_value("dpsubs", edge=name)
+        except (InvalidScopeError, KeyError):
+            # continuous time model
+            fg_edge = name
+            num_Q += 1
 
-            sim_conv = convergence(sim_pi, sim_Q, sim_t)
-            neutral_convs.append(sim_conv)
-        except ValueError:
-            sim_result = None
+    if num_Q == 0:
+        raise ValueError("at least one edge must be continuous-time")
 
-    neutral_mean = array(neutral_convs).mean()
-    neutral_std = std(array(neutral_convs), ddof=1)
+    if num_Q == 1:
+        # we identified a single continuous-time fg_edge, so we want length
+        # from that, which is done in the other function
+        time_delta = None
 
-    conv_normalised = (conv - neutral_mean) / neutral_std
+    if num_Q > 1:
+        if num_Q != len(names):
+            raise NotImplementedError(
+                f"either one or all {len(names)} edges are continuous-time, not {num_Q}"
+            )
+        fg_edge = name  # just use last edge name
+        time_delta = time_delta or 0.1  # we want a set length
 
-    result = generic_result(source=result.source)
-    result.update(
-        [
-            ("convergence_normalised", conv_normalised),
-            ("convergence", conv),
-            ("fg_edge", fg_edge),
-            ("source", result.source),
-        ]
+    return get_nabla(
+        fg_edge, gn_result=gn_result, time_delta=time_delta, wrt_nstat=wrt_nstat
     )
 
-    return result
+
+def get_delta_nabla(
+    obs_result, sim_results, fg_edge=None, wrt_nstat=False
+) -> delta_nabla:
+    """returns the adjusted nabla statistic
+
+    Parameters
+    ----------
+    obs_result : model_result
+        resulting from fitting a GN model to observed data
+    sim_results : series of model_result objects
+        each one is from fitting a GN model to data generated under the
+        null (GNS). The latter model having been fit to the observed data.
+    fg_edge : str or None
+        a designated edge to compute nabla for, by default None.
+    wrt_nstat : bool
+        If True, Q is calibrated such that as a non-stationary process,
+        i.e. ENS(pi_0, Q) == 1, otherwise it will calibrated as a stationary
+        process, i.e. -sum(pi_0_j * Q[j, j])==1
+
+    """
+    kwargs = dict(wrt_nstat=wrt_nstat)
+    obs_nabla = get_nabla(fg_edge, gn_result=obs_result, **kwargs)
+    sim_nabla = [get_nabla(fg_edge, gn_result=r, **kwargs) for r in sim_results]
+    return delta_nabla(obs_nabla, sim_nabla, source=obs_result.source)
 
 
-get_convergence_bstrap = user_function(
-    _get_convergence_bstrap,
-    input_types=SERIALISABLE_TYPE,
-    output_types=SERIALISABLE_TYPE,
-)
+@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
+def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
+    """returns delta nabla stats from bootstrap result"""
+    null_results = [r["GN"] for k, r in result.items() if k != "observed"]
+    obs_result = result["observed"]["GN"]
+    return get_delta_nabla(
+        obs_result, null_results, fg_edge=fg_edge, wrt_nstat=wrt_nstat
+    )

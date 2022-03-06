@@ -11,16 +11,15 @@ from numpy import array, diag_indices, mean, std
 from numpy.random import default_rng
 from numpy.testing import assert_almost_equal
 
-from mdeq.bootstrap import create_bootstrap_app
 from mdeq.convergence import (
+    bootstrap_to_nabla,
     convergence,
-    get_convergence,
-    get_convergence_bstrap,
-    get_convergence_mc,
     delta_nabla,
+    get_nabla,
+    unit_nonstationary_Q,
+    unit_stationary_Q,
 )
 from mdeq.model import GN_sm
-from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
@@ -28,51 +27,113 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 loader = io.load_db()
 
 
+@pytest.fixture(scope="session")
+def opt_args():
+    """settings for faster optimisation during testing"""
+    return {"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
+
+
+@pytest.fixture(scope="session")
+def pi_Q_gtr():
+    pi = array(
+        [
+            0.2505424026859996,
+            0.07241230639286972,
+            0.5281794353326765,
+            0.14886585558845405,
+        ]
+    )
+    Q = array(
+        [
+            [
+                -0.17455278757517198,
+                0.058340638985947,
+                0.05728142637446871,
+                0.05893072221475628,
+            ],
+            [
+                0.20185524524619958,
+                -0.49216829003818047,
+                0.13586228894387486,
+                0.15445075584810602,
+            ],
+            [
+                0.027171497474340816,
+                0.018626438358100565,
+                -0.09083073160277577,
+                0.0450327957703344,
+            ],
+            [
+                0.09918086775065285,
+                0.07512895022752823,
+                0.15977738177371378,
+                -0.3340871997518949,
+            ],
+        ]
+    )
+    return pi, Q
+
+
 @pytest.fixture()
-def mcr_dstore():
-    return io.get_data_store(DATADIR / "mcr.tinydb")
+def pi_Q():
+    """pi0 and Q for a non-stationary process"""
+    pi = array(
+        [
+            0.32299999999999995,
+            0.26366666666666666,
+            0.26366666666666666,
+            0.14966666666666667,
+        ]
+    )
+    Q = array(
+        [
+            [
+                -0.1756505156896979,
+                0.04785472427668278,
+                0.061937684487172545,
+                0.06585810692584257,
+            ],
+            [
+                0.2556183740709909,
+                -0.49677205172124006,
+                0.11120873609843097,
+                0.12994494155181815,
+            ],
+            [
+                0.025005623046479422,
+                0.021294409870822213,
+                -0.09273954148445357,
+                0.04643950856715194,
+            ],
+            [
+                0.08460220390537197,
+                0.08443523025341788,
+                0.1571661576846348,
+                -0.3262035918434247,
+            ],
+        ]
+    )
+
+    return pi, Q
 
 
-def test_convergence_GN(mcr_dstore):
-    """Convergence for a GN process should be greater or equal to zero."""
-    result = loader(mcr_dstore[0])
-    fg_edge = result["fg_edge"]
-    gn = result["mcr"]["GN"]
-
-    pi = get_pi_tip(gn, fg_edge)
-    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-
-    t = gn.lf.get_param_value("length", edge=fg_edge)
-    conv = convergence(pi, Q, t)
-
-    assert conv >= 0
-
-
-def test_convergence_non_zero(mcr_dstore):
+def test_convergence_non_zero(pi_Q):
     """Convergence of a non-stationary process should be greater than 0."""
-    result = loader(mcr_dstore[0])
-    fg_edge = result["fg_edge"]
-    gn = result["mcr"]["GN"]
-
-    pi = get_pi_tip(gn, fg_edge)
-    Q = gn.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-
-    new_pi = numpy.array([(pi[0] + pi[1]), pi[2] / 2, pi[2] / 2, pi[3]])
-    t = gn.lf.get_param_value("length", edge=fg_edge)
-
-    conv = convergence(new_pi, Q, t)
-
+    conv = convergence(*pi_Q, 0.17728507678400238)
     assert conv >= 0
 
 
-def test_convergence_GTR(mcr_dstore):
-    """The Convergence of a stationary process should be 0."""
-    result = loader(mcr_dstore[0])
-    fg_edge = result["fg_edge"]
-    gtr = result["mcr"]["GTR"]
+def test_convergence_GTR(pi_Q_gtr):
+    """convergence of a stationary process should be 0."""
+    pi, Q = pi_Q_gtr
+    t = 0.17708101717074656
+    # it's a stationary process
+    assert_almost_equal(pi @ Q, 0.0)
 
-    Q = gtr.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
-    pi = get_pi_0(gtr)
+    conv = convergence(pi, Q, t)
+    assert_almost_equal(conv, 0, decimal=10)
+
+
 # testing delta_nabla dataclass
 def test_make_delta_nabla():
     """works if list, tuple or numpy array used"""
@@ -82,10 +143,7 @@ def test_make_delta_nabla():
         assert obj.mean_null == 1
         assert obj.size_null == 3
 
-    t = gtr.lf.get_param_value("length", edge=fg_edge)
-    conv = convergence(pi, Q, t)
 
-    numpy.testing.assert_almost_equal(conv, 0, decimal=10)
 def test_fail_make_delta_nabla():
     """fail if empty null distribution"""
     for _type_ in (tuple, list, array):
@@ -111,9 +169,6 @@ def test_delta_nabla_value():
     assert dnab.delta_nabla == obs_nabla - mean_null
 
 
-def test_get_convergence(mcr_dstore):
-    loader = io.load_db()
-    gn = loader(mcr_dstore[0])["mcr"]["GN"]
 def test_rich_dict():
     """dict can be json formatted"""
     obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
@@ -123,8 +178,6 @@ def test_rich_dict():
     assert got["type"].endswith(delta_nabla.__name__)
 
 
-    conv = get_convergence(gn)
-    assert conv["convergence"] >= 0
 def test_roundtrip_json():
     """direct deserialisation works"""
     obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
@@ -142,41 +195,76 @@ def test_cogent3_deserialisation():
     assert g == obj
 
 
-def test_get_convergence_mc(mcr_dstore):
+def test_get_nabla(toe_bstrap):
+    """correctly computes nabla stats"""
+    result = toe_bstrap[0]
+    null_results = [r["GN"] for k, r in result.items() if k != "observed"]
+    obs_result = result["observed"]["GN"]
+    n = get_nabla(None, obs_result)
+    assert isinstance(n, float)
+    with pytest.raises(AssertionError):
+        get_nabla(None, gn_result=obs_result, time_delta=obs_result)
+
+
+@pytest.fixture(scope="session")
+def alignment_tree():
+    aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
+    aln = aln.take_seqs(["Human", "Mouse", "Rhesus", "Wombat"]).no_degenerates(
+        motif_length=3
+    )
+    tree = make_tree("(Wombat,Mouse,(Human,Rhesus))")
+    return aln, tree
+
+
+def test_get_nabla_mixes(alignment_tree, opt_args):
+    """should raise a NotImplementedError if number of Q != number edges or 1"""
+    aln, tree = alignment_tree
+
+    mod = GN_sm(tree=tree, discrete_edges=["Wombat"], opt_args=opt_args)
+    result = mod(aln)
+    # too many Q
+    with pytest.raises(NotImplementedError):
+        get_nabla(result)
+
+    # but works for all Q
+    mod = GN_sm(tree=tree, opt_args=opt_args)
+    result = mod(aln)
+    nabla = get_nabla(None, result)
+    assert isinstance(nabla, float)
+
+
+@pytest.fixture(scope="session")
+def toe_bstrap():
+    """tinydb with bootstrap results"""
+    inpath = DATADIR / "toe-300bp.tinydb"
+    dstore = io.get_data_store(inpath)
     loader = io.load_db()
-    gn_mc = loader(mcr_dstore[2])
-    conv = get_convergence_mc(gn_mc)
-    assert conv["convergence"] >= 0
+    return [loader(m) for m in dstore]
 
 
-def test_get_convergence_mc_composable(tmp_path, mcr_dstore):
-    reader = io.load_db()
-
-    outpath = tmp_path / "tempdir.tinydb"
-    writer = io.write_db(outpath)
-
-    process = reader + get_convergence_mc + writer
-
-    process.apply_to(mcr_dstore[:1])
-    assert len(process.data_store.summary_incomplete) == 0
+def test_load_delta_nabla(toe_bstrap):
+    """returns a series of delta_nabla instances"""
+    app = bootstrap_to_nabla()
+    results = [app(r) for r in toe_bstrap]
+    assert {type(r) for r in results} == {delta_nabla}
+    assert all(v.delta_nabla >= 0 for v in results)
 
 
-def test_get_convergence_bstrap(tmp_path):
-    dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
-    reader = io.load_db()
-    boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
-    outpath = tmp_path / "tempdir.tinydb"
-    writer1 = io.write_db(outpath)
+def test_unit_ens(pi_Q):
+    pi, Q = pi_Q
+    result = unit_nonstationary_Q(pi, Q)
+    ens = expected_number_subs(pi, result, 1.0)
+    assert_almost_equal(ens, 1.0)
 
-    process = reader + boostrap + writer1
-    process.apply_to(dstore[:1])
 
-    loader = io.load_db()
-    dstore2 = io.get_data_store(outpath)
-    conv = get_convergence_bstrap(loader(dstore2[0]))
-    print(conv)
-
-    assert isinstance(conv["convergence"], float)
-    assert isinstance(conv["fg_edge"], str)
-    assert conv["source"] == reader(dstore[0]).info.source
-    assert len(process.data_store.summary_incomplete) == 0
+def test_unit_ens_gtr(pi_Q_gtr):
+    """result is same as standard calibration for GTR matrix"""
+    pi, Q = pi_Q_gtr
+    # calibrated assuming non-stationary
+    ens_Q = unit_nonstationary_Q(pi, Q)
+    # calibrated assuming stationary
+    tau_Q = unit_stationary_Q(pi, Q)
+    assert_almost_equal(ens_Q, tau_Q)
+    # time == 1
+    indices = diag_indices(4)
+    assert_almost_equal(-sum(pi * Q[indices]), 1.0)
