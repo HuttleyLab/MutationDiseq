@@ -1,9 +1,15 @@
+import json
 import pathlib
 
-import numpy
 import pytest
 
+from cogent3 import load_aligned_seqs, make_tree
 from cogent3.app import io
+from cogent3.maths.matrix_exponential_integration import expected_number_subs
+from cogent3.util.deserialise import deserialise_object
+from numpy import array, diag_indices, mean, std
+from numpy.random import default_rng
+from numpy.testing import assert_almost_equal
 
 from mdeq.bootstrap import create_bootstrap_app
 from mdeq.convergence import (
@@ -11,6 +17,7 @@ from mdeq.convergence import (
     get_convergence,
     get_convergence_bstrap,
     get_convergence_mc,
+    delta_nabla,
 )
 from mdeq.model import GN_sm
 from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
@@ -66,26 +73,73 @@ def test_convergence_GTR(mcr_dstore):
 
     Q = gtr.lf.get_rate_matrix_for_edge(fg_edge, calibrated=False).to_array()
     pi = get_pi_0(gtr)
+# testing delta_nabla dataclass
+def test_make_delta_nabla():
+    """works if list, tuple or numpy array used"""
+    data = [0.2, 1, 1.8]
+    for _type_ in (tuple, list, array):
+        obj = delta_nabla(3.0, _type_(data))
+        assert obj.mean_null == 1
+        assert obj.size_null == 3
 
     t = gtr.lf.get_param_value("length", edge=fg_edge)
     conv = convergence(pi, Q, t)
 
     numpy.testing.assert_almost_equal(conv, 0, decimal=10)
+def test_fail_make_delta_nabla():
+    """fail if empty null distribution"""
+    for _type_ in (tuple, list, array):
+        for data in ([], [2]):
+            with pytest.raises(ValueError):
+                delta_nabla(3.0, _type_(data), 3)
 
 
+def test_delta_nabla_value():
+    """given statistic and null of statistic computes correct delta_nabla"""
+    rng = default_rng()
+    size = 67
+    obs_nabla = rng.uniform(low=1e-6, high=100, size=1)[0]
+    null_nabla = rng.uniform(low=1e-6, high=100, size=size)
+    dnab = delta_nabla(obs_nabla, null_nabla)
+    assert dnab.obs_nabla == obs_nabla
+    assert dnab.size_null == size
+    mean_null = mean(null_nabla)
+    assert mean_null == dnab.mean_null
+    std_null = std(null_nabla, ddof=1)
+    assert std_null == dnab.std_null
 
-
-
-
-
+    assert dnab.delta_nabla == obs_nabla - mean_null
 
 
 def test_get_convergence(mcr_dstore):
     loader = io.load_db()
     gn = loader(mcr_dstore[0])["mcr"]["GN"]
+def test_rich_dict():
+    """dict can be json formatted"""
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    got = obj.to_rich_dict()
+    _ = json.dumps(got)  # should not fail
+    # type value has correct name
+    assert got["type"].endswith(delta_nabla.__name__)
+
 
     conv = get_convergence(gn)
     assert conv["convergence"] >= 0
+def test_roundtrip_json():
+    """direct deserialisation works"""
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    j = obj.to_json()
+    g = delta_nabla.from_dict(json.loads(j))
+    assert g == obj
+
+
+def test_cogent3_deserialisation():
+    """works with deserialise_object"""
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    j = obj.to_json()
+    g = deserialise_object(j)
+    assert isinstance(g, delta_nabla)
+    assert g == obj
 
 
 def test_get_convergence_mc(mcr_dstore):
