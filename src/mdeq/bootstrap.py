@@ -141,77 +141,9 @@ def create_bootstrap_app(num_reps=100, discrete_edges=None, opt_args=None):
     return bootstrap(hyp, num_reps)
 
 
+
+# todo this should become a method on compact_bootstrap_result
 def estimate_pval(result):
     obs = result.observed.LR
     num_ge = sum(v >= obs for v in result.null_dist)
     return num_ge / len(result.null_dist)
-
-
-class confidence_interval(ComposableHypothesis):
-    """Parametric bootstrap to give confidence intervals for a provided
-    statistic. Returns a confindence_interval_result.
-
-    Fits a General Nucleotide (GN) model to derive statistics.
-
-    Vendored with alterations from cogent3.evo.app.bootstrap
-    """
-
-    _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
-    _output_types = SERIALISABLE_TYPE
-    _data_types = ("ArrayAlignment", "Alignment")
-
-    def __init__(self, stat_func, num_reps, verbose=False, opt_args=None):
-        super(confidence_interval, self).__init__(
-            input_types=self._input_types,
-            output_types=self._output_types,
-            data_types=self._data_types,
-        )
-        self.stat_func = stat_func
-        self._num_reps = num_reps
-        self._verbose = verbose
-        self.func = self.run
-
-        self._opt_args = opt_args or {}
-
-    def fit_sim(self, rep_num):
-        sim_aln = self.alt_params.simulate_alignment()
-        sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
-        sim_aln.info.fg_edge = self.fg_edge
-
-        try:
-            sim_model_fit = self.alt(sim_aln)
-            sim_result = self.stat_func(sim_model_fit)
-        except ValueError:
-            sim_result = None
-        return sim_result, sim_model_fit
-
-    def run(self, aln):
-        result = generic_result(aln.info.source)
-
-        self.fg_edge = aln.info.fg_edge
-        self.bg_edges = list({self.fg_edge} ^ set(aln.names))
-
-        GN = GN_sm(discrete_edges=self.bg_edges, opt_args=self._opt_args)
-
-        self.alt = GN
-        self.alt_params = self.alt(aln)
-        try:
-            obs = self.stat_func(self.alt_params)
-        except OscillatingPiException as err:
-            obs = NotCompleted(
-                "ERROR - OscillatingPiException", str(self.stat_func), err.args[0]
-            )
-            return obs
-        result["observed"] = obs
-        result["observed-model_fit"] = self.alt_params
-
-        self._inpath = aln.info.source
-
-        sim_results = [r for r in map(self.fit_sim, range(self._num_reps)) if r]
-        null = {}
-        for i, (sim_result, sim_model_fit) in enumerate(sim_results):
-            null[f"sim_{i+1}-result"] = sim_result
-            null[f"sim_{i+1}-model_fit"] = sim_model_fit
-
-        result.update(dict(null))
-        return result
