@@ -32,7 +32,8 @@ LOGGER = CachingLogger(create_dir=True)
 
 
 def _process_comma_seq(*args):
-    return args[-1].split(",")
+    val = args[-1]
+    return val.split(",") if val else val
 
 
 def _valid_path(path, exists):
