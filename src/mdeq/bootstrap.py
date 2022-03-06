@@ -120,7 +120,7 @@ class bootstrap(ComposableHypothesis):
             return result
 
         result.observed = obs
-        self._null = obs.null
+        self._null = obs["GSN"]
         self._inpath = aln.info.source
 
         sim_results = [r for r in map(self._fit_sim, range(self._num_reps)) if r]
@@ -131,7 +131,7 @@ class bootstrap(ComposableHypothesis):
 
 
 def create_bootstrap_app(num_reps=100, discrete_edges=None, opt_args=None):
-    """wrapper of cogent3.app.evo.bootstrap with hypothesis of GS as the null
+    """wrapper of cogent3.app.evo.bootstrap with hypothesis of GSN as the null
     and GN as the alternate."""
 
     GS = GS_sm(discrete_edges, opt_args=opt_args)
