@@ -6,7 +6,7 @@ import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
 
-from mdeq.eop import adjacent_EOP, edge_EOP
+from mdeq.eop import adjacent_eop, edge_EOP
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
@@ -65,17 +65,6 @@ def diff_length_alns():
 loader = io.load_db()
 
 
-def test_adjacent_EOP_construction(dstore_instance):
-
-    aln1 = loader(dstore_instance[0])
-    aln2 = loader(dstore_instance[1])
-
-    eop = adjacent_EOP([aln1, aln2], "758")
-
-    assert isinstance(eop.LR, float)
-    assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
-
-
 def test_edge_EOP_construction(dstore_instance):
 
     aln = loader(dstore_instance[0])
@@ -87,31 +76,10 @@ def test_edge_EOP_construction(dstore_instance):
     assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
 
 
-def test_adjacent_EOP_same_aln(dstore_instance):
+def test_adjacent_eop_same_aln(dstore_instance):
 
     aln1 = loader(dstore_instance[1])
     aln2 = loader(dstore_instance[1])
 
-    lr = adjacent_EOP([aln1, aln2], "758").LR
+    lr = adjacent_eop([aln1, aln2], "758").LR
     numpy.testing.assert_almost_equal(lr, 0, decimal=5)
-
-
-def test_adjacent_EOP_three_alns(multiple_alns):
-    eop = adjacent_EOP(multiple_alns, "Human")
-    assert isinstance(eop.LR, float)
-    assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
-
-
-def test_adjacent_EOP_different_lengths(diff_length_alns):
-    eop = adjacent_EOP(diff_length_alns, "Human")
-    assert isinstance(eop.LR, float)
-    assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
-
-
-def test_adjacent_EOP_short_seq():
-    dstore = io.get_data_store(DATADIR / "300bp.tinydb")
-    loader = io.load_db()
-    aln1 = loader(dstore[9])
-    aln2 = loader(dstore[10])
-
-    adjacent_EOP([aln1, aln2], "758")

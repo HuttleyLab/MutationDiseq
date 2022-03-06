@@ -62,6 +62,8 @@ def test_make_identifier():
     assert got == "a--c"
     got = make_identifier([a, b, c])
     assert got == "a--b--c"
+    got = make_identifier([a, a, a])
+    assert got == "a--a--a"
 
 
 def test_grouped_data():
@@ -72,6 +74,11 @@ def test_grouped_data():
     assert isinstance(got, grouped_data)
     with pytest.raises(AssertionError):
         grouped_data((a, c), source="a--c")
+
+    # can group same alignment
+    got = grouped_data((a, a), source="a--a")
+    assert isinstance(got, grouped_data)
+    assert got.source == "a--a"
 
 
 def test_load_data_group():
