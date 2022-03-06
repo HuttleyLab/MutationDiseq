@@ -24,16 +24,15 @@ def physically_adjacent(
     sample_ids
         sample ID's
     """
-    adjacent = []
+
+    all_adjacent = []
     for coord_name in table.distinct_values("coord_name"):
         sub_table = table.filtered(lambda x: x == coord_name, columns="coord_name")
-        num_rows = sub_table.shape[0]
-        if num_rows == 1:
+        if sub_table.shape[0] == 1:
             continue
-        for i in range(1, num_rows):
-            names = [sub_table[j, "name"] for j in range(i - 1, i + 1)]
-            if set(names).issubset(sample_ids):
-                adjacent.append(tuple(names))
+        all_adjacent.extend(sequential_groups(sub_table.columns["name"], 2))
+
+    adjacent = [pair for pair in all_adjacent if set(pair).issubset(sample_ids)]
     return tuple(adjacent)
 
 
