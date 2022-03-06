@@ -10,6 +10,7 @@ from mdeq.adjacent import (
     make_identifier,
     sequential_groups,
 )
+from mdeq.eop import adjacent_eop
 
 
 DATADIR = Path(__file__).parent / "data"
@@ -100,3 +101,30 @@ def test_load_data_group():
     eval_input(pair)
     eval_input(tuple(e.replace(".json", "") for e in pair))
 
+
+def test_new_adjacent_eop():
+    from random import choice, shuffle
+
+    from cogent3.app import io
+
+    path = DATADIR / "300bp.tinydb"
+    dstore = io.get_data_store(path)
+    names = [m.name for m in dstore]
+    shuffle(names)
+
+    paired = sequential_groups(names, 2)
+    pair = tuple(e.replace(".json", "") for e in choice(paired))
+    group_loader = load_data_group(str(path))
+    data = group_loader(pair)
+    eop = adjacent_eop(
+        opt_args={"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
+    )
+    got = eop(data)
+    assert len(got["null"]) == 1
+    assert len(got["alts"]) == 2
+    for k in got:
+        assert isinstance(got[k].lnL, float)
+        assert isinstance(got[k].nfp, int)
+
+    # alt has more parameters than null
+    assert got["alts"].nfp > got["null"].nfp
