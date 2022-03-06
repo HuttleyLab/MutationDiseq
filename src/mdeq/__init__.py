@@ -2,15 +2,18 @@
 
 # following line to stop automatic threading by numpy
 from . import _block_threading  # isort: skip  # make sure this stays at the top
+import json
 import pathlib
 
 from warnings import filterwarnings
 
 import click
 
+from cogent3.app import io
 from scitrack import CachingLogger
 
-from mdeq.bootstrap import create_bootstrap_app
+from mdeq.bootstrap import bootstrap_toe
+from mdeq.convergence import bootstrap_to_nabla
 
 from . import (
     model as _model,  # to ensure registration of define substitution models
@@ -55,7 +58,7 @@ def valid_result_types(dstore, types):
     """fail if the record type in dstore is not within types."""
     from cogent3.app import data_store
 
-    _, data, _ = data_store.load_record_from_json(dstore[0].read())
+    data = json.loads(dstore[0].read())
     type_ = data["type"].split(".")[-1]
     return type_ in types
 
@@ -174,11 +177,23 @@ def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
 @_limit
 @_overwrite
 @_verbose
-@_testrun
-def convergence(inpath, outpath, num_reps, limit, overwrite, verbose, testrun):
-    """fits GN/GSN to observed, simulates under GSN and fits only GN."""
-    LOGGER.log_file_path = outpath.parent / "mdeq-bootstrap_convergence.log"
+def convergence(inpath, outpath, limit, overwrite, verbose):
+    """uses output from toe to generate delta_nabla."""
+    LOGGER.log_file_path = outpath.parent / "mdeq-convergence.log"
     LOGGER.log_args()
+    dstore = io.get_data_store(inpath, limit=limit)
+    expected_types = ("compact_bootstrap_result",)
+    if not valid_result_types(dstore, expected_types):
+        click.secho(f"records one of the expected types {expected_types}", fg="red")
+        exit()
+
+    loader = io.load_db()
+    to_delta_nabla = bootstrap_to_nabla()
+    writer = io.write_db(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+    process = loader + to_delta_nabla + writer
+    r = process.apply_to(dstore, logger=True, cleanup=True, show_progress=verbose > 1)
 
 
 @main.command()
