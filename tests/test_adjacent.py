@@ -2,7 +2,10 @@ from pathlib import Path
 
 import pytest
 
+from cogent3 import make_unaligned_seqs
+
 from mdeq.adjacent import (
+    grouped_data,
     make_identifier,
     sequential_groups,
 )
@@ -57,5 +60,15 @@ def test_make_identifier():
     assert got == "a--c"
     got = make_identifier([a, b, c])
     assert got == "a--b--c"
+
+
+def test_grouped_data():
+    a = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/a.json"))
+    b = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/b.json"))
+    c = make_unaligned_seqs({"a": "ACGG", "d": "ACGG"}, info=dict(source="blah/c.json"))
+    got = grouped_data((a, b), source="a--b")
+    assert isinstance(got, grouped_data)
+    with pytest.raises(AssertionError):
+        grouped_data((a, c), source="a--c")
 
 

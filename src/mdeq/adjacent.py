@@ -42,3 +42,14 @@ def make_identifier(data) -> str:
     return "--".join(composite)
 
 
+@dataclass
+class grouped_data:
+    elements: tuple[T, ...]
+    source: str
+
+    def __post_init__(self):
+        self.elements = tuple(self.elements)
+        # make sure all alignments have exactly the same sequence names
+        names = set(self.elements[0].names)
+        for e in self.elements:
+            assert set(e.names) == names, f"names {e.names} != {names}"
