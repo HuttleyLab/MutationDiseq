@@ -135,6 +135,8 @@ def toe(
     inpath, outpath, background_edges, num_reps, limit, overwrite, verbose, testrun
 ):
     """test of existence of mutation equilibrium."""
+    # todo need a separate command to apply foreground_from_jsd() to an
+    #  alignment for decorating alignments with the foreground edge
     # or check alignment.info for a fg_edge key -- all synthetic data
     LOGGER.log_file_path = outpath.parent / "mdeq-toe.log"
     LOGGER.log_args()

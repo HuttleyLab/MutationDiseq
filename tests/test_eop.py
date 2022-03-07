@@ -83,3 +83,6 @@ def test_adjacent_eop_same_aln(dstore_instance):
 
     lr = adjacent_eop([aln1, aln2], "758").LR
     numpy.testing.assert_almost_equal(lr, 0, decimal=5)
+
+# todo check whether the multi-locus LF object can simulate alignments
+
