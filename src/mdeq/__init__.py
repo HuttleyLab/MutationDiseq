@@ -31,6 +31,15 @@ filterwarnings("ignore", ".*decreased to keep within bounds")
 LOGGER = CachingLogger(create_dir=True)
 
 
+def get_opt_settings(testrun):
+    """create optimisation settings"""
+    return (
+        {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
+        if testrun
+        else None
+    )
+
+
 def _process_comma_seq(*args):
     val = args[-1]
     return val.split(",") if val else val
@@ -156,15 +165,6 @@ def toe(
     process = loader + bstrapper + writer
     process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
     click.secho("Done!", fg="green")
-
-
-def get_opt_settings(testrun):
-    """create optimisation settings"""
-    return (
-        {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
-        if testrun
-        else None
-    )
 
 
 @main.command()
