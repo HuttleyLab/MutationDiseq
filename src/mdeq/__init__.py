@@ -146,10 +146,7 @@ def toe(
         exit()
 
     loader = io.load_db()
-    if testrun:
-        opt_args = {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
-    else:
-        opt_args = None
+    opt_args = get_opt_settings(testrun)
     bstrapper = bootstrap_toe(num_reps=num_reps, opt_args=opt_args)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
@@ -157,6 +154,15 @@ def toe(
     process = loader + bstrapper + writer
     process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
     click.secho("Done!", fg="green")
+
+
+def get_opt_settings(testrun):
+    """create optimisation settings"""
+    return (
+        {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
+        if testrun
+        else None
+    )
 
 
 @main.command()
