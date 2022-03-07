@@ -60,7 +60,7 @@ def gtr_defined_t50(aln):
     lf_gtr = model_gtr.make_likelihood_function(tree)
     lf_gtr.set_alignment(aln)
     lf_gtr.optimise(
-        show_progress=False, max_restart=5, tolerance=1e-10, limit_action="raise"
+        show_progress=False, max_restarts=5, tolerance=1e-10, limit_action="raise"
     )
 
     Q = lf_gtr.get_rate_matrix_for_edge("TombBat", calibrated=False).to_array()
@@ -81,7 +81,7 @@ def non_stationary_t50(aln):
     lf_gtr = model_gtr.make_likelihood_function(tree)
     lf_gtr.set_alignment(aln)
     lf_gtr.optimise(
-        show_progress=False, max_restart=5, tolerance=1e-10, limit_action="raise"
+        show_progress=False, max_restarts=5, tolerance=1e-10, limit_action="raise"
     )
 
     Q = lf_gtr.get_rate_matrix_for_edge("TombBat", calibrated=False).to_array()

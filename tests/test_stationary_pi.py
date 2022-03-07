@@ -36,7 +36,7 @@ def likelihood_gtr(brca1_alignment):
     lf_gtr = model_gtr.make_likelihood_function(tree)
     lf_gtr.set_alignment(brca1_alignment)
 
-    lf_gtr.optimise(show_progress=False, max_restart=5, tolerance=1e-10)
+    lf_gtr.optimise(show_progress=False, max_restarts=5, tolerance=1e-10)
 
     return lf_gtr
 
