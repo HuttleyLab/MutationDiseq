@@ -35,7 +35,10 @@ dev = ["black",
        "click",
        "docformatter",
        "flit",
-       "isort"]
+       "isort",
+       "pytest",
+       "pytest-cov",
+       "pytest-xdist"]
 
 [tool.black]
 line-length = 88
