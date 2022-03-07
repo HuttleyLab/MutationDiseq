@@ -48,7 +48,7 @@ def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
     model_names.extend(["GSN", "GN"])
 
     fg_edge = get_foreground(aln)
-    bg_edges = list({fg_edge} ^ set(aln.names))
+    bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
     sm_args = dict(optimise_motif_probs=True)
     opt_args = opt_args or {}
     opt_args = dict(max_restarts=5, tolerance=1e-8, **opt_args)
