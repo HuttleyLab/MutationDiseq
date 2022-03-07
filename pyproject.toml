@@ -1,16 +1,18 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
+requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "mdeq"
-author = "Katherine Caley"
-author-email = "katherine.caley@anu.edu.au"
-keywords = "biology, genomics, statistics, phylogeny, evolution, bioinformatics"
-description-file = "README.md"
-license = "BSD-3"
+[project]
+name = "mdeq"
+authors = [
+    { name = "Katherine Caley", email = "katherine.caley@anu.edu.au"},
+    { name = "Gavin Huttley", email = "Gavin.Huttley@anu.edu.au"},
+]
+keywords = ["biology", "genomics", "statistics", "phylogeny", "evolution", "bioinformatics"]
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.9"
-requires = ["cogent3", "click", "accupy", "scipy"]
+dependencies = ["cogent3", "click", "accupy", "scipy"]
 classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
@@ -22,23 +24,31 @@ classifiers = [
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ]
+dynamic = ["version", "description"]
 
-[tool.flit.sdist]
+[project.sdist]
 include = ["doc/", "requirements.txt", "src/*", "pyproject.toml"]
 exclude = ["doc/*.html"]
 
-[tool.flit.scripts]
+[project.scripts]
 mdeq = "mdeq:main"
 
-[tool.flit.metadata.requires-extra]
-dev = ["black",
-       "click",
-       "docformatter",
-       "flit",
-       "isort",
-       "pytest",
-       "pytest-cov",
-       "pytest-xdist"]
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+]
+dev = [
+    "black",
+    "click",
+    "docformatter",
+    "flit",
+    "isort",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist"
+]
 
 [tool.black]
 line-length = 88
