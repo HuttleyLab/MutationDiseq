@@ -5,11 +5,17 @@ import pytest
 
 from cogent3 import make_aligned_seqs
 from cogent3.app import io
+from cogent3.app.result import hypothesis_result
 
 from mdeq.eop import adjacent_eop, edge_EOP
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
+
+
+@pytest.fixture(scope="session")
+def opt_args():
+    return dict(max_restarts=1, max_evaluations=50, limit_action="ignore")
 
 
 @pytest.fixture()
@@ -84,5 +90,23 @@ def test_adjacent_eop_same_aln(dstore_instance):
     lr = adjacent_eop([aln1, aln2], "758").LR
     numpy.testing.assert_almost_equal(lr, 0, decimal=5)
 
+
 # todo check whether the multi-locus LF object can simulate alignments
 
+
+def test_adjacent_eop(multiple_alns, opt_args):
+    from mdeq.adjacent import grouped_data
+
+    for i, aln in enumerate(multiple_alns):
+        aln.info.name = f"name-{i}"
+
+    grp = grouped_data(tuple(multiple_alns[:2]), "fake")
+    test_adjacent = adjacent_eop(opt_args=opt_args)
+    # works if no fg edge specified
+    got = test_adjacent(grp)
+    assert isinstance(got, hypothesis_result)
+    for aln in multiple_alns:
+        aln.info.fg_edge = "Human"
+    grp = grouped_data(tuple(multiple_alns[:2]), "fake")
+    got = test_adjacent(grp)
+    assert isinstance(got, hypothesis_result)
