@@ -84,14 +84,16 @@ _loader = load_db()
 
 
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
-def load_data_group(data_store_path, data_identifiers=None) -> grouped_data:
+def load_data_group(
+    data_store_path, data_identifiers: tuple[str] = None
+) -> grouped_data:
     """
 
     Parameters
     ----------
     data_store_path : str
         path to a tinydb
-    data_identifiers : tuple[str, ...]
+    data_identifiers
         series of identifiers
 
     Notes
