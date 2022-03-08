@@ -149,7 +149,7 @@ def create_bootstrap_app(tree=None, num_reps=100, discrete_edges=None, opt_args=
 def bootstrap_toe(aln, tree=None, num_reps=100, opt_args=None):
     """dynamically constructs a bootstrap app and performs the toe."""
     hyp = toe_on_edge(
-        aln, tree=None, with_gtr=False, sequential=False, opt_args=opt_args
+        aln, tree=tree, with_gtr=False, sequential=False, opt_args=opt_args
     )
     bstrapper = bootstrap(hyp, num_reps)
     return bstrapper(aln)

@@ -42,6 +42,10 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     alignments. The other edges are modelled using a discrete-time Markov
     process. We do not advise doing this for > 3 edges.
 
+    Defaults to a strictly continuous-time process if no such fg_edge can
+    be inferred, i.e. null is a single GSN process, alt is a single GN
+    process.
+
     Returns
     -------
     model_collection
