@@ -19,6 +19,7 @@ from mdeq.convergence import bootstrap_to_nabla
 from . import (
     model as _model,  # to ensure registration of define substitution models
 )
+from mdeq.utils import get_obj_type
 
 
 __author__ = "Gavin Huttley"
@@ -86,15 +87,6 @@ def _valid_tinydb_output(*args):
 def _load_tree(*args):
     path = args[-1]
     return load_tree(path) if path else path
-
-
-def valid_result_types(dstore, types):
-    """fail if the record type in dstore is not within types."""
-    from cogent3.app import data_store
-
-    data = json.loads(dstore[0].read())
-    type_ = data["type"].split(".")[-1]
-    return type_ in types
 
 
 @click.group()
@@ -218,7 +210,7 @@ def toe(
 
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
-    if not valid_result_types(dstore, expected_types):
+    if get_obj_type(dstore) not in expected_types:
         click.secho(f"records one of the expected types {expected_types}", fg="red")
         exit()
 
@@ -320,7 +312,7 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
     LOGGER.log_args()
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("compact_bootstrap_result",)
-    if not valid_result_types(dstore, expected_types):
+    if get_obj_type(dstore) not in expected_types:
         click.secho(f"records one of the expected types {expected_types}", fg="red")
         exit()
 

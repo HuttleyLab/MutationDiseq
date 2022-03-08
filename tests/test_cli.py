@@ -4,7 +4,7 @@ import pytest
 
 from click.testing import CliRunner
 
-from mdeq import aeop, convergence, make_adjacent, teop, toe
+from mdeq import aeop, convergence, get_obj_type, make_adjacent, teop, toe
 
 
 __author__ = "Gavin Huttley"
@@ -22,6 +22,19 @@ def runner():
 @pytest.fixture(scope="session")
 def tmp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("tinydb")
+
+
+def test_get_obj_type():
+    from cogent3.app.io import get_data_store
+
+    types = {
+        "300bp.tinydb": "ArrayAlignment",
+        "toe-300bp.tinydb": "compact_bootstrap_result",
+    }
+    for path, expect in types.items():
+        dstore = get_data_store(DATADIR / path)
+        ty = get_obj_type(dstore)
+        assert ty == expect
 
 
 def test_toe_exercise(runner, tmp_dir):

@@ -61,3 +61,11 @@ class SerialisableMixin:
 
     def to_json(self):
         return json.dumps(self.to_rich_dict())
+
+
+def get_obj_type(dstore):
+    """returns the record type in dstore"""
+    from cogent3.app import data_store
+
+    data = json.loads(dstore[0].read())
+    return data["type"].split(".")[-1]
