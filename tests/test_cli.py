@@ -75,3 +75,13 @@ def test_aeop_exercise(runner, tmp_dir, test_make_adjacent):
     outpath = tmp_dir / "aeop.tinydb"
     r = runner.invoke(aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O"])
     assert r.exit_code == 0, r.output
+
+
+def test_aeop_exercise_shared_mprobs(runner, tmp_dir, test_make_adjacent):
+    # We're using the result created in test_make_adjacent as input here
+    inpath = test_make_adjacent
+    outpath = tmp_dir / "aeop.tinydb"
+    r = runner.invoke(
+        aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"]
+    )
+    assert r.exit_code == 0, r.output

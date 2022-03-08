@@ -23,7 +23,7 @@ from mdeq.utils.utils import get_foreground
 
 
 class adjacent_eop(ComposableAligned):
-    def __init__(self, tree=None, opt_args=None):
+    def __init__(self, tree=None, opt_args=None, share_mprobs=True):
         super(adjacent_eop, self).__init__(
             data_types="grouped",
             input_types=SERIALISABLE_TYPE,
@@ -37,6 +37,7 @@ class adjacent_eop(ComposableAligned):
             **opt_args,
         }
         self._tree = tree
+        self._share_mprobs = share_mprobs
         self.func = self.fit
 
     def _background_edges(self, data):
@@ -85,7 +86,8 @@ class adjacent_eop(ComposableAligned):
             expm="pade",
         )
         lf.set_alignment([aligns[k] for k in names])
-        lf.set_param_rule("mprobs", is_independent=False)
+        if self._share_mprobs:
+            lf.set_param_rule("mprobs", is_independent=False)
         lf.optimise(**self._opt_args)
         lf.name = "null"
 

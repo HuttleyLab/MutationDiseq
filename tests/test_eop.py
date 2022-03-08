@@ -88,6 +88,8 @@ def test_edge_EOP_construction(dstore_instance):
 
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
+    from cogent3.util.dict_array import DictArray
+
     from mdeq.adjacent import grouped
 
     aln = loader(dstore_instance[4])
@@ -100,9 +102,20 @@ def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     app = adjacent_eop(opt_args=opt_args)
     result = app(grp)
     numpy.testing.assert_almost_equal(result.LR, 0, decimal=5)
+    # just one mrpobs
+    mprobs = result.null.lf.get_motif_probs()
+    assert isinstance(mprobs, DictArray)
+
+    # allow mprobs to be different
+    app = adjacent_eop(opt_args=opt_args, share_mprobs=False)
+    result = app(grp)
+    mprobs = result.null.lf.get_motif_probs()
+    assert isinstance(mprobs, dict)
+    assert len(mprobs) == 2
 
 
 # todo check whether the multi-locus LF object can simulate alignments
+# Answer - it can, e.g. lf.simulate_alignment(locus="a")
 
 
 def test_adjacent_eop(multiple_alns, opt_args):

@@ -230,11 +230,17 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
 @main.command()
 @_inpath
 @_outpath
+@click.option(
+    "-s",
+    "--share_mprobs",
+    is_flag=True,
+    help="constrain loci to have the same motif probs",
+)
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
+def aeop(inpath, outpath, share_mprobs, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between adjacent loci."""
     from .adjacent import load_data_group, physically_adjacent
     from .eop import adjacent_eop
@@ -249,7 +255,9 @@ def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
-    test_adjacent = adjacent_eop(opt_args=get_opt_settings(testrun))
+    test_adjacent = adjacent_eop(
+        opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
+    )
     process = loader + test_adjacent + writer
     _ = process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1)
     click.secho("Done1", fg="green")
