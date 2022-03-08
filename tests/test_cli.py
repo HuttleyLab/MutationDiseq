@@ -102,3 +102,5 @@ def test_teop_exercise(runner, tmp_dir):
     results = [loader(m) for m in dstore]
     for r in results:
         assert isinstance(r, result.hypothesis_result)
+
+# todo write tests of toe that don't specify a fg edge; that have > 3 taxa and specify a tree

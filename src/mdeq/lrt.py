@@ -18,7 +18,7 @@ def get_lrt(mc):
     return hyp
 
 
-def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
+def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None):
     """make app to test for equilibrium with a dynamically defined background edge.
 
     Parameters
@@ -26,6 +26,8 @@ def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
     aln : Alignment
         must have a fg_edge value in the dict to identify the sequence on the
         foreground edge
+    tree
+        phylogenetic tree
     with_gtr : bool
         use GTR to get initial estimates for GSN
     sequential : bool
@@ -55,7 +57,7 @@ def toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=None):
     lf_args = dict(discrete_edges=bg_edges, expm="pade")
 
     models = [
-        evo.model(mn, sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
+        evo.model(mn,tree=tree , sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
         for mn in model_names
     ]
     return evo.model_collection(*models, sequential=sequential)

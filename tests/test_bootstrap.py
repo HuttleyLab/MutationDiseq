@@ -71,3 +71,5 @@ def test_estimate_pval(aln, opt_args):
     )
     bootstrap = bstrap(aln)
     assert estimate_pval(bootstrap) == 0
+
+# todo write tests that don't specify a fg edge; that have > 3 taxa and specify a tree

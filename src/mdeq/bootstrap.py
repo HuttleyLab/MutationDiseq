@@ -147,9 +147,9 @@ def create_bootstrap_app(num_reps=100, discrete_edges=None, opt_args=None):
     (SERIALISABLE_TYPE, ALIGNED_TYPE),
     (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE),
 )
-def bootstrap_toe(aln, num_reps=100, opt_args=None):
+def bootstrap_toe(aln, tree=None, num_reps=100, opt_args=None):
     """dynamically constructs a bootstrap app and performs the toes of existence"""
-    hyp = toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)
+    hyp = toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=opt_args)
     bstrapper = bootstrap(hyp, num_reps)
     return bstrapper(aln)
 

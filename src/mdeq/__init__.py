@@ -186,6 +186,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 
 @main.command()
 @_inpath
+@_treepath
 @_outpath
 @_bg_edge
 @_num_reps
@@ -194,10 +195,9 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 @_verbose
 @_testrun
 def toe(
-    inpath, outpath, background_edges, num_reps, limit, overwrite, verbose, testrun
+    inpath, treepath, outpath, background_edges, num_reps, limit, overwrite, verbose, testrun
 ):
     """test of existence of mutation equilibrium."""
-    # todo need to support specifying the tree
     # todo need a separate command to apply foreground_from_jsd() to an
     #  alignment for decorating alignments with the foreground edge
     # or check alignment.info for a fg_edge key -- all synthetic data
@@ -213,7 +213,7 @@ def toe(
 
     loader = io.load_db()
     opt_args = get_opt_settings(testrun)
-    bstrapper = bootstrap_toe(num_reps=num_reps, opt_args=opt_args)
+    bstrapper = bootstrap_toe(tree=treepath, num_reps=num_reps, opt_args=opt_args)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
