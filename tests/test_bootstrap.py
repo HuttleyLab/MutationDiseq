@@ -6,7 +6,12 @@ from cogent3 import load_aligned_seqs
 from cogent3.app import io
 from cogent3.util.deserialise import deserialise_object
 
-from mdeq.bootstrap import create_bootstrap_app, estimate_pval
+from mdeq.bootstrap import (
+    bootstrap_toe,
+    compact_bootstrap_result,
+    create_bootstrap_app,
+    estimate_pval,
+)
 
 
 __author__ = "Katherine Caley"
@@ -75,4 +80,53 @@ def test_estimate_pval(aln, opt_args):
     bootstrap = bstrap(aln)
     assert estimate_pval(bootstrap) == 0
 
-# todo write tests that don't specify a fg edge; that have > 3 taxa and specify a tree
+
+@pytest.fixture(scope="session")
+def dstore4_tree():
+    inpath = DATADIR / "4otu-aligns.tinydb"
+    tree = "(Human,Platypus,(Mouse,Rat))"
+    dstore = io.get_data_store(inpath)
+    return dstore, tree
+
+
+def num_discrete_edges(lf):
+    from cogent3.recalculation.scope import InvalidScopeError
+
+    num = 0
+    for e in lf.tree.get_edge_vector(include_root=False):
+        try:
+            # is this edge modelled using discrete-time process
+            lf.get_param_value("dpsubs", edge=e.name)
+        except (InvalidScopeError, KeyError):
+            pass
+        else:
+            num += 1
+    return num
+
+
+def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
+    dstore, tree = dstore4_tree
+    bstrap = create_bootstrap_app(tree=tree, num_reps=2, opt_args=opt_args)
+
+    loader = io.load_db()
+    aln = loader(dstore[0])
+    result = bstrap(aln)
+    assert isinstance(result, compact_bootstrap_result)
+    n = num_discrete_edges(result.observed.null.lf)
+    assert n == 0
+    n = num_discrete_edges(result.observed.alt.lf)
+    assert n == 0
+
+
+def test_4otu_bootstrap_toe(dstore4_tree, opt_args):
+    dstore, tree = dstore4_tree
+    bstrap = bootstrap_toe(tree=tree, num_reps=2, opt_args=opt_args)
+
+    loader = io.load_db()
+    aln = loader(dstore[0])
+    result = bstrap(aln)
+    assert isinstance(result, compact_bootstrap_result)
+    n = num_discrete_edges(result.observed["GSN"].lf)
+    assert n == 0
+    n = num_discrete_edges(result.observed["GN"].lf)
+    assert n == 0
