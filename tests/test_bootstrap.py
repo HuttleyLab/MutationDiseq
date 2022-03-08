@@ -36,7 +36,7 @@ def dstore_instance():
 
 
 def test_create_bootstrap_app(aln, opt_args):
-    bstrap = create_bootstrap_app(1, opt_args=opt_args)
+    bstrap = create_bootstrap_app(num_reps=1, opt_args=opt_args)
     bootstrap = bstrap(aln)
 
     # assert isinstance(bootstrap, generic_result)
@@ -47,7 +47,7 @@ def test_create_bootstrap_app(aln, opt_args):
 def test_deserialise_compact_boostrap_result(aln, opt_args):
     import json
 
-    bstrap = create_bootstrap_app(1, opt_args=opt_args)
+    bstrap = create_bootstrap_app(num_reps=1, opt_args=opt_args)
     result = bstrap(aln)
     txt = result.to_json()
     d = json.loads(txt)
@@ -60,7 +60,7 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
-    bstrap = create_bootstrap_app(2, opt_args=opt_args)
+    bstrap = create_bootstrap_app(num_reps=2, opt_args=opt_args)
     process = reader + bstrap + writer
 
     process.apply_to(dstore_instance[:1])
@@ -70,7 +70,7 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
 def test_estimate_pval(aln, opt_args):
     opt_args["max_evaluations"] = 2000
     bstrap = create_bootstrap_app(
-        2, discrete_edges=["443154", "73021"], opt_args=opt_args
+        num_reps=2, discrete_edges=["443154", "73021"], opt_args=opt_args
     )
     bootstrap = bstrap(aln)
     assert estimate_pval(bootstrap) == 0

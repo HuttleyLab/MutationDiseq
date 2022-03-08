@@ -241,7 +241,7 @@ def test_get_t50_mc_composable(tmp_path, mcr_dstore):
 def test_get_t50_bstrap(tmp_path):
     dstore = io.get_data_store(DATADIR / "3000bp.tinydb")
     reader = io.load_db()
-    boostrap = create_bootstrap_app(1, discrete_edges=["758", "443154"])
+    boostrap = create_bootstrap_app(num_reps=1, discrete_edges=["758", "443154"])
     outpath = tmp_path / "tempdir.tinydb"
     writer1 = io.write_db(outpath)
 

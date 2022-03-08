@@ -130,12 +130,13 @@ class bootstrap(ComposableHypothesis):
         return result
 
 
-def create_bootstrap_app(num_reps=100, discrete_edges=None, opt_args=None):
+# todo reconcile usage and overlap between this and bootstrap_toe
+def create_bootstrap_app(tree=None, num_reps=100, discrete_edges=None, opt_args=None):
     """wrapper of cogent3.app.evo.bootstrap with hypothesis of GSN as the null
     and GN as the alternate."""
 
-    GS = GS_sm(discrete_edges=discrete_edges, opt_args=opt_args)
-    GN = GN_sm(discrete_edges=discrete_edges, opt_args=opt_args)
+    GS = GS_sm(tree=tree, discrete_edges=discrete_edges, opt_args=opt_args)
+    GN = GN_sm(tree=tree, discrete_edges=discrete_edges, opt_args=opt_args)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
     return bootstrap(hyp, num_reps)
