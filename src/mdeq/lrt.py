@@ -18,7 +18,8 @@ def get_lrt(mc):
 
 
 def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None):
-    """make app to test for equilibrium with a dynamically defined background edge.
+    """make app to test for equilibrium with a dynamically defined background
+    edge.
 
     Parameters
     ----------
@@ -56,19 +57,25 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     lf_args = dict(discrete_edges=bg_edges, expm="pade")
 
     models = [
-        evo.model(mn,tree=tree , sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
+        evo.model(mn, tree=tree, sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
         for mn in model_names
     ]
     return evo.model_collection(*models, sequential=sequential)
 
 
 def get_no_init_model_coll(aln, opt_args=None):
-    """creates a model_collection object without sequential fitting to be
-    called with given alignment.
+    """fits GSN and GN **without** sequential fitting
 
     Parameters
     ----------
-    aln : alignment to fit models to. NOTE! aln needs the foreground edge as an entry to the .info dictionary!
+    aln
+        alignment to fit models to.
+    opt_args : dict
+        settings passed to the optimiser
+
+    Notes
+    -----
+    aln needs the foreground edge as an entry to the .info dictionary!
 
     Returns
     -------
@@ -77,18 +84,9 @@ def get_no_init_model_coll(aln, opt_args=None):
     return toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)(aln)
 
 
+@extend_docstring_from(get_no_init_model_coll)
 def get_init_model_coll(aln, opt_args=None):
-    """creates a model_collection object with sequential fitting to be called
-    with given aln.
-
-    Parameters
-    ----------
-    aln : alignment to fit models to. NOTE! aln needs the foreground edge as an entry to the .info dictionary!
-
-    Returns
-    -------
-    model_collection_result containing GTR, GS and GN models (with sequential fitting)
-    """
+    """fits GTR, GSN, GN models **with** sequential fitting"""
     return toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)(aln)
 
 

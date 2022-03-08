@@ -1,12 +1,9 @@
 from accupy import fsum as sum
-from cogent3.app.composable import SERIALISABLE_TYPE, user_function
-from cogent3.app.result import generic_result
 from cogent3.core.profile import safe_p_log_p
 from cogent3.maths.measure import jsd as jsd_func
 from cogent3.util.dict_array import DictArray
-from numpy import array as np_array
 
-from mdeq.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
+from mdeq.stationary_pi import get_stat_pi_via_brute
 
 
 __author__ = "Katherine Caley"

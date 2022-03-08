@@ -1,4 +1,4 @@
-"""mdeq: mutation disequilibrium analysis tools"""
+"""mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
 from . import _block_threading  # isort: skip  # make sure this stays at the top
@@ -33,7 +33,7 @@ filterwarnings("ignore", ".*decreased to keep within bounds")
 
 
 def get_opt_settings(testrun):
-    """create optimisation settings"""
+    """create optimisation settings."""
     return (
         {"max_restarts": 1, "limit_action": "ignore", "max_evaluations": 10}
         if testrun
@@ -47,7 +47,7 @@ def _process_comma_seq(*args):
 
 
 def _gene_order_table(*args):
-    """returns a cogent3 Table with required columns
+    """returns a cogent3 Table with required columns.
 
     Raises
     ------
@@ -100,7 +100,7 @@ def valid_result_types(dstore, types):
 @click.group()
 @click.version_option(__version__)
 def main():
-    """mdeq: mutation disequilibrium analysis tools"""
+    """mdeq: mutation disequilibrium analysis tools."""
     pass
 
 
@@ -198,7 +198,15 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 @_verbose
 @_testrun
 def toe(
-    inpath, treepath, outpath, background_edges, num_reps, limit, overwrite, verbose, testrun
+    inpath,
+    treepath,
+    outpath,
+    background_edges,
+    num_reps,
+    limit,
+    overwrite,
+    verbose,
+    testrun,
 ):
     """test of existence of mutation equilibrium."""
     # todo need a separate command to apply foreground_from_jsd() to an
@@ -331,6 +339,7 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
 @click.option(
     "--controls",
     default=click.Choice(["-ve", "+ve"]),
+    required=True,
     help="which control set to generate",
 )
 @_num_reps

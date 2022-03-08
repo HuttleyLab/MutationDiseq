@@ -1,4 +1,4 @@
-"""ordered grouping of alignments for EOP testing"""
+"""ordered grouping of alignments for EOP testing."""
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -20,7 +20,7 @@ T = TypeVar("T")
 
 
 class grouped_alignments(tuple):
-    """a validating tuple"""
+    """a validating tuple."""
 
     def __new__(cls, elements):
         elements = tuple(elements)
@@ -72,7 +72,7 @@ def deserialise_grouped(data):
 
 
 def physically_adjacent(table: Table, sample_ids: set[str]) -> tuple[grouped, ...]:
-    """identifiers members of id_set that are adjacent in table
+    """identifiers members of id_set that are adjacent in table.
 
     Parameters
     ----------
@@ -98,7 +98,7 @@ def physically_adjacent(table: Table, sample_ids: set[str]) -> tuple[grouped, ..
 
 
 def sequential_groups(data, num: int) -> tuple[tuple[T, ...], ...]:
-    """returns all num sequential overlapping elements"""
+    """returns all num sequential overlapping elements."""
     if num < 1:
         raise ValueError(f"{num=}, should be >= 1")
     if len(data) < num:

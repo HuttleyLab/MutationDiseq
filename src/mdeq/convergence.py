@@ -16,15 +16,15 @@ from numpy.linalg import norm
 from scipy.linalg import expm
 from scipy.optimize import minimize_scalar
 
+from mdeq.utils import SerialisableMixin
+
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
 
-from mdeq.utils import SerialisableMixin
-
 
 def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
-    """returns Q with sum(pi_i Q[i,i]) == -1 given pi_0"""
+    """returns Q with sum(pi_i Q[i,i]) == -1 given pi_0."""
     indices = diag_indices(Q.shape[0])
     scalar = -sum(pi_0 * Q[indices])
     Q /= scalar
@@ -34,7 +34,7 @@ def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
 
 
 def unit_nonstationary_Q(pi_0: ndarray, Q: ndarray):
-    """returns Q with ENS==1 given pi_0"""
+    """returns Q with ENS==1 given pi_0."""
     result = minimize_scalar(
         lambda x: (1.0 - expected_number_subs(pi_0, Q, x)) ** 2,
         method="brent",
@@ -48,7 +48,7 @@ def unit_nonstationary_Q(pi_0: ndarray, Q: ndarray):
 
 
 def convergence(pi_0: ndarray, Q: ndarray, t: float, wrt_nstat=False) -> float:
-    """measure of how fast pi is changing
+    """measure of how fast pi is changing.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ class delta_nabla(SerialisableMixin):
     @property
     @lru_cache()
     def delta_nabla(self):
-        """returns observed nabla minus mean of the null nabla distribution"""
+        """returns observed nabla minus mean of the null nabla distribution."""
         return self.obs_nabla - self.mean_null
 
     def to_rich_dict(self):
@@ -119,25 +119,25 @@ class delta_nabla(SerialisableMixin):
 
     @classmethod
     def from_json(cls, data):
-        """constructor from json data"""
+        """constructor from json data."""
         return cls(**data)
 
     @classmethod
     def from_dict(cls, data: dict):
-        """constructor from dict data"""
+        """constructor from dict data."""
         data.pop("type", None)
         return cls(**data)
 
 
 @deserialise.register_deserialiser(get_object_provenance(delta_nabla))
 def deserialise_delta_nabla(data: dict):
-    """recreates delta_nabla instance from dict"""
+    """recreates delta_nabla instance from dict."""
     return delta_nabla.from_dict(data)
 
 
 @singledispatch
 def get_nabla(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
-    """returns the convergence statistic from a model_result object
+    """returns the convergence statistic from a model_result object.
 
     Parameters
     ----------
@@ -218,7 +218,7 @@ def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
 def get_delta_nabla(
     obs_result, sim_results, fg_edge=None, wrt_nstat=False
 ) -> delta_nabla:
-    """returns the adjusted nabla statistic
+    """returns the adjusted nabla statistic.
 
     Parameters
     ----------
@@ -243,7 +243,7 @@ def get_delta_nabla(
 
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
 def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
-    """returns delta nabla stats from bootstrap result"""
+    """returns delta nabla stats from bootstrap result."""
     null_results = [r["GN"] for k, r in result.items() if k != "observed"]
     obs_result = result["observed"]["GN"]
     return get_delta_nabla(

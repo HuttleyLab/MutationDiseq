@@ -21,13 +21,13 @@ def aln():
 
 
 def test_get_foreground(aln):
-    "returns None if no key in info"
+    """returns None if no key in info."""
     fg_edge = get_foreground(aln)
     assert fg_edge is None
 
 
 def test_foreground_from_jsd(aln):
-    "with no foreground, identifies ingrouped lineage"
+    """with no foreground, identifies ingrouped lineage."""
     # but fails if > 3 sequences
     with pytest.raises(NotImplementedError):
         foreground_from_jsd(aln)

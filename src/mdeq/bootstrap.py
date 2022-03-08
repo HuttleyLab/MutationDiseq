@@ -9,14 +9,12 @@ from cogent3.app.composable import (
     ComposableHypothesis,
     NotCompleted,
     appify,
-    user_function,
 )
-from cogent3.app.result import bootstrap_result, generic_result
+from cogent3.app.result import bootstrap_result
 from cogent3.util import deserialise
 
 from mdeq.lrt import toe_on_edge
 from mdeq.model import GN_sm, GS_sm
-from mdeq.stationary_pi import OscillatingPiException
 
 
 __author__ = "Katherine Caley"
@@ -148,8 +146,10 @@ def create_bootstrap_app(num_reps=100, discrete_edges=None, opt_args=None):
     (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE),
 )
 def bootstrap_toe(aln, tree=None, num_reps=100, opt_args=None):
-    """dynamically constructs a bootstrap app and performs the toes of existence"""
-    hyp = toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=opt_args)
+    """dynamically constructs a bootstrap app and performs the toe."""
+    hyp = toe_on_edge(
+        aln, tree=None, with_gtr=False, sequential=False, opt_args=opt_args
+    )
     bstrapper = bootstrap(hyp, num_reps)
     return bstrapper(aln)
 

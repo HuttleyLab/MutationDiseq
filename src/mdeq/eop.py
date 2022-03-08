@@ -49,7 +49,7 @@ class adjacent_eop(ComposableAligned):
         return list({fg_edge} ^ set(data.elements[0].names))
 
     def fit(self, data, *args, **kwargs):
-        """fits multiple adjacent loci in"""
+        """fits multiple adjacent loci in."""
         # todo is it possible to get the param rules from each locus in null
         # if so, they could then be applied to the corresponding alternate
         bg_edges = self._background_edges(data)

@@ -32,7 +32,7 @@ loader = io.load_db()
 
 @pytest.fixture(scope="session")
 def opt_args():
-    """settings for faster optimisation during testing"""
+    """settings for faster optimisation during testing."""
     return {"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
 
 
@@ -79,7 +79,7 @@ def pi_Q_gtr():
 
 @pytest.fixture()
 def pi_Q():
-    """pi0 and Q for a non-stationary process"""
+    """pi0 and Q for a non-stationary process."""
     pi = array(
         [
             0.32299999999999995,
@@ -139,7 +139,7 @@ def test_convergence_GTR(pi_Q_gtr):
 
 # testing delta_nabla dataclass
 def test_make_delta_nabla():
-    """works if list, tuple or numpy array used"""
+    """works if list, tuple or numpy array used."""
     data = [0.2, 1, 1.8]
     for _type_ in (tuple, list, array):
         obj = delta_nabla(3.0, _type_(data))
@@ -148,7 +148,7 @@ def test_make_delta_nabla():
 
 
 def test_fail_make_delta_nabla():
-    """fail if empty null distribution"""
+    """fail if empty null distribution."""
     for _type_ in (tuple, list, array):
         for data in ([], [2]):
             with pytest.raises(ValueError):
@@ -156,7 +156,7 @@ def test_fail_make_delta_nabla():
 
 
 def test_delta_nabla_value():
-    """given statistic and null of statistic computes correct delta_nabla"""
+    """given statistic and null of statistic computes correct delta_nabla."""
     rng = default_rng()
     size = 67
     obs_nabla = rng.uniform(low=1e-6, high=100, size=1)[0]
@@ -173,7 +173,7 @@ def test_delta_nabla_value():
 
 
 def test_rich_dict():
-    """dict can be json formatted"""
+    """dict can be json formatted."""
     obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
     got = obj.to_rich_dict()
     _ = json.dumps(got)  # should not fail
@@ -182,7 +182,7 @@ def test_rich_dict():
 
 
 def test_roundtrip_json():
-    """direct deserialisation works"""
+    """direct deserialisation works."""
     obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
     j = obj.to_json()
     g = delta_nabla.from_dict(json.loads(j))
@@ -190,7 +190,7 @@ def test_roundtrip_json():
 
 
 def test_cogent3_deserialisation():
-    """works with deserialise_object"""
+    """works with deserialise_object."""
     obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
     j = obj.to_json()
     g = deserialise_object(j)
@@ -199,7 +199,7 @@ def test_cogent3_deserialisation():
 
 
 def test_get_nabla(toe_bstrap):
-    """correctly computes nabla stats"""
+    """correctly computes nabla stats."""
     result = toe_bstrap[0]
     null_results = [r["GN"] for k, r in result.items() if k != "observed"]
     obs_result = result["observed"]["GN"]
@@ -220,7 +220,8 @@ def alignment_tree():
 
 
 def test_get_nabla_mixes(alignment_tree, opt_args):
-    """should raise a NotImplementedError if number of Q != number edges or 1"""
+    """should raise a NotImplementedError if number of Q != number edges or
+    1."""
     aln, tree = alignment_tree
 
     mod = GN_sm(tree=tree, discrete_edges=["Wombat"], opt_args=opt_args)
@@ -238,7 +239,7 @@ def test_get_nabla_mixes(alignment_tree, opt_args):
 
 @pytest.fixture(scope="session")
 def toe_bstrap():
-    """tinydb with bootstrap results"""
+    """tinydb with bootstrap results."""
     inpath = DATADIR / "toe-300bp.tinydb"
     dstore = io.get_data_store(inpath)
     loader = io.load_db()
@@ -246,7 +247,7 @@ def toe_bstrap():
 
 
 def test_load_delta_nabla(toe_bstrap):
-    """returns a series of delta_nabla instances"""
+    """returns a series of delta_nabla instances."""
     app = bootstrap_to_nabla()
     results = [app(r) for r in toe_bstrap]
     assert {type(r) for r in results} == {delta_nabla}
@@ -261,7 +262,7 @@ def test_unit_ens(pi_Q):
 
 
 def test_unit_ens_gtr(pi_Q_gtr):
-    """result is same as standard calibration for GTR matrix"""
+    """result is same as standard calibration for GTR matrix."""
     pi, Q = pi_Q_gtr
     # calibrated assuming non-stationary
     ens_Q = unit_nonstationary_Q(pi, Q)

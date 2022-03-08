@@ -15,7 +15,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture(scope="session")
 def runner():
-    """exportrc works correctly"""
+    """exportrc works correctly."""
     return CliRunner()
 
 

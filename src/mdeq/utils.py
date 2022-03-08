@@ -23,7 +23,7 @@ def get_pi_tip(model_result, fg_edge):
 
 
 def get_foreground(aln):
-    """returns fg_edge value from info attribute"""
+    """returns fg_edge value from info attribute."""
     try:
         fg = aln.info.get("fg_edge", None)
     except AttributeError:
@@ -32,7 +32,7 @@ def get_foreground(aln):
 
 
 def foreground_from_jsd(aln):
-    """returns the ingroup lineage with maximal JSD
+    """returns the ingroup lineage with maximal JSD.
 
     Notes
     -----
