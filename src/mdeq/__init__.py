@@ -130,6 +130,47 @@ _bg_edge = click.option(
 
 @main.command()
 @_inpath
+@click.option(
+    "-g",
+    "--gene_order",
+    required=True,
+    callback=_gene_order_table,
+    help="path to gene order table, note must contain"
+    " 'name', 'coord_name' and 'start' columns",
+)
+@_outpath
+@_limit
+@_overwrite
+@_verbose
+@_testrun
+def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
+    """makes tinydb of adjacent alignment records."""
+    from tqdm import tqdm
+
+    from .adjacent import load_data_group, physically_adjacent
+
+    LOGGER = CachingLogger(create_dir=True)
+
+    LOGGER.log_file_path = outpath.parent / "mdeq-make_adjacent.log"
+    LOGGER.log_args()
+
+    # we get member names from input dstore
+    dstore = io.get_data_store(inpath, limit=limit)
+    writer = io.write_db(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+
+    sample_ids = {m.name.replace(".json", "") for m in dstore}
+    paired = physically_adjacent(gene_order, sample_ids)
+    # make the grouped data app
+    group_loader = load_data_group(inpath)
+    for pair in tqdm(paired):
+        record = group_loader(pair)
+        writer(record)
+
+    writer.data_store.close()
+    click.secho("Done!", fg="green")
+
 @_outpath
 @_bg_edge
 @_num_reps

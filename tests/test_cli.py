@@ -4,7 +4,7 @@ import pytest
 
 from click.testing import CliRunner
 
-from mdeq import convergence, toe
+from mdeq import aeop, convergence, make_adjacent, toe
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
@@ -43,3 +43,22 @@ def test_convergence(runner, tmp_dir):
     results = [loader(m) for m in dstore]
     assert {type(r) for r in results} == {delta_nabla}
     assert len(dstore) == len(results)
+def test_make_adjacent(runner, tmp_dir):
+    from cogent3.app import io
+
+    from mdeq.adjacent import grouped
+
+    inpath = DATADIR / "apes-align.tinydb"
+    gene_order = DATADIR / "gene_order.tsv"
+    outpath = tmp_dir / "adjacent.tinydb"
+    r = runner.invoke(
+        make_adjacent, [f"-i{inpath}", f"-g{gene_order}", f"-o{outpath}", "-t", "-O"]
+    )
+    assert r.exit_code == 0, r.output
+
+    loader = io.load_db()
+    dstore = io.get_data_store(outpath)
+    results = [loader(m) for m in dstore]
+    for r in results:
+        assert isinstance(r, grouped)
+        assert len(r.elements) == 2
