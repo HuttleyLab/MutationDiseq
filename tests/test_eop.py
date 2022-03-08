@@ -14,6 +14,11 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture(scope="session")
+def tmp_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("tinydb")
+
+
+@pytest.fixture(scope="session")
 def opt_args():
     return dict(max_restarts=1, max_evaluations=50, limit_action="ignore")
 
@@ -82,13 +87,19 @@ def test_edge_EOP_construction(dstore_instance):
     assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
 
 
-def test_adjacent_eop_same_aln(dstore_instance):
+def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
+    from mdeq.adjacent import grouped
 
-    aln1 = loader(dstore_instance[1])
-    aln2 = loader(dstore_instance[1])
+    aln = loader(dstore_instance[1])
+    aln.info.pop("fg_edge")
+    grp = grouped(("a", "b"))
+    grp.elements = [aln, aln]
 
-    lr = adjacent_eop([aln1, aln2], "758").LR
-    numpy.testing.assert_almost_equal(lr, 0, decimal=5)
+    opt_args["max_evaluations"] = 100000
+    app = adjacent_eop(opt_args=opt_args)
+    result = app(grp)
+    print(result.null.lf, result.alt["locus-0"], sep="\n")
+    numpy.testing.assert_almost_equal(result.LR, 0, decimal=5)
 
 
 # todo check whether the multi-locus LF object can simulate alignments
