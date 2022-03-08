@@ -43,6 +43,9 @@ def test_convergence(runner, tmp_dir):
     results = [loader(m) for m in dstore]
     assert {type(r) for r in results} == {delta_nabla}
     assert len(dstore) == len(results)
+
+
+@pytest.fixture(scope="session")
 def test_make_adjacent(runner, tmp_dir):
     from cogent3.app import io
 
@@ -62,3 +65,13 @@ def test_make_adjacent(runner, tmp_dir):
     for r in results:
         assert isinstance(r, grouped)
         assert len(r.elements) == 2
+
+    return outpath
+
+
+def test_aeop_exercise(runner, tmp_dir, test_make_adjacent):
+    # We're using the result created in test_make_adjacent as input here
+    inpath = test_make_adjacent
+    outpath = tmp_dir / "aeop.tinydb"
+    r = runner.invoke(aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O"])
+    assert r.exit_code == 0, r.output

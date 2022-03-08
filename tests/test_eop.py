@@ -95,18 +95,22 @@ def test_adjacent_eop_same_aln(dstore_instance):
 
 
 def test_adjacent_eop(multiple_alns, opt_args):
-    from mdeq.adjacent import grouped_data
+    from mdeq.adjacent import grouped
 
+    identifiers = []
     for i, aln in enumerate(multiple_alns):
-        aln.info.name = f"name-{i}"
+        identifiers.append(f"name-{i}")
+        aln.info.name = identifiers[-1]
 
-    grp = grouped_data(tuple(multiple_alns[:2]), "fake")
+    grp = grouped(identifiers=identifiers)
+    grp.elements = multiple_alns[:2]
     test_adjacent = adjacent_eop(opt_args=opt_args)
     # works if no fg edge specified
     got = test_adjacent(grp)
     assert isinstance(got, hypothesis_result)
     for aln in multiple_alns:
         aln.info.fg_edge = "Human"
-    grp = grouped_data(tuple(multiple_alns[:2]), "fake")
+    # although elements is immutable, the alignment instance members are
+    # not so the data is actually differemt
     got = test_adjacent(grp)
     assert isinstance(got, hypothesis_result)

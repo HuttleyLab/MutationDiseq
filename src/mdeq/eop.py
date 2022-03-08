@@ -6,7 +6,11 @@ from accupy import fsum
 from cogent3 import get_model, make_table, make_tree
 from cogent3.app import evo
 from cogent3.app import result as c3_result
-from cogent3.app.composable import ComposableAligned, NotCompleted
+from cogent3.app.composable import (
+    SERIALISABLE_TYPE,
+    ComposableAligned,
+    NotCompleted,
+)
 from cogent3.maths.stats import chisqprob
 
 from mdeq.utils.numeric_utils import fix_rounding_error
@@ -20,7 +24,11 @@ from mdeq.utils.utils import get_foreground
 
 class adjacent_eop(ComposableAligned):
     def __init__(self, tree=None, opt_args=None):
-        super(adjacent_eop, self).__init__(data_types="grouped_data")
+        super(adjacent_eop, self).__init__(
+            data_types="grouped",
+            input_types=SERIALISABLE_TYPE,
+            output_types=SERIALISABLE_TYPE,
+        )
         opt_args = opt_args or {}
         self._opt_args = {
             "max_restarts": 5,

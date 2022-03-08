@@ -226,6 +226,7 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
     LOGGER.log_args()
 
 
+# todo add args for parallelisation
 @main.command()
 @_inpath
 @_outpath
@@ -235,12 +236,23 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
 @_testrun
 def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between adjacent loci."""
-    from .eop import adjacent_eop, edge_EOP
+    from .adjacent import load_data_group, physically_adjacent
+    from .eop import adjacent_eop
 
     LOGGER = CachingLogger(create_dir=True)
 
     LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
     LOGGER.log_args()
+
+    dstore = io.get_data_store(inpath, limit=limit)
+    loader = io.load_db()
+    writer = io.write_db(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+    test_adjacent = adjacent_eop(opt_args=get_opt_settings(testrun))
+    process = loader + test_adjacent + writer
+    _ = process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1)
+    click.secho("Done1", fg="green")
 
 
 @main.command()
