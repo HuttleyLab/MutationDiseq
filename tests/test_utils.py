@@ -5,6 +5,10 @@ from cogent3 import make_aligned_seqs
 from mdeq.utils import foreground_from_jsd, get_foreground
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley"]
+
+
 @pytest.fixture()
 def aln():
     _seqs = {

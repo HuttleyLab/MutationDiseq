@@ -21,6 +21,9 @@ from . import (
 )
 
 
+__author__ = "Gavin Huttley"
+__credits__ = ["Gavin Huttley"]
+
 __version__ = "2021.12.20"
 
 filterwarnings("ignore", "Not using MPI")

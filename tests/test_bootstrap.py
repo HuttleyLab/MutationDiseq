@@ -9,6 +9,9 @@ from cogent3.util.deserialise import deserialise_object
 from mdeq.bootstrap import create_bootstrap_app, estimate_pval
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

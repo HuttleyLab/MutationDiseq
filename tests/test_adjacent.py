@@ -16,6 +16,10 @@ from mdeq.adjacent import (
 from mdeq.eop import adjacent_eop
 
 
+__author__ = "Gavin Huttley"
+__credits__ = ["Gavin Huttley"]
+
+
 DATADIR = Path(__file__).parent / "data"
 
 

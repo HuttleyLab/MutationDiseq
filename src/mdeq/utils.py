@@ -5,6 +5,10 @@ from cogent3.util.misc import get_object_provenance
 from numpy import array
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
 def get_pi_0(model_result):
     return model_result.lf.get_motif_probs().to_array()
 

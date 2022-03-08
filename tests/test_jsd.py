@@ -7,6 +7,10 @@ from numpy import allclose
 from mdeq.jsd import get_entropy, get_jsd
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
 @pytest.fixture()
 def aln():
 

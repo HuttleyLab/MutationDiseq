@@ -9,7 +9,7 @@ from cogent3.app.composable import (
 
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 from mdeq.utils import get_foreground
 

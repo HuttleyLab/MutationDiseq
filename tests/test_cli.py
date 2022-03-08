@@ -7,6 +7,9 @@ from click.testing import CliRunner
 from mdeq import aeop, convergence, make_adjacent, teop, toe
 
 
+__author__ = "Gavin Huttley"
+__credits__ = ["Gavin Huttley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

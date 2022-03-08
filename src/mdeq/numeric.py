@@ -7,6 +7,10 @@ from accupy import fsum as sum
 from cogent3.util.dict_array import DictArray
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
 def valid_stochastic_matrix(matrix):
     """returns True if all rows sum to 1 and all entries are valid
     probabilities."""

@@ -4,6 +4,10 @@ from cogent3.evolve.models import register_model
 from cogent3.evolve.ns_substitution_model import GeneralStationary
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
 @register_model("nucleotide")
 def GSN(**kwargs):
     """A General Stationary Nucleotide substitution model instance."""

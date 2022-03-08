@@ -10,7 +10,7 @@ from mdeq.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
 
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
 def get_jsd(aln, edge=None, evaluate="ingroup"):

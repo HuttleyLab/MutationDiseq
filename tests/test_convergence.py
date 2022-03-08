@@ -22,6 +22,9 @@ from mdeq.convergence import (
 from mdeq.model import GN_sm
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 loader = io.load_db()

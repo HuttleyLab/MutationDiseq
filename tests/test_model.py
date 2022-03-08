@@ -3,6 +3,10 @@ from cogent3 import get_model
 from mdeq import model
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
+
 def test_get_gsn():
     """model registry process works and we can get a GSN instance."""
     from cogent3.evolve.ns_substitution_model import GeneralStationary

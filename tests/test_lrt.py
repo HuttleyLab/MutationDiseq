@@ -15,6 +15,9 @@ from mdeq.lrt import (
 )
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

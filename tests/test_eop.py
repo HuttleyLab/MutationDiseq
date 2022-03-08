@@ -10,6 +10,9 @@ from cogent3.app.result import hypothesis_result
 from mdeq.eop import adjacent_eop, temporal_eop
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

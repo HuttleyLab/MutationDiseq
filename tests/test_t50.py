@@ -18,6 +18,9 @@ from mdeq.numeric import (
 from mdeq.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

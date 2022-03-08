@@ -16,6 +16,9 @@ from mdeq.stationary_pi import (
 )
 
 
+__author__ = "Katherine Caley"
+__credits__ = ["Katherine Caley"]
+
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

@@ -7,7 +7,7 @@ from mdeq.utils import get_foreground
 
 
 __author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
+__credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
