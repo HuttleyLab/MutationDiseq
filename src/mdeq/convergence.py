@@ -1,6 +1,6 @@
 import json
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
 
@@ -19,6 +19,8 @@ from scipy.optimize import minimize_scalar
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
+
+from mdeq.utils.utils import SerialisableMixin
 
 
 def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
@@ -76,7 +78,7 @@ def convergence(pi_0: ndarray, Q: ndarray, t: float, wrt_nstat=False) -> float:
 
 
 @dataclass(eq=True)
-class delta_nabla:
+class delta_nabla(SerialisableMixin):
     obs_nabla: float
     null_nabla: tuple[float]
     size_null: int = None
@@ -109,13 +111,8 @@ class delta_nabla:
         return self.obs_nabla - self.mean_null
 
     def to_rich_dict(self):
-        return {
-            "obs_nabla": self.obs_nabla,
-            "null_nabla": self.null_nabla,
-            "size_null": self.size_null,
-            "type": get_object_provenance(self),
-            "source": self.source,
-        }
+        result = super().to_rich_dict()
+        return {**result, **asdict(self)}
 
     def to_json(self):
         return json.dumps(self.to_rich_dict())
@@ -132,7 +129,7 @@ class delta_nabla:
         return cls(**data)
 
 
-@deserialise.register_deserialiser("delta_nabla")
+@deserialise.register_deserialiser(get_object_provenance(delta_nabla))
 def deserialise_delta_nabla(data: dict):
     """recreates delta_nabla instance from dict"""
     return delta_nabla.from_dict(data)

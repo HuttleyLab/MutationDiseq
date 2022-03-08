@@ -1,4 +1,7 @@
+import json
+
 from cogent3.util.dict_array import DictArray
+from cogent3.util.misc import get_object_provenance
 from numpy import array
 
 
@@ -43,3 +46,14 @@ def foreground_from_jsd(aln):
     ingroup = min(tip_dists, key=lambda k: tip_dists[k])
     jsd_totals = {key: jsd_totals[key] for key in ingroup}
     return max(jsd_totals, key=lambda k: jsd_totals[k])
+
+
+class SerialisableMixin:
+    def to_rich_dict(self):
+        return {
+            "type": get_object_provenance(self),
+            "source": self.source,
+        }
+
+    def to_json(self):
+        return json.dumps(self.to_rich_dict())
