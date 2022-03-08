@@ -1,8 +1,8 @@
 """mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
-from . import _block_threading  # isort: skip  # make sure this stays at the top
-import json
+
+from mdeq import _block_threading  # isort: skip  # make sure this stays at the top
 import pathlib
 
 from warnings import filterwarnings
@@ -13,12 +13,11 @@ from cogent3 import load_tree
 from cogent3.app import io
 from scitrack import CachingLogger
 
-from mdeq.bootstrap import bootstrap_toe
-from mdeq.convergence import bootstrap_to_nabla
-
-from . import (
+from mdeq import (
     model as _model,  # to ensure registration of define substitution models
 )
+from mdeq.bootstrap import bootstrap_toe
+from mdeq.convergence import bootstrap_to_nabla
 from mdeq.utils import get_obj_type
 
 
