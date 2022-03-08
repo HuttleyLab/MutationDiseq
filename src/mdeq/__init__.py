@@ -171,6 +171,9 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     writer.data_store.close()
     click.secho("Done!", fg="green")
 
+
+@main.command()
+@_inpath
 @_outpath
 @_bg_edge
 @_num_reps
@@ -223,30 +226,14 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
     LOGGER.log_args()
 
 
-# todo add strict option, limit analysis to genes that are actually adjacent in reference
 @main.command()
 @_inpath
-@click.option(
-    "-go",
-    "--gene_order",
-    required=True,
-    callback=_gene_order_table,
-    help="path to gene order table, note must contain"
-    " 'name', 'coord_name' and 'start' columns",
-)
 @_outpath
-@click.option(
-    "-s",
-    "--strict",
-    is_flag=True,
-    help="only genes physically adjacent in gene_order are considered,"
-    " this requires the gene order file be genomically complete",
-)
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def aeop(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
+def aeop(inpath, outpath, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between adjacent loci."""
     from .eop import adjacent_eop, edge_EOP
 
