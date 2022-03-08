@@ -82,7 +82,7 @@ def _valid_tinydb_output(*args):
 
 def _load_tree(*args):
     path = args[-1]
-    return load_tree(args[-1]) if path else path
+    return load_tree(path) if path else path
 
 
 def valid_result_types(dstore, types):
