@@ -10,7 +10,7 @@ from cogent3.app.composable import (
     NotCompleted,
     appify,
 )
-from cogent3.app.result import bootstrap_result
+from cogent3.app.result import bootstrap_result, hypothesis_result
 from cogent3.util import deserialise
 
 from mdeq.lrt import toe_on_edge
@@ -71,6 +71,15 @@ def _eliminated_redundant_aln_in_place(hyp_result):
     return
 
 
+def as_hypothesis_result(result):
+    if isinstance(result, hypothesis_result):
+        return result
+    r = hypothesis_result("GSN", source="blah")
+    r["GSN"] = result["GSN"]
+    r["GN"] = result["GN"]
+    return r
+
+
 class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
@@ -81,6 +90,28 @@ class compact_bootstrap_result(bootstrap_result):
             _eliminated_redundant_aln_in_place(item[1])
 
         return rd
+
+    @property
+    def pvalue(self):
+        obs = as_hypothesis_result(self.observed).LR
+        if obs < 0:  # not optimised correctly?
+            return 1.0
+
+        size_valid = 0
+        num_ge = 0
+        for k, v in self.items():
+            v = as_hypothesis_result(v)
+            if k != "observed" or v.LR < 0:
+                continue
+
+            size_valid += 1
+            if v.LR >= obs:
+                num_ge += 1
+
+        if size_valid == 0:
+            return 1.0
+
+        return num_ge / size_valid
 
 
 class bootstrap(ComposableHypothesis):
@@ -153,10 +184,3 @@ def bootstrap_toe(aln, tree=None, num_reps=100, opt_args=None):
     )
     bstrapper = bootstrap(hyp, num_reps)
     return bstrapper(aln)
-
-
-# todo this should become a method on compact_bootstrap_result
-def estimate_pval(result):
-    obs = result.observed.LR
-    num_ge = sum(v >= obs for v in result.null_dist)
-    return num_ge / len(result.null_dist)

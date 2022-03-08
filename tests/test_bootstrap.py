@@ -10,7 +10,6 @@ from mdeq.bootstrap import (
     bootstrap_toe,
     compact_bootstrap_result,
     create_bootstrap_app,
-    estimate_pval,
 )
 
 
@@ -44,21 +43,19 @@ def test_create_bootstrap_app(aln, opt_args):
     bstrap = create_bootstrap_app(num_reps=1, opt_args=opt_args)
     bootstrap = bstrap(aln)
 
-    # assert isinstance(bootstrap, generic_result)
+    assert isinstance(bootstrap, compact_bootstrap_result)
     assert len(bootstrap) == 2
     rd = bootstrap.to_rich_dict()
 
 
 def test_deserialise_compact_boostrap_result(aln, opt_args):
-    import json
-
     bstrap = create_bootstrap_app(num_reps=1, opt_args=opt_args)
     result = bstrap(aln)
     txt = result.to_json()
-    d = json.loads(txt)
     got = deserialise_object(txt)
 
     assert len(result) == 2
+    assert isinstance(got, compact_bootstrap_result)
 
 
 def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
@@ -70,6 +67,14 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
 
     process.apply_to(dstore_instance[:1])
     assert len(process.data_store.summary_incomplete) == 0
+    writer.data_store.close()
+
+    loader = io.load_db()
+    dstore = io.get_data_store(outpath)
+    result = loader(dstore[0])
+    assert isinstance(result, compact_bootstrap_result)
+    pvalue = result.pvalue
+    assert isinstance(pvalue, float)
 
 
 def test_estimate_pval(aln, opt_args):
@@ -77,8 +82,8 @@ def test_estimate_pval(aln, opt_args):
     bstrap = create_bootstrap_app(
         num_reps=2, discrete_edges=["443154", "73021"], opt_args=opt_args
     )
-    bootstrap = bstrap(aln)
-    assert estimate_pval(bootstrap) == 0
+    result = bstrap(aln)
+    assert isinstance(result.pvalue, float)
 
 
 @pytest.fixture(scope="session")
