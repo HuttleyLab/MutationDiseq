@@ -28,9 +28,6 @@ filterwarnings("ignore", "using slow exponentiator")
 filterwarnings("ignore", ".*decreased to keep within bounds")
 
 
-LOGGER = CachingLogger(create_dir=True)
-
-
 def get_opt_settings(testrun):
     """create optimisation settings"""
     return (
@@ -147,6 +144,7 @@ def toe(
     # todo need a separate command to apply foreground_from_jsd() to an
     #  alignment for decorating alignments with the foreground edge
     # or check alignment.info for a fg_edge key -- all synthetic data
+    LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-toe.log"
     LOGGER.log_args()
 
@@ -179,6 +177,7 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between branches."""
     from .eop import adjacent_eop, edge_EOP
 
+    LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
     LOGGER.log_args()
 
@@ -210,6 +209,8 @@ def aeop(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between adjacent loci."""
     from .eop import adjacent_eop, edge_EOP
 
+    LOGGER = CachingLogger(create_dir=True)
+
     LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
     LOGGER.log_args()
 
@@ -222,6 +223,7 @@ def aeop(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
 @_verbose
 def convergence(inpath, outpath, limit, overwrite, verbose):
     """uses output from toe to generate delta_nabla."""
+    LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-convergence.log"
     LOGGER.log_args()
     dstore = io.get_data_store(inpath, limit=limit)
@@ -260,6 +262,7 @@ def make_controls(
     Note the input here MUST be hypothesis_result OR model_result in a
     tinydb
     """
+    LOGGER = CachingLogger(create_dir=True)
     # todo the positive controls
     LOGGER.log_file_path = outpath.parent / "mdeq-make_controls.log"
     LOGGER.log_args()
