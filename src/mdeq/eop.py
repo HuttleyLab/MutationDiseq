@@ -63,7 +63,11 @@ class adjacent_eop(ComposableAligned):
         if isinstance(bg_edges, NotCompleted):
             return bg_edges
 
-        aligns = {e.info.name: e for e in data.elements}
+        aligns = {}
+        for i, e in enumerate(data.elements):
+            n = e.info.get("name", f"locus-{i}")
+            aligns[n] = e
+
         names = list(aligns)
         if self._tree is None:
             assert (
