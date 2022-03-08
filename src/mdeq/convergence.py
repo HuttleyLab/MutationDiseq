@@ -20,7 +20,7 @@ from scipy.optimize import minimize_scalar
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
 
-from mdeq.utils.utils import SerialisableMixin
+from mdeq.utils import SerialisableMixin
 
 
 def unit_stationary_Q(pi_0: ndarray, Q: ndarray):

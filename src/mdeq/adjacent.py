@@ -10,7 +10,7 @@ from cogent3.app.io import get_data_store, load_db
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 
-from mdeq.utils.utils import SerialisableMixin
+from mdeq.utils import SerialisableMixin
 
 
 T = TypeVar("T")

@@ -10,13 +10,12 @@ from numpy.ma.core import dot
 from scipy.linalg import expm
 
 from mdeq.bootstrap import create_bootstrap_app
-from mdeq.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
-from mdeq.utils.numeric_utils import (
+from mdeq.numeric import (
     valid_probability_vector,
     valid_rate_matrix,
     valid_stochastic_matrix,
 )
-from mdeq.utils.utils import get_pi_0
+from mdeq.t50 import T50, get_t50, get_t50_bstrap, get_t50_mc
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"

@@ -5,7 +5,7 @@ from cogent3.app import evo
 from cogent3.util.dict_array import DictArray
 from numpy import eye
 
-from mdeq.utils.numeric_utils import (
+from mdeq.numeric import (
     valid_probability_vector,
     valid_rate_matrix,
     valid_stochastic_matrix,

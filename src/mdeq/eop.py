@@ -1,9 +1,4 @@
-from typing import Sequence
-
-import numpy
-
-from accupy import fsum
-from cogent3 import get_model, make_table, make_tree
+from cogent3 import get_model, make_tree
 from cogent3.app import evo
 from cogent3.app import result as c3_result
 from cogent3.app.composable import (
@@ -11,15 +6,12 @@ from cogent3.app.composable import (
     ComposableAligned,
     NotCompleted,
 )
-from cogent3.maths.stats import chisqprob
-
-from mdeq.utils.numeric_utils import fix_rounding_error
 
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
 
-from mdeq.utils.utils import get_foreground
+from mdeq.utils import get_foreground
 
 
 class adjacent_eop(ComposableAligned):

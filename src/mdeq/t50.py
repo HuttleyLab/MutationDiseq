@@ -1,5 +1,3 @@
-import numpy as np
-
 from accupy import fdot as dot
 from cogent3.app.composable import SERIALISABLE_TYPE, user_function
 from cogent3.app.result import generic_result
@@ -8,8 +6,8 @@ from cogent3.maths.measure import jsm
 from cogent3.maths.optimisers import minimise
 from scipy.linalg import expm
 
-from mdeq.stationary_pi import get_stat_pi_via_brute, get_stat_pi_via_eigen
-from mdeq.utils.utils import get_foreground, get_pi_0, get_pi_tip
+from mdeq.stationary_pi import get_stat_pi_via_brute
+from mdeq.utils import get_pi_tip
 
 
 __author__ = "Katherine Caley"

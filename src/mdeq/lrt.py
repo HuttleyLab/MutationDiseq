@@ -3,8 +3,7 @@ from cogent3.app.composable import SERIALISABLE_TYPE, appify
 from cogent3.app.result import generic_result
 from cogent3.util.misc import extend_docstring_from
 
-from mdeq.model import GSN
-from mdeq.utils.utils import get_foreground
+from mdeq.utils import get_foreground
 
 
 __author__ = "Katherine Caley"

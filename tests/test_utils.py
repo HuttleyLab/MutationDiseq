@@ -2,7 +2,7 @@ import pytest
 
 from cogent3 import make_aligned_seqs
 
-from mdeq.utils.utils import foreground_from_jsd, get_foreground
+from mdeq.utils import foreground_from_jsd, get_foreground
 
 
 @pytest.fixture()
