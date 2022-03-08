@@ -4,7 +4,7 @@ import pytest
 
 from click.testing import CliRunner
 
-from mdeq import aeop, convergence, make_adjacent, toe
+from mdeq import aeop, convergence, make_adjacent, teop, toe
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
@@ -85,3 +85,20 @@ def test_aeop_exercise_shared_mprobs(runner, tmp_dir, test_make_adjacent):
         aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"]
     )
     assert r.exit_code == 0, r.output
+
+
+def test_teop_exercise(runner, tmp_dir):
+    from cogent3.app import io, result
+
+    # We're using the result created in test_make_adjacent as input here
+    inpath = DATADIR / "apes-align.tinydb"
+    outpath = tmp_dir / "teop.tinydb"
+    args = [f"-i{inpath}", f"-o{outpath}", "-e'Human,Chimp'", "-t", "-O"]
+    r = runner.invoke(teop, args)
+    assert r.exit_code == 0, r.output
+
+    loader = io.load_db()
+    dstore = io.get_data_store(outpath)
+    results = [loader(m) for m in dstore]
+    for r in results:
+        assert isinstance(r, result.hypothesis_result)

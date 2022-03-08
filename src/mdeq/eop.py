@@ -113,51 +113,52 @@ class adjacent_eop(ComposableAligned):
         return combined
 
 
-# todo usage example
-class edge_EOP:
-    def __init__(self, locus, edges, mod="GN"):
-        assert len(edges) == 2
-        for edge in edges:
-            assert (
-                edge in locus.names
-            ), "edges must correspond to taxa in the given alignment"
-        self.mod = mod
-        self.null_lf = self.get_null_lf(edges, locus)
-        self.alt_lf = self.get_alt_lf(locus)
-        self.LRT = self.get_LRT_stats()
-        self.LR = self.get_LR()
-
-    def get_null_lf(self, edges, locus):
-        null_mod = evo.model(
-            self.mod, time_het=[dict(edges=edges, is_independent=False, upper=200)]
+class temporal_eop(ComposableAligned):
+    def __init__(self, edge_names, tree=None, opt_args=None):
+        super(temporal_eop, self).__init__(
+            input_types=SERIALISABLE_TYPE,
+            output_types=SERIALISABLE_TYPE,
         )
-        result = null_mod(locus)
-        lf = result.lf
-        lf.optimise()
-        return lf
+        opt_args = opt_args or {}
+        self._opt_args = {
+            "max_restarts": 5,
+            "tolerance": 1e-8,
+            "show_progress": False,
+            **opt_args,
+        }
+        assert (
+            not isinstance(edge_names, str) and len(edge_names) > 1
+        ), "must specify > 1 edge name"
+        self._edge_names = edge_names
+        self._tree = tree
+        self._hyp = None
 
-    def get_alt_lf(self, locus):
-        alt_mod = evo.model(self.mod, time_het="max")
-        result = alt_mod(locus)
-        lf = result.lf
-        lf.optimise()
-        return lf
+        self.func = self.fit
 
-    def get_LRT_stats(self):
-        null = self.null_lf.lnL
-        alt = self.alt_lf.lnL
-        df = self.alt_lf.nfp - self.null_lf.nfp
+    def _get_app(self, aln):
+        if self._tree is None:
+            assert len(aln.names) == 3
+            self._tree = make_tree(tip_names=aln.names)
+        assert set(self._tree.get_tip_names()) == set(aln.names)
+        if self._hyp is None:
+            time_het = [dict(edges=self._edge_names, is_independent=False, upper=100)]
+            null = evo.model(
+                "GN",
+                time_het=[
+                    dict(edges=self._edge_names, is_independent=False, upper=100)
+                ],
+                name="GN-teop",
+                opt_args=self._opt_args,
+            )
+            alt = evo.model(
+                "GN",
+                name="GN",
+                opt_args=self._opt_args,
+                time_het=[dict(edges=self._edge_names, is_independent=True, upper=100)],
+            )
+            self._hyp = evo.hypothesis(null, alt)
+        return self._hyp
 
-        LR = 2 * fsum(numpy.array([alt, -null]))
-        LR = fix_rounding_error(LR, round_error=1e-1)
-
-        table = make_table(
-            header=["LR", "df", "p"],
-            rows=[[LR, df, chisqprob(LR, df)]],
-            digits=2,
-            space=3,
-        )
-        return table
-
-    def get_LR(self):
-        return self.LRT.to_dict(flatten=True)[(0, "LR")]
+    def fit(self, data, *args, **kwargs):
+        app = self._get_app(data)
+        return app(data)

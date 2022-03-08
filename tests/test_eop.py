@@ -7,7 +7,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import hypothesis_result
 
-from mdeq.eop import adjacent_eop, edge_EOP
+from mdeq.eop import adjacent_eop, temporal_eop
 
 
 DATADIR = pathlib.Path(__file__).parent / "data"
@@ -76,17 +76,6 @@ def diff_length_alns():
 loader = io.load_db()
 
 
-def test_edge_EOP_construction(dstore_instance):
-
-    aln = loader(dstore_instance[0])
-    names = ["758", "443154"]
-
-    eop = edge_EOP(aln, names)
-
-    assert isinstance(eop.LR, float)
-    assert 0 <= eop.get_LRT_stats().to_dict(flatten=True)[(0, "p")] <= 1
-
-
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     from cogent3.util.dict_array import DictArray
 
@@ -138,3 +127,17 @@ def test_adjacent_eop(multiple_alns, opt_args):
     # not so the data is actually differemt
     got = test_adjacent(grp)
     assert isinstance(got, hypothesis_result)
+
+
+def test_temporal_eop(opt_args):
+    from cogent3.app import evo
+
+    inpath = DATADIR / "apes-align.tinydb"
+    dstore = io.get_data_store(inpath)
+    aln = loader(dstore[4])
+    opt_args["max_evaluations"] = 100
+    edge_names = ["Human", "Chimp"]
+    app = temporal_eop(edge_names=edge_names, opt_args=opt_args)
+    result = app(aln)
+    assert isinstance(result, hypothesis_result)
+    assert result["GN"] is result.alt and result["GN-teop"] is result.null

@@ -9,6 +9,7 @@ from warnings import filterwarnings
 
 import click
 
+from cogent3 import load_tree
 from cogent3.app import io
 from scitrack import CachingLogger
 
@@ -79,6 +80,11 @@ def _valid_tinydb_output(*args):
     return _valid_path(args[-1], False)
 
 
+def _load_tree(*args):
+    path = args[-1]
+    return load_tree(args[-1]) if path else path
+
+
 def valid_result_types(dstore, types):
     """fail if the record type in dstore is not within types."""
     from cogent3.app import data_store
@@ -103,6 +109,12 @@ _outpath = click.option(
     "--outpath",
     callback=_valid_tinydb_output,
     help="path to create a result tinydb",
+)
+_treepath = click.option(
+    "-T",
+    "--treepath",
+    callback=_load_tree,
+    help="path to newick formatted phylogenetic tree",
 )
 _num_reps = click.option(
     "-n", "num_reps", type=int, default=100, help="number of samples to simulate"
@@ -212,24 +224,44 @@ def toe(
 @main.command()
 @_inpath
 @_outpath
-@click.option("-e", "--edge_names", required=True, help="edges to test for equivalence")
+@_treepath
+@click.option(
+    "-e",
+    "--edge_names",
+    callback=_process_comma_seq,
+    required=True,
+    help="comma separated edge names to test for equivalence",
+)
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
+def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between branches."""
-    from .eop import adjacent_eop, edge_EOP
+    from .eop import adjacent_eop, temporal_eop
 
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
     LOGGER.log_args()
+
+    dstore = io.get_data_store(inpath, limit=limit)
+    # construct hypothesis app, null constrains edge_names to same process
+    loader = io.load_db()
+    opt_args = get_opt_settings(testrun)
+    teop = temporal_eop(edge_names, tree=treepath, opt_args=opt_args)
+    writer = io.write_db(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+    process = loader + teop + writer
+    process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
+    click.secho("Done!", fg="green")
 
 
 # todo add args for parallelisation
 @main.command()
 @_inpath
 @_outpath
+@_treepath
 @click.option(
     "-s",
     "--share_mprobs",
@@ -240,7 +272,7 @@ def teop(inpath, outpath, edge_names, limit, overwrite, verbose, testrun):
 @_overwrite
 @_verbose
 @_testrun
-def aeop(inpath, outpath, share_mprobs, limit, overwrite, verbose, testrun):
+def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, testrun):
     """test of equivalence of mutation equilibrium between adjacent loci."""
     from .adjacent import load_data_group, physically_adjacent
     from .eop import adjacent_eop
@@ -256,7 +288,7 @@ def aeop(inpath, outpath, share_mprobs, limit, overwrite, verbose, testrun):
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     test_adjacent = adjacent_eop(
-        opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
+        tree=treepath, opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
     )
     process = loader + test_adjacent + writer
     _ = process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1)
