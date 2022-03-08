@@ -90,15 +90,15 @@ def test_edge_EOP_construction(dstore_instance):
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     from mdeq.adjacent import grouped
 
-    aln = loader(dstore_instance[1])
+    aln = loader(dstore_instance[4])
+
     aln.info.pop("fg_edge")
     grp = grouped(("a", "b"))
     grp.elements = [aln, aln]
 
-    opt_args["max_evaluations"] = 100000
+    opt_args["max_evaluations"] = 100
     app = adjacent_eop(opt_args=opt_args)
     result = app(grp)
-    print(result.null.lf, result.alt["locus-0"], sep="\n")
     numpy.testing.assert_almost_equal(result.LR, 0, decimal=5)
 
 

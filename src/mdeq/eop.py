@@ -77,7 +77,7 @@ class adjacent_eop(ComposableAligned):
         else:
             tree = self._tree
 
-        null = get_model("GSN", optimise_motif_probs=True)
+        null = get_model("GN", optimise_motif_probs=True)
         lf = null.make_likelihood_function(
             tree,
             loci=names,
