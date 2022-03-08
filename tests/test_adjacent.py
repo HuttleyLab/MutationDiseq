@@ -3,9 +3,11 @@ from pathlib import Path
 import pytest
 
 from cogent3 import make_unaligned_seqs
+from cogent3.util.deserialise import deserialise_object
 
 from mdeq.adjacent import (
-    grouped_data,
+    grouped,
+    grouped_alignments,
     load_data_group,
     make_identifier,
     physically_adjacent,
@@ -67,19 +69,46 @@ def test_make_identifier():
     assert got == "a--a--a"
 
 
-def test_grouped_data():
+def test_grouped_alignments():
     a = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/a.json"))
     b = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/b.json"))
     c = make_unaligned_seqs({"a": "ACGG", "d": "ACGG"}, info=dict(source="blah/c.json"))
-    got = grouped_data((a, b), source="a--b")
-    assert isinstance(got, grouped_data)
+    got = grouped_alignments([a, b])
+    assert isinstance(got, grouped_alignments)
     with pytest.raises(AssertionError):
-        grouped_data((a, c), source="a--c")
+        grouped_alignments((a, c))
 
     # can group same alignment
-    got = grouped_data((a, a), source="a--a")
-    assert isinstance(got, grouped_data)
+    got = grouped_alignments((a, a))
+    assert isinstance(got, grouped_alignments)
+
+
+def test_grouped_data():
+    got = grouped(identifiers=("a", "b"))
+    assert isinstance(got, grouped)
+    assert got.source == "a--b"
+    assert got.identifiers == ("a", "b")
+    assert (got[0], got[1]) == ("a", "b")
+
+    # can group same alignment
+    assert isinstance(got, grouped)
+    got = grouped(identifiers=("a", "a"))
     assert got.source == "a--a"
+
+    a = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/a.json"))
+    b = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/b.json"))
+    got.elements = [a, b]
+    assert isinstance(got.elements, grouped_alignments)
+    assert len(got.elements) == len(got.identifiers)
+
+    json = got.to_json()
+    # can we get it back
+    obj = deserialise_object(json)
+    assert obj.identifiers == got.identifiers
+    for i in range(2):
+        assert got.elements[i].to_dict() == obj.elements[i].to_dict()
+
+    assert len(obj.elements) == len(got.elements)
 
 
 def test_load_data_group():
@@ -88,7 +117,7 @@ def test_load_data_group():
     from cogent3.app import io
 
     def eval_input(pair):
-        got = group_loader(pair)
+        got = group_loader(grouped(identifiers=pair))
         assert len(got.elements) == 2
         source = "--".join(e.replace(".json", "") for e in pair)
         assert got.source == source
@@ -121,7 +150,7 @@ def test_new_adjacent_eop():
     shuffle(names)
 
     paired = sequential_groups(names, 2)
-    pair = tuple(e.replace(".json", "") for e in choice(paired))
+    pair = grouped(e.replace(".json", "") for e in choice(paired))
     group_loader = load_data_group(str(path))
     data = group_loader(pair)
     eop = adjacent_eop(
@@ -153,6 +182,9 @@ def test_physically_adjacent():
     }
     got = physically_adjacent(table, sample_ids)
     assert set(got) == {
-        ("ENSG00000142657", "ENSG00000184677"),
-        ("ENSG00000158477", "ENSG00000162739"),
+        grouped(identifiers=p)
+        for p in [
+            ("ENSG00000142657", "ENSG00000184677"),
+            ("ENSG00000158477", "ENSG00000162739"),
+        ]
     }

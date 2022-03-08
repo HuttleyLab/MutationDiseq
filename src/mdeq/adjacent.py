@@ -1,20 +1,74 @@
 """ordered grouping of alignments for EOP testing"""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TypeVar
 
 from cogent3 import _Table as Table
 from cogent3.app.composable import SERIALISABLE_TYPE, appify
 from cogent3.app.io import get_data_store, load_db
+from cogent3.util import deserialise
+from cogent3.util.misc import get_object_provenance
+
+from mdeq.utils.utils import SerialisableMixin
 
 
 T = TypeVar("T")
 
 
-def physically_adjacent(
-    table: Table, sample_ids: set[str]
-) -> tuple[tuple[str, ...], ...]:
+class grouped_alignments(tuple):
+    """a validating tuple"""
+
+    def __new__(cls, elements):
+        elements = tuple(elements)
+        names = set(elements[0].names)
+        for e in elements:
+            assert set(e.names) == names, f"names {e.names} != {names}"
+        return tuple.__new__(cls, elements)
+
+
+@dataclass(eq=True, unsafe_hash=True)
+class grouped(SerialisableMixin):
+    identifiers: tuple[str, ...]
+    source: str = None
+    _elements: grouped_alignments = None
+
+    def __post_init__(self):
+        self.identifiers = tuple(self.identifiers)
+        self.source = make_identifier(self.identifiers)
+
+    def __getitem__(self, item):
+        return self.identifiers[item]
+
+    @property
+    def elements(self):
+        return self._elements
+
+    @elements.setter
+    def elements(self, elements):
+        self._elements = grouped_alignments(elements)
+
+    def to_rich_dict(self):
+        result = super().to_rich_dict()
+        result = {**result, **asdict(self)}
+        result["_elements"] = [m.to_rich_dict() for m in self.elements]
+        return result
+
+    @classmethod
+    def from_dict(cls, data):
+        data.pop("type", None)
+        elements = [deserialise.deserialise_object(e) for e in data.pop("_elements")]
+        result = cls(**data)
+        result.elements = elements
+        return result
+
+
+@deserialise.register_deserialiser(get_object_provenance(grouped))
+def deserialise_grouped(data):
+    return grouped.from_dict(data)
+
+
+def physically_adjacent(table: Table, sample_ids: set[str]) -> tuple[grouped, ...]:
     """identifiers members of id_set that are adjacent in table
 
     Parameters
@@ -32,7 +86,11 @@ def physically_adjacent(
             continue
         all_adjacent.extend(sequential_groups(sub_table.columns["name"], 2))
 
-    adjacent = [pair for pair in all_adjacent if set(pair).issubset(sample_ids)]
+    adjacent = [
+        grouped(identifiers=pair)
+        for pair in all_adjacent
+        if set(pair).issubset(sample_ids)
+    ]
     return tuple(adjacent)
 
 
@@ -67,26 +125,11 @@ def make_identifier(data) -> str:
     return "--".join(composite)
 
 
-@dataclass
-class grouped_data:
-    elements: tuple[T, ...]
-    source: str
-
-    def __post_init__(self):
-        self.elements = tuple(self.elements)
-        # make sure all alignments have exactly the same sequence names
-        names = set(self.elements[0].names)
-        for e in self.elements:
-            assert set(e.names) == names, f"names {e.names} != {names}"
-
-
 _loader = load_db()
 
 
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
-def load_data_group(
-    data_store_path, data_identifiers: tuple[str] = None
-) -> grouped_data:
+def load_data_group(data_store_path, data_identifiers: grouped = None) -> grouped:
     """
 
     Parameters
@@ -94,7 +137,7 @@ def load_data_group(
     data_store_path : str
         path to a tinydb
     data_identifiers
-        series of identifiers
+        grouped instance
 
     Notes
     -----
@@ -111,10 +154,10 @@ def load_data_group(
         obj = _loader(m[0])
         if not obj:  # probably not completed error
             return obj
+        obj.info.name = identifier.replace(".json", "")
         data_objs.append(obj)
 
-    identifier = make_identifier(data_objs)
-    for n, obj in zip(identifier.split("--"), data_objs):
-        obj.info.name = n
+    dstore.close()
 
-    return grouped_data(elements=tuple(data_objs), source=identifier)
+    data_identifiers.elements = data_objs
+    return data_identifiers
