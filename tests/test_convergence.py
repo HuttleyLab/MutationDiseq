@@ -33,7 +33,7 @@ loader = io.load_db()
 @pytest.fixture(scope="session")
 def opt_args():
     """settings for faster optimisation during testing."""
-    return {"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
+    return {"max_evaluations": 10, "limit_action": "ignore", "max_restarts": 1}
 
 
 @pytest.fixture(scope="session")

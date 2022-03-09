@@ -21,7 +21,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture()
 def opt_args():
-    return {"max_evaluations": 100, "limit_action": "ignore"}
+    return {"max_evaluations": 100, "limit_action": "ignore", "max_restarts": 1}
 
 
 @pytest.fixture()
