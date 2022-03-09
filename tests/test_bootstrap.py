@@ -79,9 +79,7 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
 
 def test_estimate_pval(aln, opt_args):
     opt_args["max_evaluations"] = 2000
-    bstrap = create_bootstrap_app(
-        num_reps=2, discrete_edges=["443154", "73021"], opt_args=opt_args
-    )
+    bstrap = bootstrap_toe(num_reps=2, sequential=True, opt_args=opt_args)
     result = bstrap(aln)
     assert isinstance(result.pvalue, float)
 
