@@ -133,7 +133,6 @@ class temporal_eop(ComposableAligned):
             self._tree = make_tree(tip_names=aln.names)
         assert set(self._tree.get_tip_names()) == set(aln.names)
         if self._hyp is None:
-            time_het = [dict(edges=self._edge_names, is_independent=False, upper=100)]
             null = evo.model(
                 "GN",
                 time_het=[
