@@ -147,8 +147,7 @@ class bootstrap(ComposableHypothesis):
         try:
             obs = self._hyp(aln)
         except ValueError as err:
-            result = NotCompleted("ERROR", str(self._hyp), err.args[0])
-            return result
+            return NotCompleted("ERROR", str(self._hyp), err.args[0])
 
         result.observed = obs
         self._null = obs["GSN"]
