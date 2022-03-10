@@ -13,11 +13,15 @@ from cogent3 import load_tree
 from cogent3.app import io
 from scitrack import CachingLogger
 
+from mdeq import adjacent as _adjacent
 from mdeq import (
     model as _model,  # to ensure registration of define substitution models
 )
 from mdeq.bootstrap import bootstrap_toe
+from mdeq.control import select_model_result
 from mdeq.convergence import bootstrap_to_nabla
+from mdeq.eop import ALT_AEOP, ALT_TEOP, NULL_AEOP, NULL_TEOP
+from mdeq.lrt import ALT_TOE, NULL_TOE
 from mdeq.utils import get_obj_type
 
 
@@ -29,7 +33,8 @@ __version__ = "2021.12.20"
 filterwarnings("ignore", "Not using MPI")
 filterwarnings("ignore", "Unexpected warning from scipy")
 filterwarnings("ignore", "using slow exponentiator")
-filterwarnings("ignore", ".*decreased to keep within bounds")
+filterwarnings("ignore", ".*creased to keep within bounds")
+filterwarnings("ignore", "Used mean of.*", module="cogent3")
 
 
 def get_opt_settings(testrun):
@@ -328,30 +333,70 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
 @_inpath
 @_outpath
 @click.option(
-    "--controls",
-    default=click.Choice(["-ve", "+ve"]),
+    "-a",
+    "--analysis",
+    type=click.Choice(["aeop", "teop", "toe", "single-model"]),
     required=True,
     help="which control set to generate",
 )
-@_num_reps
+@click.option(
+    "--controls",
+    type=click.Choice(["-ve", "+ve"]),
+    required=True,
+    help="which control set to generate",
+)
 @_limit
 @_overwrite
 @_verbose
 @_testrun
 def make_controls(
-    inpath, outpath, controls, num_reps, limit, overwrite, verbose, testrun
+    inpath, outpath, analysis, controls, limit, overwrite, verbose, testrun
 ):
-    """simulate negative and positive controls.
+    """simulate negative and positive controls
 
-    Note the input here MUST be hypothesis_result OR model_result in a
-    tinydb
+    Notes
+    -----
+    A single simulated record is produced for each input record.
     """
     LOGGER = CachingLogger(create_dir=True)
-    # todo the positive controls
+    # todo support specifying the rng seed
     LOGGER.log_file_path = outpath.parent / "mdeq-make_controls.log"
     LOGGER.log_args()
     # create loader, read a single result and validate the type matches the controls choice
     # validate the model choice too
+    dstore = io.get_data_store(inpath, limit=limit)
+    result_types = {
+        "teop": "hypothesis_result",
+        "aeop": "hypothesis_result",
+        "toe": "compact_bootstrap_result",
+        "single-model": "model_result",
+    }
+    control_name = {
+        "aeop": {"-ve": NULL_AEOP, "+ve": ALT_AEOP},
+        "teop": {"-ve": NULL_TEOP, "+ve": ALT_TEOP},
+        "toe": {"-ve": NULL_TOE, "+ve": ALT_TOE},
+        "single-model": {"-ve": "", "+ve": ""},
+    }
+    record_type = get_obj_type(dstore)
+    if record_type != result_types[analysis]:
+        click.secho(
+            f"object type in {inpath!r} does not match expected "
+            f"{result_types[analysis]!r} for analysis {analysis!r}",
+            fg="red",
+        )
+        exit()
+
+    model_name = control_name[analysis][controls]
+    model_selector = select_model_result(model_name)
+
+    loader = io.load_db()
+    generator = control.control_generator(model_selector)
+    writer = io.write_db(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+    proc = loader + generator + writer
+    proc.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
+    click.secho("Done!", fg="green")
 
 
 # todo postprocess functions, generate figures, tabulate data

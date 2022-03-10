@@ -4,7 +4,15 @@ import pytest
 
 from click.testing import CliRunner
 
-from mdeq import aeop, convergence, get_obj_type, make_adjacent, teop, toe
+from mdeq import (
+    aeop,
+    convergence,
+    get_obj_type,
+    make_adjacent,
+    make_controls,
+    teop,
+    toe,
+)
 
 
 __author__ = "Gavin Huttley"
@@ -120,4 +128,56 @@ def test_teop_exercise(runner, tmp_dir):
         assert isinstance(r, result.hypothesis_result)
 
 
-# todo write tests of toe that don't specify a fg edge; that have > 3 taxa and specify a tree
+def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
+    from cogent3.app import io
+
+    outpaths = (
+        f"{analysis}-negative_controls.tinydb",
+        f"{analysis}-positive_controls.tinydb",
+    )
+    for path in outpaths:
+        control = "-ve" if "neg" in path else "+ve"
+        outpath = tmp_dir / path
+        args = [
+            "-i",
+            f"{inpath}",
+            "-a",
+            analysis,
+            "--controls",
+            control,
+            "-o",
+            f"{outpath}",
+            "-O",
+        ]
+        # make_controls(args)  # useful for debugging
+        r = runner.invoke(make_controls, args)
+        assert r.exit_code == 0, r.output
+
+        loader = io.load_db()
+        dstore = io.get_data_store(outpath)
+        results = [loader(m) for m in dstore]
+        for r in results:
+            assert isinstance(r, result_type)
+
+        dstore.close()
+
+
+def test_make_controls_aeop_exercise(runner, tmp_dir):
+    from mdeq.adjacent import grouped
+
+    inpath = DATADIR / "aeop-apes.tinydb"
+    exercise_make_controls(runner, inpath, tmp_dir, "aeop", grouped)
+
+
+def test_make_controls_teop_exercise(runner, tmp_dir):
+    from cogent3 import ArrayAlignment
+
+    inpath = DATADIR / "teop-apes.tinydb"
+    exercise_make_controls(runner, inpath, tmp_dir, "teop", ArrayAlignment)
+
+
+def test_make_controls_toe_exercise(runner, tmp_dir):
+    from cogent3 import ArrayAlignment
+
+    inpath = DATADIR / "toe-300bp.tinydb"
+    exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
