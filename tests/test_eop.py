@@ -106,10 +106,6 @@ def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     assert len(mprobs) == 2
 
 
-# todo check whether the multi-locus LF object can simulate alignments
-# Answer - it can, e.g. lf.simulate_alignment(locus="a")
-
-
 def test_adjacent_eop(multiple_alns, opt_args):
     from mdeq.adjacent import grouped
 
@@ -118,7 +114,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
         identifiers.append(f"name-{i}")
         aln.info.name = identifiers[-1]
 
-    grp = grouped(identifiers=identifiers)
+    grp = grouped(identifiers=tuple(identifiers))
     grp.elements = multiple_alns[:2]
     test_adjacent = adjacent_eop(opt_args=opt_args)
     # works if no fg edge specified
@@ -127,7 +123,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
     for aln in multiple_alns:
         aln.info.fg_edge = "Human"
     # although elements is immutable, the alignment instance members are
-    # not so the data is actually differemt
+    # not so the data is actually different
     got = test_adjacent(grp)
     assert isinstance(got, hypothesis_result)
 

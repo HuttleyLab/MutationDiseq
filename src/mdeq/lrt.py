@@ -57,7 +57,7 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
     sm_args = dict(optimise_motif_probs=True)
     opt_args = opt_args or {}
-    opt_args = {"max_restarts": 5, "tolerance": 1e-8, ** opt_args}
+    opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
     lf_args = dict(discrete_edges=bg_edges, expm="pade")
 
     models = [
