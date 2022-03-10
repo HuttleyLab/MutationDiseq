@@ -38,7 +38,7 @@ class grouped(SerialisableMixin):
 
     def __post_init__(self):
         self.identifiers = tuple(self.identifiers)
-        self.source = make_identifier(self.identifiers)
+        self.source = self.source or make_identifier(self.identifiers)
 
     def __getitem__(self, item):
         return self.identifiers[item]
