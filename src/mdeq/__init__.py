@@ -215,7 +215,7 @@ def toe(
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
     if get_obj_type(dstore) not in expected_types:
-        click.secho(f"records one of the expected types {expected_types}", fg="red")
+        click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit()
 
     loader = io.load_db()
@@ -317,7 +317,7 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("compact_bootstrap_result",)
     if get_obj_type(dstore) not in expected_types:
-        click.secho(f"records one of the expected types {expected_types}", fg="red")
+        click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit()
 
     loader = io.load_db()
