@@ -53,7 +53,7 @@ class control_generator(Composable):
         # conventional model object
         model = self._select_model(result)
         sim = model.lf.simulate_alignment()
-        sim.info.source = f"{source}-sim"
+        sim.info.source = source
         return sim
 
     def _from_single_model_multi_locus(self, result) -> grouped:
@@ -66,13 +66,13 @@ class control_generator(Composable):
         names = []
         alns = []
         for name in locus_names:
-            n = f"{name}-sim"
+            n = name
             names.append(n)
             sim = model.lf.simulate_alignment(locus=name)
             sim.info.name = n
             alns.append(sim)
 
-        r = grouped(names, source=f"{source}-sim")
+        r = grouped(names, source=source)
         r.elements = alns
         return r
 
@@ -87,11 +87,11 @@ class control_generator(Composable):
         sims = []
         ids = []
         for name, lf in model.items():
-            ids.append(f"{source}-{name}-sim")
+            ids.append(name)
             sim = lf.simulate_alignment()
             sim.info.source = ids[-1]
             sims.append(sim)
-        result = grouped(ids, source=make_identifier(ids))
+        result = grouped(ids, source=source)
         result.elements = sims
         return result
 
