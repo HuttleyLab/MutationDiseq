@@ -69,9 +69,9 @@ def _gene_order_table(*args):
     return table[:, list(required)]
 
 
-def _valid_path(path, exists):
+def _valid_path(path, must_exist):
     path = pathlib.Path(path)
-    if exists and not path.exists():
+    if must_exist and not path.exists():
         raise ValueError(f"{path!r} does not exist")
 
     if path.suffix != ".tinydb":
@@ -216,7 +216,7 @@ def toe(
     expected_types = ("ArrayAlignment", "Alignment")
     if get_obj_type(dstore) not in expected_types:
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
-        exit()
+        exit(1)
 
     loader = io.load_db()
     opt_args = get_opt_settings(testrun)
@@ -253,6 +253,11 @@ def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testr
     LOGGER.log_args()
 
     dstore = io.get_data_store(inpath, limit=limit)
+    expected_types = ("ArrayAlignment", "Alignment")
+    if get_obj_type(dstore) not in expected_types:
+        click.secho(f"records not one of the expected types {expected_types}", fg="red")
+        exit(1)
+
     # construct hypothesis app, null constrains edge_names to same process
     loader = io.load_db()
     opt_args = get_opt_settings(testrun)
@@ -291,6 +296,11 @@ def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, tes
     LOGGER.log_args()
 
     dstore = io.get_data_store(inpath, limit=limit)
+    expected_types = ("grouped",)
+    if get_obj_type(dstore) not in expected_types:
+        click.secho(f"records not one of the expected types {expected_types}", fg="red")
+        exit(1)
+
     loader = io.load_db()
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
@@ -318,7 +328,7 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
     expected_types = ("compact_bootstrap_result",)
     if get_obj_type(dstore) not in expected_types:
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
-        exit()
+        exit(1)
 
     loader = io.load_db()
     to_delta_nabla = bootstrap_to_nabla()
@@ -384,7 +394,7 @@ def make_controls(
             f"{result_types[analysis]!r} for analysis {analysis!r}",
             fg="red",
         )
-        exit()
+        exit(1)
 
     model_name = control_name[analysis][controls]
     model_selector = select_model_result(model_name)
