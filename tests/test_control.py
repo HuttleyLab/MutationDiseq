@@ -114,21 +114,21 @@ def test_gen_toe_null(toe_result):
     from mdeq.lrt import NULL_TOE
 
     selector = control.select_model_result(NULL_TOE)
-    gen = control.control_generator(selector, 2)
+    gen = control.control_generator(selector)
     got = gen(toe_result)
-    assert len(got) == 2
+    assert isinstance(got, ArrayAlignment)
     # successive calls work too
     got = gen(toe_result)
-    assert len(got) == 2
+    assert isinstance(got, ArrayAlignment)
 
 
 def test_gen_toe_alt(toe_result):
     from mdeq.lrt import ALT_TOE
 
     selector = control.select_model_result(ALT_TOE)
-    gen = control.control_generator(selector, 2)
+    gen = control.control_generator(selector)
     got = gen(toe_result)
-    assert len(got) == 2
+    assert isinstance(got, ArrayAlignment)
 
 
 @pytest.fixture(scope="session")
@@ -152,64 +152,52 @@ def teop_result():
 def test_gen_aeop_null(aeop_result):
     from mdeq.eop import NULL_AEOP
 
-    def validate_for_result(generator, result, num_reps):
-        got = generator(result)
-        assert len(got) == num_reps
-        for record in got:
-            assert isinstance(record, grouped)
-            assert all(isinstance(e, ArrayAlignment) for e in record.elements)
+    def validate_for_result(generator, result):
+        r = generator(result)
+        assert isinstance(r, grouped)
+        assert all(isinstance(e, ArrayAlignment) for e in r.elements)
 
     selector = control.select_model_result(NULL_AEOP)
-    num_reps = 2
-    gen = control.control_generator(selector, num_reps=num_reps)
+    gen = control.control_generator(selector)
     for result in aeop_result:
-        validate_for_result(gen, result, num_reps)
+        validate_for_result(gen, result)
 
 
 def test_gen_aeop_alt(aeop_result):
     from mdeq.eop import ALT_AEOP
 
-    def validate_for_result(generator, result, num_reps):
-        got = generator(result)
-        assert len(got) == num_reps
-        for record in got:
-            assert isinstance(record, grouped)
-            assert all(isinstance(e, ArrayAlignment) for e in record.elements)
+    def validate_for_result(generator, result):
+        r = generator(result)
+        assert isinstance(r, grouped)
+        assert all(isinstance(e, ArrayAlignment) for e in r.elements)
 
     selector = control.select_model_result(ALT_AEOP)
-    num_reps = 2
-    gen = control.control_generator(selector, num_reps=num_reps)
+    gen = control.control_generator(selector)
     for result in aeop_result:
-        validate_for_result(gen, result, num_reps)
+        validate_for_result(gen, result)
 
 
 def test_gen_teop_null(teop_result):
     from mdeq.eop import NULL_TEOP
 
-    def validate_for_result(generator, result, num_reps):
-        got = generator(result)
-        assert len(got) == num_reps
-        for r in got:
-            assert isinstance(r, ArrayAlignment)
+    def validate_for_result(generator, result):
+        r = generator(result)
+        assert isinstance(r, ArrayAlignment)
 
     selector = control.select_model_result(NULL_TEOP)
-    num_reps = 2
-    gen = control.control_generator(selector, num_reps=num_reps)
+    gen = control.control_generator(selector)
     for result in teop_result:
-        validate_for_result(gen, result, num_reps)
+        validate_for_result(gen, result)
 
 
 def test_gen_teop_alt(teop_result):
     from mdeq.eop import ALT_TEOP
 
-    def validate_for_result(generator, result, num_reps):
-        got = generator(result)
-        assert len(got) == num_reps
-        for r in got:
-            assert isinstance(r, ArrayAlignment)
+    def validate_for_result(generator, result):
+        r = generator(result)
+        assert isinstance(r, ArrayAlignment)
 
     selector = control.select_model_result(ALT_TEOP)
-    num_reps = 2
-    gen = control.control_generator(selector, num_reps=num_reps)
+    gen = control.control_generator(selector)
     for result in teop_result:
-        validate_for_result(gen, result, num_reps)
+        validate_for_result(gen, result)

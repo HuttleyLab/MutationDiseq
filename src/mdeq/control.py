@@ -1,15 +1,15 @@
 import pathlib
 
-from typing import TypeVar
+from typing import Union
 
+from cogent3 import ArrayAlignment
 from cogent3.app.composable import (
     ALIGNED_TYPE,
     RESULT_TYPE,
     SERIALISABLE_TYPE,
     Composable,
-    NotCompleted,
 )
-from cogent3.app.result import bootstrap_result, model_result
+from cogent3.app.result import bootstrap_result, generic_result, model_result
 
 from mdeq.adjacent import grouped, make_identifier
 
@@ -17,8 +17,6 @@ from mdeq.adjacent import grouped, make_identifier
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
 __version__ = "2021.12.20"
-
-T = TypeVar("T")
 
 
 class select_model_result:
@@ -39,7 +37,7 @@ class select_model_result:
 
 
 class control_generator(Composable):
-    def __init__(self, model_selector, num_reps):
+    def __init__(self, model_selector):
         super(control_generator, self).__init__(
             input_types=(
                 SERIALISABLE_TYPE,
@@ -47,45 +45,38 @@ class control_generator(Composable):
             ),
             output_types=(SERIALISABLE_TYPE, ALIGNED_TYPE),
         )
-        self.num_reps = num_reps
         self._select_model = model_selector
         self.func = self.gen
 
-    def _from_single_model_single_locus(self, result) -> list[T]:
+    def _from_single_model_single_locus(self, result) -> ArrayAlignment:
         source = pathlib.Path(result.source).stem
         # conventional model object
         model = self._select_model(result)
-        results = []
-        for i in range(self.num_reps):
-            sim = model.lf.simulate_alignment()
-            sim.info.source = f"{source}-sim-{i}"
-            results.append(sim)
+        sim = model.lf.simulate_alignment()
+        sim.info.source = f"{source}-sim"
+        return sim
 
-        return results
-
-    def _from_single_model_multi_locus(self, result) -> list[T]:
+    def _from_single_model_multi_locus(self, result) -> grouped:
         # this is an adjacent EOP null, so has multiple alignments for one lf
         # aeop modelling works via grouped data, so we need to bundle the
         # simulated alignments into a grouped instance
         model = self._select_model(result)
         source = pathlib.Path(result.source).stem
         locus_names = model.lf.locus_names[:]
-        results = []
-        for i in range(self.num_reps):
-            names = []
-            alns = []
-            for name in locus_names:
-                n = f"{name}-sim-{i}"
-                names.append(n)
-                sim = model.lf.simulate_alignment(locus=name)
-                sim.info.name = n
-                alns.append(sim)
-            r = grouped(names, source=f"{source}-sim-{i}")
-            r.elements = alns
-            results.append(r)
-        return results
+        names = []
+        alns = []
+        for name in locus_names:
+            n = f"{name}-sim"
+            names.append(n)
+            sim = model.lf.simulate_alignment(locus=name)
+            sim.info.name = n
+            alns.append(sim)
 
-    def _from_multi_model_multi_locus(self, result) -> list[T]:
+        r = grouped(names, source=f"{source}-sim")
+        r.elements = alns
+        return r
+
+    def _from_multi_model_multi_locus(self, result) -> grouped:
         # this is an adjacent EOP alt, so has a separate model
         # instance for each alignment
         # aeop modelling works via grouped data, so we need to bundle the
@@ -93,22 +84,18 @@ class control_generator(Composable):
 
         model = self._select_model(result)
         source = pathlib.Path(result.source).stem
-        results = []
-        for i in range(self.num_reps):
-            sims = []
-            ids = []
-            for name, lf in model.items():
-                ids.append(f"{source}-{name}-sim-{i}")
-                sim = lf.simulate_alignment()
-                sim.info.source = ids[-1]
-                sims.append(sim)
-            result = grouped(ids, source=make_identifier(ids))
-            result.elements = sims
-            results.append(result)
+        sims = []
+        ids = []
+        for name, lf in model.items():
+            ids.append(f"{source}-{name}-sim")
+            sim = lf.simulate_alignment()
+            sim.info.source = ids[-1]
+            sims.append(sim)
+        result = grouped(ids, source=make_identifier(ids))
+        result.elements = sims
+        return result
 
-        return results
-
-    def gen(self, result) -> list[T]:
+    def gen(self, result) -> Union[ArrayAlignment, grouped]:
         # this function will only be called on the first result object,
         # it establishes the appropriate method to set for the data
         # and assigns that to self.func, which the Composable architecture
