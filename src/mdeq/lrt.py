@@ -10,6 +10,10 @@ __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
+NULL_TOE = "GSN"
+ALT_TOE = "GN"
+
+
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_lrt(mc):
     hyp = mc["mcr"].get_hypothesis_result("GSN", "GN")
@@ -51,7 +55,7 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     model_collection
     """
     model_names = ["GTR"] if with_gtr else []
-    model_names.extend(["GSN", "GN"])
+    model_names.extend([NULL_TOE, ALT_TOE])
 
     fg_edge = get_foreground(aln)
     bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None

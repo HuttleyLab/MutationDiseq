@@ -13,6 +13,11 @@ from mdeq.utils import get_foreground
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
+NULL_AEOP = "null"
+ALT_AEOP = "alt"
+
+NULL_TEOP = "GN-teop"
+ALT_TEOP = "GN"
 
 
 class adjacent_eop(ComposableAligned):
@@ -101,8 +106,8 @@ class adjacent_eop(ComposableAligned):
             alt_results[locus] = lf
 
         combined = c3_result.hypothesis_result("null", source=data.source)
-        combined["null"] = null_result
-        combined["alt"] = alt_results
+        combined[NULL_AEOP] = null_result
+        combined[ALT_AEOP] = alt_results
         return combined
 
 
@@ -139,12 +144,12 @@ class temporal_eop(ComposableAligned):
                 time_het=[
                     dict(edges=self._edge_names, is_independent=False, upper=100)
                 ],
-                name="GN-teop",
+                name=NULL_TEOP,
                 opt_args=self._opt_args,
             )
             alt = evo.model(
                 "GN",
-                name="GN",
+                name=ALT_TEOP,
                 opt_args=self._opt_args,
                 time_het=[dict(edges=self._edge_names, is_independent=True, upper=100)],
             )
