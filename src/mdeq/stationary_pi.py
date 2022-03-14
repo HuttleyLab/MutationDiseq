@@ -45,7 +45,7 @@ def get_stat_pi_via_brute(
     num_iterations = 0
 
     if not (valid_stochastic_matrix(P) and valid_probability_vector(pi_zero)):
-        raise TypeError("Invalid psub matrix or pi vector input")
+        raise ValueError("Invalid psub matrix or pi vector input")
 
     while delta > threshold:
         new_pi = dot(pi_zero, P)
