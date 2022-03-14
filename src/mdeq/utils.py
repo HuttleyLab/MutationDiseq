@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
@@ -40,10 +41,11 @@ def foreground_from_jsd(aln):
 
 class SerialisableMixin:
     def to_rich_dict(self):
-        return {
+        result = {
             "type": get_object_provenance(self),
             "source": self.source,
         }
+        return {**result, **asdict(self)}
 
     def to_json(self):
         return json.dumps(self.to_rich_dict())

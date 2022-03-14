@@ -110,10 +110,6 @@ class delta_nabla(SerialisableMixin):
         """returns observed nabla minus mean of the null nabla distribution."""
         return self.obs_nabla - self.mean_null
 
-    def to_rich_dict(self):
-        result = super().to_rich_dict()
-        return {**result, **asdict(self)}
-
     def to_json(self):
         return json.dumps(self.to_rich_dict())
 

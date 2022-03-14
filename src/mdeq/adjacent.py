@@ -53,7 +53,6 @@ class grouped(SerialisableMixin):
 
     def to_rich_dict(self):
         result = super().to_rich_dict()
-        result = {**result, **asdict(self)}
         result["_elements"] = [m.to_rich_dict() for m in self.elements]
         return result
 
