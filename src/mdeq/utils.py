@@ -48,6 +48,18 @@ class SerialisableMixin:
     def to_json(self):
         return json.dumps(self.to_rich_dict())
 
+    @classmethod
+    def from_json(cls, data):
+        """constructor from json data."""
+        data.pop("type", None)
+        return cls(**data)
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """constructor from dict data."""
+        data.pop("type", None)
+        return cls(**data)
+
 
 def get_obj_type(dstore):
     """returns the record type in dstore"""

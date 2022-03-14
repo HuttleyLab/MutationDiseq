@@ -117,17 +117,6 @@ class delta_nabla(SerialisableMixin):
     def to_json(self):
         return json.dumps(self.to_rich_dict())
 
-    @classmethod
-    def from_json(cls, data):
-        """constructor from json data."""
-        return cls(**data)
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        """constructor from dict data."""
-        data.pop("type", None)
-        return cls(**data)
-
 
 @deserialise.register_deserialiser(get_object_provenance(delta_nabla))
 def deserialise_delta_nabla(data: dict):
