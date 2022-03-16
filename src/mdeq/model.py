@@ -65,12 +65,16 @@ def mles_within_bounds(
     result if parameter estimate are further from the boundaries than machine
     precision epsilon, NotCompleted otherwise
     """
+    exclude_cols = {"edge", "parent", "length"}
+    if not result:  # handle case where result is NotCompleted
+        return result
+
     tables = result.lf.get_statistics()
     for table in tables:
         # if time-het model, rate params in table with "edge params" title
         # otherwise, rate params in table with "global params" title
         if table.title in ("edge params", "global params"):
-            arr = table[:, [c for c in table.columns if c != "length"]].array
+            arr = table[:, [c for c in table.columns if c not in exclude_cols]].array
             if not all([(arr.min() - lower) > _eps, (upper - arr.max()) > _eps]):
                 minval = arr.min()
                 maxval = arr.max()
