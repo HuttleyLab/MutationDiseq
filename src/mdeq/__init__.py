@@ -245,7 +245,7 @@ def toe(
 @_verbose
 @_testrun
 def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testrun):
-    """test of equivalence of mutation equilibrium between branches."""
+    """between branch equivalence of mutation process test"""
     from .eop import adjacent_eop, temporal_eop
 
     LOGGER = CachingLogger(create_dir=True)
@@ -286,7 +286,7 @@ def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testr
 @_verbose
 @_testrun
 def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, testrun):
-    """test of equivalence of mutation equilibrium between adjacent loci."""
+    """between loci equivalence of mutation process test"""
     from .adjacent import load_data_group, physically_adjacent
     from .eop import adjacent_eop
 
@@ -320,7 +320,7 @@ def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, tes
 @_overwrite
 @_verbose
 def convergence(inpath, outpath, limit, overwrite, verbose):
-    """uses output from toe to generate delta_nabla."""
+    """estimates convergence towards mutation equilibrium."""
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-convergence.log"
     LOGGER.log_args()

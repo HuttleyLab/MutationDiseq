@@ -35,11 +35,11 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  aeop           test of equivalence of mutation equilibrium between...
-  convergence    uses output from toe to generate delta_nabla.
+  aeop           between loci equivalence of mutation process test
+  convergence    estimates convergence towards mutation equilibrium.
   make-adjacent  makes tinydb of adjacent alignment records.
   make-controls  simulate negative and positive controls
-  teop           test of equivalence of mutation equilibrium between branches.
+  teop           between branch equivalence of mutation process test
   toe            test of existence of mutation equilibrium.
 
 ```
