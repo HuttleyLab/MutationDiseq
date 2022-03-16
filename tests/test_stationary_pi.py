@@ -170,7 +170,7 @@ def test_eigen_numerical_same_pi(likelihood_gn):
 def test_throw_error():
     P = numpy.ones((4, 4))
     pi_0 = numpy.array([0.25] * 4)
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         get_stat_pi_via_brute(P, pi_0)
 
 
