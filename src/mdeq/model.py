@@ -1,9 +1,12 @@
+from typing import Union
+
 from cogent3 import get_moltype
 from cogent3.app import evo
 from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
+from cogent3.app.result import model_result
 from cogent3.evolve.models import register_model
 from cogent3.evolve.ns_substitution_model import GeneralStationary
-from numpy import allclose
+from numpy import finfo
 
 
 __author__ = "Katherine Caley"
@@ -47,11 +50,20 @@ def GN_sm(tree=None, discrete_edges=None, opt_args=None):
     )
 
 
-@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
-def mles_near_bounds(result, lower=1e-5, upper=RATE_PARAM_UPPER):
-    """
-    Returns a NotCompleted if parameter estimates of model_result are at the bounds, else returns model_result.
+# the machine precision limit
+_eps = finfo(float).eps
 
+
+@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
+def mles_within_bounds(
+    result: model_result, lower=1e-5, upper=RATE_PARAM_UPPER
+) -> Union[model_result, NotCompleted]:
+    """validate fitted model rate parameter estimates are not close to the bounds
+
+    Returns
+    -------
+    result if parameter estimate are further from the boundaries than machine
+    precision epsilon, NotCompleted otherwise
     """
     tables = result.lf.get_statistics()
     for table in tables:
@@ -59,13 +71,13 @@ def mles_near_bounds(result, lower=1e-5, upper=RATE_PARAM_UPPER):
         # otherwise, rate params in table with "global params" title
         if table.title in ("edge params", "global params"):
             arr = table[:, [c for c in table.columns if c != "length"]].array
-            if not all([(arr.min() - lower) > 0.0, (upper - arr.max()) > 0.0]):
+            if not all([(arr.min() - lower) > _eps, (upper - arr.max()) > _eps]):
                 minval = arr.min()
                 maxval = arr.max()
                 return NotCompleted(
                     "FAIL",
-                    "params_near_bounds",
-                    f"({minval:.1e}, {{maxval:.1f}}) params not within bounds ({lower:.1e}, {upper:.1f})",
+                    "mles_within_bounds",
+                    f"({minval:.1e}, {maxval:.1f}) params are close to bounds ({lower:.1e}, {upper:.1f})",
                     source=str(result.source),
                 )
     return result

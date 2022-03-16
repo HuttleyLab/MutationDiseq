@@ -38,31 +38,31 @@ def test_mles_at_bounds():
     path = DATADIR / "toe-300bp.tinydb"
     dstore = io.get_data_store(path, limit=1)
     models = [loader(dstore[0]).observed[mod] for mod in ("GSN", "GN")]
-    app = model.mles_near_bounds()
+    app = model.mles_within_bounds()
     for mod in models:
         got = app(mod)
         assert got is mod
 
     # set lower value of 1.0 (these models have min val of 1), should return NotCompleted
-    app = model.mles_near_bounds(lower=1.0)
+    app = model.mles_within_bounds(lower=1.0)
     for mod in models:
         got = app(mod)
         assert isinstance(got, composable.NotCompleted)
 
     # set upper value of 10 (both models have upper vals >20), should return NotCompleted
-    app = model.mles_near_bounds(upper=10)
+    app = model.mles_within_bounds(upper=10)
     for mod in models:
         got = app(mod)
         assert isinstance(got, composable.NotCompleted)
 
     # set both lower and upper, should return NotCompleted
-    app = model.mles_near_bounds(lower=1, upper=10)
+    app = model.mles_within_bounds(lower=1, upper=10)
     for mod in models:
         got = app(mod)
         assert isinstance(got, composable.NotCompleted)
 
     # value of length should trigger NotCompleted
     mod.lf.set_param_rule("length", init=1e-6)
-    app = model.mles_near_bounds(lower=0.5)
+    app = model.mles_within_bounds(lower=0.5)
     got = app(mod)
     assert got is mod
