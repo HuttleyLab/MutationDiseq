@@ -7,6 +7,8 @@ from cogent3.evolve.ns_substitution_model import GeneralStationary
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
+RATE_PARAM_UPPER = 100
+
 
 @register_model("nucleotide")
 def GSN(**kwargs):
@@ -19,13 +21,13 @@ def GSN(**kwargs):
 def GS_sm(tree=None, discrete_edges=None, opt_args=None):
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
-
     return evo.model(
         GSN(),
         tree=tree,
         sm_args=dict(optimise_motif_probs=True),
         opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
+        upper=RATE_PARAM_UPPER,
     )
 
 
@@ -39,4 +41,5 @@ def GN_sm(tree=None, discrete_edges=None, opt_args=None):
         sm_args=dict(optimise_motif_probs=True),
         opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
+        upper=RATE_PARAM_UPPER,
     )

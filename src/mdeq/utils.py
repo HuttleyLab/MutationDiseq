@@ -1,4 +1,5 @@
 import json
+
 from dataclasses import asdict
 
 from cogent3.util.dict_array import DictArray

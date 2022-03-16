@@ -7,6 +7,7 @@ from cogent3.app.composable import (
     NotCompleted,
 )
 
+from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
 
@@ -21,7 +22,7 @@ ALT_TEOP = "GN"
 
 
 class adjacent_eop(ComposableAligned):
-    def __init__(self, tree=None, opt_args=None, share_mprobs=True):
+    def __init__(self, tree=None, opt_args=None, share_mprobs=True, time_het=None):
         super(adjacent_eop, self).__init__(
             data_types="grouped",
             input_types=SERIALISABLE_TYPE,
@@ -37,6 +38,8 @@ class adjacent_eop(ComposableAligned):
         self._tree = tree
         self._share_mprobs = share_mprobs
         self.func = self.fit
+        time_het = time_het or {}
+        self._time_het = {"upper": RATE_PARAM_UPPER, **time_het}
 
     def _background_edges(self, data):
         selected_foreground = [get_foreground(e) for e in data.elements]
@@ -83,6 +86,7 @@ class adjacent_eop(ComposableAligned):
             discrete_edges=bg_edges,
             expm="pade",
         )
+        lf.set_time_heterogeneity(**self._time_het)
         lf.set_alignment([aligns[k] for k in names])
         if self._share_mprobs:
             lf.set_param_rule("mprobs", is_independent=False)
@@ -101,6 +105,7 @@ class adjacent_eop(ComposableAligned):
                 expm="pade",
             )
             lf.set_alignment(aln)
+            lf.set_time_heterogeneity(**self._time_het)
             lf.optimise(**self._opt_args)
             lf.name = aln.info.name
             alt_results[locus] = lf
@@ -142,16 +147,28 @@ class temporal_eop(ComposableAligned):
             null = evo.model(
                 "GN",
                 time_het=[
-                    dict(edges=self._edge_names, is_independent=False, upper=100)
+                    dict(
+                        edges=self._edge_names,
+                        is_independent=False,
+                        upper=RATE_PARAM_UPPER,
+                    )
                 ],
                 name=NULL_TEOP,
                 opt_args=self._opt_args,
+                upper=RATE_PARAM_UPPER,
             )
             alt = evo.model(
                 "GN",
                 name=ALT_TEOP,
                 opt_args=self._opt_args,
-                time_het=[dict(edges=self._edge_names, is_independent=True, upper=100)],
+                time_het=[
+                    dict(
+                        edges=self._edge_names,
+                        is_independent=True,
+                        upper=RATE_PARAM_UPPER,
+                    )
+                ],
+                upper=RATE_PARAM_UPPER,
             )
             self._hyp = evo.hypothesis(null, alt)
         return self._hyp

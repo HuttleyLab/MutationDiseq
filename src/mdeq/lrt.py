@@ -3,6 +3,7 @@ from cogent3.app.composable import SERIALISABLE_TYPE, appify
 from cogent3.app.result import generic_result
 from cogent3.util.misc import extend_docstring_from
 
+from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
 
@@ -63,9 +64,15 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
     lf_args = dict(discrete_edges=bg_edges, expm="pade")
-
     models = [
-        evo.model(mn, tree=tree, sm_args=sm_args, opt_args=opt_args, lf_args=lf_args)
+        evo.model(
+            mn,
+            tree=tree,
+            sm_args=sm_args,
+            opt_args=opt_args,
+            lf_args=lf_args,
+            time_het=dict(upper=RATE_PARAM_UPPER),
+        )
         for mn in model_names
     ]
     return evo.model_collection(*models, sequential=sequential)
