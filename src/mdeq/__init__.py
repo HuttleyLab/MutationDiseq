@@ -3,6 +3,7 @@
 # following line to stop automatic threading by numpy
 from mdeq import _block_threading  # isort: skip  # make sure this stays at the top
 import pathlib
+import sys
 
 from warnings import filterwarnings
 
@@ -34,6 +35,14 @@ filterwarnings("ignore", "Unexpected warning from scipy")
 filterwarnings("ignore", "using slow exponentiator")
 filterwarnings("ignore", ".*creased to keep within bounds")
 filterwarnings("ignore", "Used mean of.*", module="cogent3")
+
+_min_version = (3, 10)
+if sys.version_info < _min_version:
+    PY_VERSION = ".".join([str(n) for n in sys.version_info])
+    _min_version = ".".join(_min_version)
+    raise RuntimeError(
+        f"Python-{_min_version} or greater is required, Python-{PY_VERSION} used."
+    )
 
 
 def get_opt_settings(testrun):
