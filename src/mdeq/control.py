@@ -1,5 +1,6 @@
 import pathlib
 
+from random import Random
 from typing import Union
 
 from cogent3 import ArrayAlignment
@@ -46,14 +47,15 @@ class control_generator(Composable):
             output_types=(SERIALISABLE_TYPE, ALIGNED_TYPE),
         )
         self._select_model = model_selector
-        self._seed = seed
+        self._rng = Random()
+        self._rng.seed(a=seed)
         self.func = self.gen
 
     def _from_single_model_single_locus(self, result) -> ArrayAlignment:
         source = pathlib.Path(result.source).stem
         # conventional model object
         model = self._select_model(result)
-        sim = model.lf.simulate_alignment(seed=self._seed)
+        sim = model.lf.simulate_alignment(seed=self._rng)
         sim.info.source = source
         return sim
 
