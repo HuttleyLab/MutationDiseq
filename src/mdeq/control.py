@@ -37,7 +37,7 @@ class select_model_result:
 
 
 class control_generator(Composable):
-    def __init__(self, model_selector):
+    def __init__(self, model_selector, seed=None):
         super(control_generator, self).__init__(
             input_types=(
                 SERIALISABLE_TYPE,
@@ -46,13 +46,14 @@ class control_generator(Composable):
             output_types=(SERIALISABLE_TYPE, ALIGNED_TYPE),
         )
         self._select_model = model_selector
+        self._seed = seed
         self.func = self.gen
 
     def _from_single_model_single_locus(self, result) -> ArrayAlignment:
         source = pathlib.Path(result.source).stem
         # conventional model object
         model = self._select_model(result)
-        sim = model.lf.simulate_alignment()
+        sim = model.lf.simulate_alignment(seed=self._seed)
         sim.info.source = source
         return sim
 

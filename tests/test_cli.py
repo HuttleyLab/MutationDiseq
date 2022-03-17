@@ -211,28 +211,31 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
     for path in outpaths:
         control = "-ve" if "neg" in path else "+ve"
         outpath = tmp_dir / path
-        args = [
-            "-i",
-            f"{inpath}",
-            "-a",
-            analysis,
-            "--controls",
-            control,
-            "-o",
-            f"{outpath}",
-            "-O",
-        ]
-        # make_controls(args)  # useful for debugging
-        r = runner.invoke(make_controls, args)
-        assert r.exit_code == 0, r.output
+        for seed in (None, 123):
+            args = [
+                "-i",
+                f"{inpath}",
+                "-a",
+                analysis,
+                "--controls",
+                control,
+                "-o",
+                f"{outpath}",
+                "-O",
+                f"-s{seed}",
+            ]
+            args = args if seed else args[:-1]
+            # make_controls(args)  # useful for debugging
+            r = runner.invoke(make_controls, args)
+            assert r.exit_code == 0, r.output
 
-        loader = io.load_db()
-        dstore = io.get_data_store(outpath)
-        results = [loader(m) for m in dstore]
-        for r in results:
-            assert isinstance(r, result_type)
+            loader = io.load_db()
+            dstore = io.get_data_store(outpath)
+            results = [loader(m) for m in dstore]
+            for r in results:
+                assert isinstance(r, result_type)
 
-        dstore.close()
+            dstore.close()
 
     # now with incorrect input
     invalidinput = DATADIR / "300bp.tinydb"

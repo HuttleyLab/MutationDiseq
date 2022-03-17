@@ -158,9 +158,10 @@ def test_gen_aeop_null(aeop_result):
         assert all(isinstance(e, ArrayAlignment) for e in r.elements)
 
     selector = control.select_model_result(NULL_AEOP)
-    gen = control.control_generator(selector)
     for result in aeop_result:
-        validate_for_result(gen, result)
+        for seed in (None, 123):
+            gen = control.control_generator(selector, seed=seed)
+            validate_for_result(gen, result)
 
 
 def test_gen_aeop_alt(aeop_result):

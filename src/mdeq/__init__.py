@@ -1,7 +1,6 @@
 """mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
-
 from mdeq import _block_threading  # isort: skip  # make sure this stays at the top
 import pathlib
 
@@ -44,6 +43,13 @@ def get_opt_settings(testrun):
         if testrun
         else None
     )
+
+
+def _rand_seed(*args):
+    """handles random seed input"""
+    import time
+
+    return int(args[-1]) if args[-1] else int(time.time())
 
 
 def _process_comma_seq(*args):
@@ -118,7 +124,13 @@ _treepath = click.option(
 _num_reps = click.option(
     "-n", "num_reps", type=int, default=100, help="number of samples to simulate"
 )
-_seed = click.option("-s", "--seed", type=int, help="seed for random number generator")
+_seed = click.option(
+    "-s",
+    "--seed",
+    callback=_rand_seed,
+    default=None,
+    help="seed for random number generator, defaults to system clock",
+)
 _verbose = click.option("-v", "--verbose", count=True)
 _limit = click.option("-L", "--limit", type=int, default=None)
 _overwrite = click.option("-O", "--overwrite", is_flag=True)
@@ -355,12 +367,13 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
     required=True,
     help="which control set to generate",
 )
+@_seed
 @_limit
 @_overwrite
 @_verbose
 @_testrun
 def make_controls(
-    inpath, outpath, analysis, controls, limit, overwrite, verbose, testrun
+    inpath, outpath, analysis, controls, seed, limit, overwrite, verbose, testrun
 ):
     """simulate negative and positive controls
 
@@ -369,7 +382,6 @@ def make_controls(
     A single simulated record is produced for each input record.
     """
     LOGGER = CachingLogger(create_dir=True)
-    # todo support specifying the rng seed
     LOGGER.log_file_path = outpath.parent / "mdeq-make_controls.log"
     LOGGER.log_args()
     # create loader, read a single result and validate the type matches the controls choice
@@ -400,7 +412,7 @@ def make_controls(
     model_selector = select_model_result(model_name)
 
     loader = io.load_db()
-    generator = control.control_generator(model_selector)
+    generator = control.control_generator(model_selector, seed=seed)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
