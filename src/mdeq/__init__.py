@@ -22,7 +22,7 @@ from mdeq.control import select_model_result
 from mdeq.convergence import bootstrap_to_nabla
 from mdeq.eop import ALT_AEOP, ALT_TEOP, NULL_AEOP, NULL_TEOP
 from mdeq.lrt import ALT_TOE, NULL_TOE
-from mdeq.utils import get_obj_type
+from mdeq.utils import configure_parallel, get_obj_type
 
 
 __author__ = "Gavin Huttley"
@@ -77,8 +77,7 @@ def _gene_order_table(*args):
 
     table = load_table(args[-1])
     required = {"name", "coord_name", "start"}
-    missing = required - set(table.header)
-    if missing:
+    if missing := required - set(table.header):
         raise ValueError(f"missing {missing!r} columns from gene order table")
 
     return table[:, list(required)]
@@ -158,6 +157,15 @@ _bg_edge = click.option(
     callback=_process_comma_seq,
     help="apply discrete-time process to these edges",
 )
+_mpi = click.option(
+    "-m", "--mpi", type=int, default=0, help="use MPI with this number of procs"
+)
+_parallel = click.option(
+    "-p",
+    "--parallel",
+    is_flag=True,
+    help="run in parallel (on single machine)",
+)
 
 
 @main.command()
@@ -210,6 +218,8 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 @_outpath
 @_bg_edge
 @_num_reps
+@_parallel
+@_mpi
 @_limit
 @_overwrite
 @_verbose
@@ -220,6 +230,8 @@ def toe(
     outpath,
     background_edges,
     num_reps,
+    parallel,
+    mpi,
     limit,
     overwrite,
     verbose,
@@ -246,7 +258,10 @@ def toe(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     process = loader + bstrapper + writer
-    process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
+    kwargs = configure_parallel(parallel=parallel, mpi=mpi)
+    process.apply_to(
+        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
+    )
     click.secho("Done!", fg="green")
 
 
@@ -261,11 +276,24 @@ def toe(
     required=True,
     help="comma separated edge names to test for equivalence",
 )
+@_parallel
+@_mpi
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testrun):
+def teop(
+    inpath,
+    outpath,
+    treepath,
+    edge_names,
+    parallel,
+    mpi,
+    limit,
+    overwrite,
+    verbose,
+    testrun,
+):
     """between branch equivalence of mutation process test"""
     from .eop import adjacent_eop, temporal_eop
 
@@ -287,26 +315,41 @@ def teop(inpath, outpath, treepath, edge_names, limit, overwrite, verbose, testr
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     process = loader + teop + writer
-    process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
+    kwargs = configure_parallel(parallel=parallel, mpi=mpi)
+    process.apply_to(
+        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
+    )
     click.secho("Done!", fg="green")
 
 
-# todo add args for parallelisation
 @main.command()
 @_inpath
 @_outpath
 @_treepath
 @click.option(
-    "-s",
+    "-m",
     "--share_mprobs",
     is_flag=True,
     help="constrain loci to have the same motif probs",
 )
+@_parallel
+@_mpi
 @_limit
 @_overwrite
 @_verbose
 @_testrun
-def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, testrun):
+def aeop(
+    inpath,
+    outpath,
+    treepath,
+    share_mprobs,
+    parallel,
+    mpi,
+    limit,
+    overwrite,
+    verbose,
+    testrun,
+):
     """between loci equivalence of mutation process test"""
     from .adjacent import load_data_group, physically_adjacent
     from .eop import adjacent_eop
@@ -330,17 +373,22 @@ def aeop(inpath, outpath, treepath, share_mprobs, limit, overwrite, verbose, tes
         tree=treepath, opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
     )
     process = loader + test_adjacent + writer
-    _ = process.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1)
+    kwargs = configure_parallel(parallel=parallel, mpi=mpi)
+    _ = process.apply_to(
+        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1, **kwargs
+    )
     click.secho("Done1", fg="green")
 
 
 @main.command()
 @_inpath
 @_outpath
+@_parallel
+@_mpi
 @_limit
 @_overwrite
 @_verbose
-def convergence(inpath, outpath, limit, overwrite, verbose):
+def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-convergence.log"
@@ -357,7 +405,10 @@ def convergence(inpath, outpath, limit, overwrite, verbose):
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     process = loader + to_delta_nabla + writer
-    r = process.apply_to(dstore, logger=True, cleanup=True, show_progress=verbose > 1)
+    kwargs = configure_parallel(parallel=parallel, mpi=mpi)
+    r = process.apply_to(
+        dstore, logger=True, cleanup=True, show_progress=verbose > 1, **kwargs
+    )
 
 
 @main.command()

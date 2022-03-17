@@ -70,3 +70,12 @@ def get_obj_type(dstore):
 
     data = json.loads(dstore[0].read())
     return data["type"].split(".")[-1]
+
+
+def configure_parallel(parallel: bool, mpi: int) -> dict:
+    """returns parallel configuration settings for use as composable.apply_to(**config)"""
+    mpi = None if mpi < 2 else mpi  # no point in MPI if < 2 processors
+    parallel = True if mpi else parallel
+    par_kw = dict(max_workers=mpi, use_mpi=True) if mpi else None
+
+    return {"parallel": parallel, "par_kw": par_kw}

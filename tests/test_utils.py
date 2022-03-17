@@ -2,7 +2,7 @@ import pytest
 
 from cogent3 import make_aligned_seqs
 
-from mdeq.utils import foreground_from_jsd, get_foreground
+from mdeq.utils import configure_parallel, foreground_from_jsd, get_foreground
 
 
 __author__ = "Katherine Caley"
@@ -35,3 +35,14 @@ def test_foreground_from_jsd(aln):
     aln = aln.take_seqs(["Human", "Bandicoot", "Rhesus"])
     fg_edge = foreground_from_jsd(aln)
     assert fg_edge is not None
+
+
+def test_configure_par():
+    got = configure_parallel(False, 0)
+    assert got == dict(parallel=False, par_kw=None)
+    got = configure_parallel(False, 3)
+    assert got == dict(parallel=True, par_kw=dict(max_workers=3, use_mpi=True))
+    got = configure_parallel(True, 3)
+    assert got == dict(parallel=True, par_kw=dict(max_workers=3, use_mpi=True))
+    got = configure_parallel(True, 0)
+    assert got == dict(parallel=True, par_kw=None)
