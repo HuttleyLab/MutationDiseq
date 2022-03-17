@@ -19,7 +19,7 @@ from mdeq import (
 )
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
-from mdeq.control import select_model_result
+from mdeq.control import control_generator, select_model_result
 from mdeq.convergence import bootstrap_to_nabla
 from mdeq.eop import (
     ALT_AEOP,
@@ -469,7 +469,7 @@ def make_controls(
     model_selector = select_model_result(model_name)
 
     loader = io.load_db()
-    generator = control.control_generator(model_selector, seed=seed)
+    generator = control_generator(model_selector, seed=seed)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
