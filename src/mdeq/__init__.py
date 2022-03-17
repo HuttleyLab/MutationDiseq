@@ -2,6 +2,7 @@
 
 # following line to stop automatic threading by numpy
 from mdeq import _block_threading  # isort: skip  # make sure this stays at the top
+import inspect
 import pathlib
 import sys
 
@@ -211,7 +212,8 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
         writer(record)
 
     writer.data_store.close()
-    click.secho("Done!", fg="green")
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command()
@@ -264,7 +266,8 @@ def toe(
     process.apply_to(
         dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
     )
-    click.secho("Done!", fg="green")
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command()
@@ -319,7 +322,8 @@ def teop(
     process.apply_to(
         dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
     )
-    click.secho("Done!", fg="green")
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command()
@@ -374,7 +378,8 @@ def aeop(
     _ = process.apply_to(
         dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1, **kwargs
     )
-    click.secho("Done1", fg="green")
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command()
@@ -406,6 +411,8 @@ def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
     r = process.apply_to(
         dstore, logger=True, cleanup=True, show_progress=verbose > 1, **kwargs
     )
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command()
@@ -475,7 +482,8 @@ def make_controls(
     )
     proc = loader + generator + writer
     proc.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
-    click.secho("Done!", fg="green")
+    func_name = inspect.stack()[0].function
+    click.secho(f"{func_name!r} is done!", fg="green")
 
 
 # todo postprocess functions, generate figures, tabulate data
