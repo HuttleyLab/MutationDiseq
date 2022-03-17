@@ -9,18 +9,26 @@ from warnings import filterwarnings
 
 import click
 
-from cogent3 import load_tree
+from cogent3 import load_table, load_tree
 from cogent3.app import io
 from scitrack import CachingLogger
+from tqdm import tqdm
 
-from mdeq import adjacent as _adjacent
 from mdeq import (
-    model as _model,  # to ensure registration of define substitution models
+    model as _model,  # required to ensure registration of define substitution models
 )
+from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import select_model_result
 from mdeq.convergence import bootstrap_to_nabla
-from mdeq.eop import ALT_AEOP, ALT_TEOP, NULL_AEOP, NULL_TEOP
+from mdeq.eop import (
+    ALT_AEOP,
+    ALT_TEOP,
+    NULL_AEOP,
+    NULL_TEOP,
+    adjacent_eop,
+    temporal_eop,
+)
 from mdeq.lrt import ALT_TOE, NULL_TOE
 from mdeq.utils import configure_parallel, get_obj_type
 
@@ -73,8 +81,6 @@ def _gene_order_table(*args):
     ------
     ValueError if required column names are not present
     """
-    from cogent3 import load_table
-
     table = load_table(args[-1])
     required = {"name", "coord_name", "start"}
     if missing := required - set(table.header):
@@ -185,10 +191,6 @@ _parallel = click.option(
 @_testrun
 def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
     """makes tinydb of adjacent alignment records."""
-    from tqdm import tqdm
-
-    from .adjacent import load_data_group, physically_adjacent
-
     LOGGER = CachingLogger(create_dir=True)
 
     LOGGER.log_file_path = outpath.parent / "mdeq-make_adjacent.log"
@@ -295,8 +297,6 @@ def teop(
     testrun,
 ):
     """between branch equivalence of mutation process test"""
-    from .eop import adjacent_eop, temporal_eop
-
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
     LOGGER.log_args()
@@ -351,9 +351,6 @@ def aeop(
     testrun,
 ):
     """between loci equivalence of mutation process test"""
-    from .adjacent import load_data_group, physically_adjacent
-    from .eop import adjacent_eop
-
     LOGGER = CachingLogger(create_dir=True)
 
     LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
