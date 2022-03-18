@@ -194,7 +194,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     """makes tinydb of adjacent alignment records."""
     LOGGER = CachingLogger(create_dir=True)
 
-    LOGGER.log_file_path = outpath.parent / "mdeq-make_adjacent.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-make_adjacent.log"
     LOGGER.log_args()
 
     # we get member names from input dstore
@@ -246,7 +246,7 @@ def toe(
     #  alignment for decorating alignments with the foreground edge
     # or check alignment.info for a fg_edge key -- all synthetic data
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = outpath.parent / "mdeq-toe.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-toe.log"
     LOGGER.log_args()
 
     dstore = io.get_data_store(inpath, limit=limit)
@@ -301,7 +301,7 @@ def teop(
 ):
     """between branch equivalence of mutation process test"""
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = outpath.parent / "mdeq-teop.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-teop.log"
     LOGGER.log_args()
 
     dstore = io.get_data_store(inpath, limit=limit)
@@ -356,8 +356,7 @@ def aeop(
 ):
     """between loci equivalence of mutation process test"""
     LOGGER = CachingLogger(create_dir=True)
-
-    LOGGER.log_file_path = outpath.parent / "mdeq-aeop.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-aeop.log"
     LOGGER.log_args()
 
     dstore = io.get_data_store(inpath, limit=limit)
@@ -393,7 +392,7 @@ def aeop(
 def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = outpath.parent / "mdeq-convergence.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
     LOGGER.log_args()
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("compact_bootstrap_result",)
@@ -446,7 +445,7 @@ def make_controls(
     A single simulated record is produced for each input record.
     """
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = outpath.parent / "mdeq-make_controls.log"
+    LOGGER.log_file_path = f"{outpath.stem}-mdeq-make_controls.log"
     LOGGER.log_args()
     # create loader, read a single result and validate the type matches the controls choice
     # validate the model choice too
