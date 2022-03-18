@@ -263,7 +263,8 @@ def toe(
     )
     process = loader + bstrapper + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
-    kwargs["par_kw"]["chunksize"] = 1
+    if mpi:
+        kwargs["par_kw"]["chunksize"] = 1
     process.apply_to(
         dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
     )
