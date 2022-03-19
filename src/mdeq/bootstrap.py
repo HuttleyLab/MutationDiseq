@@ -1,4 +1,6 @@
 from copy import deepcopy
+from pickle import dumps, loads
+from zlib import compress, decompress
 
 from cogent3.app import evo
 from cogent3.app.composable import (
@@ -83,6 +85,15 @@ def as_hypothesis_result(result):
 class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
+    def __setitem__(self, key, data):
+        # bypass the validation checks and put compressed pickle straight
+        # into self._store
+        self._store[key] = compress(dumps(data))
+
+    def __getitem__(self, key):
+        # decompress the values on the fly
+        return loads(decompress(self._store[key]))
+
     def to_rich_dict(self):
         rd = super(self.__class__, self).to_rich_dict()
         # dict is modified within _eliminated_redundant_aln_in_place(
@@ -152,10 +163,13 @@ class bootstrap(ComposableHypothesis):
         result.observed = obs
         self._null = obs["GSN"]
         self._inpath = aln.info.source
+        for i in range(self._num_reps):
+            sim_result = self._fit_sim(i)
+            if not sim_result:
+                continue
 
-        sim_results = [r for r in map(self._fit_sim, range(self._num_reps)) if r]
-        for sim_result in sim_results:
             result.add_to_null(sim_result)
+            del sim_result
 
         return result
 
