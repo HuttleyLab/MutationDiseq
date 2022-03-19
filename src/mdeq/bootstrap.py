@@ -1,5 +1,5 @@
 from copy import deepcopy
-from pickle import dumps, loads
+from json import loads
 from zlib import compress, decompress
 
 from cogent3.app import evo
@@ -38,7 +38,7 @@ def _reconstitute_collection(data):
 
 @deserialise.register_deserialiser("compact_bootstrap_result")
 def deserialise_compact(data):
-    """returns a model_collection_result."""
+    """returns a compact_bootstrap_result."""
     result_obj = compact_bootstrap_result(**data["result_construction"])
 
     for key, item in data["items"]:
@@ -88,11 +88,12 @@ class compact_bootstrap_result(bootstrap_result):
     def __setitem__(self, key, data):
         # bypass the validation checks and put compressed pickle straight
         # into self._store
-        self._store[key] = compress(dumps(data))
+        self._store[key] = compress(data.to_json().encode("utf8"))
 
     def __getitem__(self, key):
         # decompress the values on the fly
-        return loads(decompress(self._store[key]))
+        rd = loads(decompress(self._store[key]))
+        return deserialise.deserialise_object(rd)
 
     def to_rich_dict(self):
         rd = super(self.__class__, self).to_rich_dict()
