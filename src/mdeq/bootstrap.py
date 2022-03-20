@@ -86,8 +86,9 @@ class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
     def __setitem__(self, key, data):
-        # bypass the validation checks and put compressed pickle straight
+        # ignore validation checks, put compressed json straight
         # into self._store
+        # NOTE: json requires less memory and is faster than using pickle
         self._store[key] = compress(data.to_json().encode("utf8"))
 
     def __getitem__(self, key):
