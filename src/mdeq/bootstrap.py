@@ -12,10 +12,10 @@ from cogent3.app.composable import (
     NotCompleted,
     appify,
 )
-from cogent3.app.result import bootstrap_result, hypothesis_result
+from cogent3.app.result import bootstrap_result
 from cogent3.util import deserialise
 
-from mdeq.lrt import toe_on_edge
+from mdeq.lrt import ALT_TOE, NULL_TOE, toe_on_edge
 from mdeq.model import GN_sm, GS_sm
 
 
@@ -73,15 +73,6 @@ def _eliminated_redundant_aln_in_place(hyp_result):
     return
 
 
-def as_hypothesis_result(result):
-    if isinstance(result, hypothesis_result):
-        return result
-    r = hypothesis_result("GSN", source="blah")
-    r["GSN"] = result["GSN"]
-    r["GN"] = result["GN"]
-    return r
-
-
 class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
@@ -106,14 +97,14 @@ class compact_bootstrap_result(bootstrap_result):
 
     @property
     def pvalue(self):
-        obs = as_hypothesis_result(self.observed).LR
+        obs = self.observed.get_hypothesis_result(NULL_TOE, ALT_TOE).LR
         if obs < 0:  # not optimised correctly?
             return 1.0
 
         size_valid = 0
         num_ge = 0
         for k, v in self.items():
-            v = as_hypothesis_result(v)
+            v = v.get_hypothesis_result(NULL_TOE, ALT_TOE)
             if k != "observed" or v.LR < 0:
                 continue
 
@@ -163,7 +154,7 @@ class bootstrap(ComposableHypothesis):
             return NotCompleted("ERROR", str(self._hyp), err.args[0])
 
         result.observed = obs
-        self._null = obs["GSN"]
+        self._null = obs[NULL_TOE]
         self._inpath = aln.info.source
         for i in range(self._num_reps):
             sim_result = self._fit_sim(i)
