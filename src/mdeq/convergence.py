@@ -1,12 +1,12 @@
 import json
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
 
 from accupy import fdot as dot
 from accupy import fsum as sum
-from cogent3.app.composable import SERIALISABLE_TYPE, appify
+from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.recalculation.scope import InvalidScopeError
 from cogent3.util import deserialise
@@ -229,6 +229,9 @@ def get_delta_nabla(
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
 def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
     """returns delta nabla stats from bootstrap result."""
+    if isinstance(result, NotCompleted):
+        return result
+
     null_results = [r["GN"] for k, r in result.items() if k != "observed"]
     obs_result = result["observed"]["GN"]
     return get_delta_nabla(

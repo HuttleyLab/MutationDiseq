@@ -153,6 +153,9 @@ class bootstrap(ComposableHypothesis):
         except ValueError as err:
             return NotCompleted("ERROR", str(self._hyp), err.args[0])
 
+        if isinstance(obs, NotCompleted):
+            return obs
+
         result.observed = obs
         self._null = obs[NULL_TOE]
         self._inpath = aln.info.source
@@ -185,6 +188,8 @@ def create_bootstrap_app(tree=None, num_reps=100, discrete_edges=None, opt_args=
 )
 def bootstrap_toe(aln, tree=None, num_reps=100, sequential=False, opt_args=None):
     """dynamically constructs a bootstrap app and performs the toe."""
+    if isinstance(aln, NotCompleted):
+        return aln
     hyp = toe_on_edge(
         aln, tree=tree, with_gtr=False, sequential=sequential, opt_args=opt_args
     )

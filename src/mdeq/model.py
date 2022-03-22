@@ -65,9 +65,10 @@ def mles_within_bounds(
     result if parameter estimate are further from the boundaries than machine
     precision epsilon, NotCompleted otherwise
     """
-    exclude_cols = {"edge", "parent", "length"}
-    if not result:  # handle case where result is NotCompleted
+    if isinstance(result, NotCompleted):
         return result
+
+    exclude_cols = {"edge", "parent", "length"}
 
     tables = result.lf.get_statistics()
     for table in tables:

@@ -1,5 +1,5 @@
 from cogent3.app import evo
-from cogent3.app.composable import SERIALISABLE_TYPE, appify
+from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
 from cogent3.app.result import generic_result
 from cogent3.util.misc import extend_docstring_from
 
@@ -17,6 +17,9 @@ ALT_TOE = "GN"
 
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_lrt(mc):
+    if isinstance(mc, NotCompleted):
+        return mc
+
     hyp = mc["mcr"].get_hypothesis_result("GSN", "GN")
     hyp.source = hyp.source["source"]
     return hyp
@@ -107,6 +110,9 @@ def get_init_model_coll(aln, opt_args=None):
 
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_no_init_hypothesis(aln, opt_args=None):
+    if isinstance(aln, NotCompleted):
+        return aln
+
     mc_result = toe_on_edge(aln, with_gtr=False, sequential=False, opt_args=opt_args)(
         aln
     )
@@ -118,6 +124,9 @@ def get_no_init_hypothesis(aln, opt_args=None):
 @extend_docstring_from(toe_on_edge)
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
 def get_init_hypothesis(aln, opt_args=None):
+    if isinstance(aln, NotCompleted):
+        return aln
+
     mc_result = toe_on_edge(aln, with_gtr=True, sequential=True, opt_args=opt_args)(aln)
     result = generic_result(source=aln.info.source)
     result.update([("mcr", mc_result)])
