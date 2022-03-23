@@ -1,22 +1,40 @@
 """mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
-from mdeq import _block_threading  # isort: skip  # make sure this stays at the top
 import inspect
-import pathlib
 import sys
 
 from warnings import filterwarnings
 
 import click
 
-from cogent3 import load_table, load_tree
 from cogent3.app import io
 from scitrack import CachingLogger
 from tqdm import tqdm
 
 from mdeq import (
     model as _model,  # required to ensure registration of define substitution models
+)
+from mdeq._click_options import (
+    _analysis,
+    _bg_edge,
+    _controls,
+    _edge_names,
+    _gene_order,
+    _gene_order_table,
+    _inpath,
+    _limit,
+    _mpi,
+    _num_reps,
+    _outpath,
+    _overwrite,
+    _parallel,
+    _process_comma_seq,
+    _seed,
+    _share_mprobs,
+    _testrun,
+    _treepath,
+    _verbose,
 )
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
@@ -63,57 +81,6 @@ def get_opt_settings(testrun):
     )
 
 
-def _rand_seed(*args):
-    """handles random seed input"""
-    import time
-
-    return int(args[-1]) if args[-1] else int(time.time())
-
-
-def _process_comma_seq(*args):
-    val = args[-1]
-    return val.split(",") if val else val
-
-
-def _gene_order_table(*args):
-    """returns a cogent3 Table with required columns.
-
-    Raises
-    ------
-    ValueError if required column names are not present
-    """
-    table = load_table(args[-1])
-    required = {"name", "coord_name", "start"}
-    if missing := required - set(table.header):
-        raise ValueError(f"missing {missing!r} columns from gene order table")
-
-    return table[:, list(required)]
-
-
-def _valid_path(path, must_exist):
-    path = pathlib.Path(path)
-    if must_exist and not path.exists():
-        raise ValueError(f"{path!r} does not exist")
-
-    if path.suffix != ".tinydb":
-        raise ValueError(f"{path!r} is not a tinydb")
-    return path
-
-
-def _valid_tinydb_input(*args):
-    # input path must exist!
-    return _valid_path(args[-1], True)
-
-
-def _valid_tinydb_output(*args):
-    return _valid_path(args[-1], False)
-
-
-def _load_tree(*args):
-    path = args[-1]
-    return load_tree(path) if path else path
-
-
 @click.group()
 @click.version_option(__version__)
 def main():
@@ -121,70 +88,9 @@ def main():
     pass
 
 
-_inpath = click.option(
-    "-i", "--inpath", callback=_valid_tinydb_input, help="path to a tinydb of aligments"
-)
-_outpath = click.option(
-    "-o",
-    "--outpath",
-    callback=_valid_tinydb_output,
-    help="path to create a result tinydb",
-)
-_treepath = click.option(
-    "-T",
-    "--treepath",
-    callback=_load_tree,
-    help="path to newick formatted phylogenetic tree",
-)
-_num_reps = click.option(
-    "-n", "num_reps", type=int, default=100, help="number of samples to simulate"
-)
-_seed = click.option(
-    "-s",
-    "--seed",
-    callback=_rand_seed,
-    default=None,
-    help="seed for random number generator, defaults to system clock",
-)
-_verbose = click.option("-v", "--verbose", count=True)
-_limit = click.option("-L", "--limit", type=int, default=None)
-_overwrite = click.option("-O", "--overwrite", is_flag=True)
-_testrun = click.option(
-    "-t",
-    "--testrun",
-    is_flag=True,
-    help="don't write anything, quick (but inaccurate) optimisation",
-)
-_fg_edge = click.option(
-    "-fg", "--foreground_edge", help="foreground edge to test for equilibrium"
-)
-_bg_edge = click.option(
-    "-bg",
-    "--background_edges",
-    callback=_process_comma_seq,
-    help="apply discrete-time process to these edges",
-)
-_mpi = click.option(
-    "-m", "--mpi", type=int, default=0, help="use MPI with this number of procs"
-)
-_parallel = click.option(
-    "-p",
-    "--parallel",
-    is_flag=True,
-    help="run in parallel (on single machine)",
-)
-
-
 @main.command()
 @_inpath
-@click.option(
-    "-g",
-    "--gene_order",
-    required=True,
-    callback=_gene_order_table,
-    help="path to gene order table, note must contain"
-    " 'name', 'coord_name' and 'start' columns",
-)
+@_gene_order
 @_outpath
 @_limit
 @_overwrite
@@ -276,13 +182,7 @@ def toe(
 @_inpath
 @_outpath
 @_treepath
-@click.option(
-    "-e",
-    "--edge_names",
-    callback=_process_comma_seq,
-    required=True,
-    help="comma separated edge names to test for equivalence",
-)
+@_edge_names
 @_parallel
 @_mpi
 @_limit
@@ -332,12 +232,7 @@ def teop(
 @_inpath
 @_outpath
 @_treepath
-@click.option(
-    "-m",
-    "--share_mprobs",
-    is_flag=True,
-    help="constrain loci to have the same motif probs",
-)
+@_share_mprobs
 @_parallel
 @_mpi
 @_limit
@@ -419,19 +314,8 @@ def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
 @main.command()
 @_inpath
 @_outpath
-@click.option(
-    "-a",
-    "--analysis",
-    type=click.Choice(["aeop", "teop", "toe", "single-model"]),
-    required=True,
-    help="which control set to generate",
-)
-@click.option(
-    "--controls",
-    type=click.Choice(["-ve", "+ve"]),
-    required=True,
-    help="which control set to generate",
-)
+@_analysis
+@_controls
 @_seed
 @_limit
 @_overwrite

@@ -6,8 +6,6 @@ from click.testing import CliRunner
 
 from mdeq import (
     _gene_order_table,
-    _valid_tinydb_input,
-    _valid_tinydb_output,
     aeop,
     convergence,
     get_obj_type,
@@ -16,7 +14,7 @@ from mdeq import (
     teop,
     toe,
 )
-
+from mdeq._click_options import _valid_tinydb_input, _valid_tinydb_output
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
