@@ -16,6 +16,7 @@ from mdeq import (
 )
 from mdeq._click_options import _valid_tinydb_input, _valid_tinydb_output
 
+
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
 

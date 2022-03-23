@@ -105,7 +105,7 @@ class compact_bootstrap_result(bootstrap_result):
         num_ge = 0
         for k, v in self.items():
             v = v.get_hypothesis_result(NULL_TOE, ALT_TOE)
-            if k != "observed" or v.LR < 0:
+            if k == "observed" or v.LR < 0:
                 continue
 
             size_valid += 1

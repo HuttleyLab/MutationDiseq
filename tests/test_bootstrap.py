@@ -35,8 +35,13 @@ def aln():
 
 
 @pytest.fixture()
-def dstore_instance():
+def aligns_dstore():
     return io.get_data_store(DATADIR / "3000bp.tinydb")
+
+
+@pytest.fixture()
+def bstrap_result_dstore():
+    return io.get_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.tinydb")
 
 
 def test_create_bootstrap_app(aln, opt_args):
@@ -58,14 +63,14 @@ def test_deserialise_compact_boostrap_result(aln, opt_args):
     assert isinstance(got, compact_bootstrap_result)
 
 
-def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
+def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
     bstrap = create_bootstrap_app(num_reps=2, opt_args=opt_args)
     process = reader + bstrap + writer
 
-    process.apply_to(dstore_instance[:1])
+    process.apply_to(aligns_dstore[:1])
     assert len(process.data_store.summary_incomplete) == 0
     writer.data_store.close()
 
@@ -77,11 +82,18 @@ def test_create_bootstrap_app_composable(tmp_path, dstore_instance, opt_args):
     assert isinstance(pvalue, float)
 
 
-def test_estimate_pval(aln, opt_args):
-    opt_args["max_evaluations"] = 2000
-    bstrap = bootstrap_toe(num_reps=2, sequential=True, opt_args=opt_args)
-    result = bstrap(aln)
+def test_estimate_pval(bstrap_result_dstore):
+    loader = io.load_db()
+    result = loader(bstrap_result_dstore[0])
     assert isinstance(result.pvalue, float)
+
+    num_reps = sum(k != "observed" for k in result)
+    obs_lr = result.observed.get_hypothesis_result("GSN", "GN").LR
+    num_ge_obs = (
+        sum(result[k].get_hypothesis_result("GSN", "GN").LR >= obs_lr for k in result)
+        - 1
+    )  # adjust for comparing observed to itself
+    assert result.pvalue == num_ge_obs / num_reps
 
 
 @pytest.fixture(scope="session")
