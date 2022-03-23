@@ -146,3 +146,9 @@ _controls = click.option(
     required=True,
     help="which control set to generate",
 )
+_just_continuous = click.option(
+    "-J",
+    "--just_continuous",
+    is_flag=True,
+    help="no discrete-time edges",
+)
