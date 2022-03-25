@@ -175,7 +175,9 @@ class bootstrap(ComposableHypothesis):
 
 
 # todo reconcile usage and overlap between this and bootstrap_toe
-def create_bootstrap_app(tree=None, num_reps=100, discrete_edges=None, opt_args=None):
+def create_bootstrap_app(
+    tree=None, num_reps=100, discrete_edges=None, opt_args=None, verbose=False
+):
     """wrapper of cogent3.app.evo.bootstrap with hypothesis of GSN as the null
     and GN as the alternate."""
 
@@ -183,19 +185,21 @@ def create_bootstrap_app(tree=None, num_reps=100, discrete_edges=None, opt_args=
     GN = GN_sm(tree=tree, discrete_edges=discrete_edges, opt_args=opt_args)
 
     hyp = evo.hypothesis(GS, GN, sequential=False)
-    return bootstrap(hyp, num_reps)
+    return bootstrap(hyp, num_reps, verbose=verbose)
 
 
 @appify(
     (SERIALISABLE_TYPE, ALIGNED_TYPE),
     (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE),
 )
-def bootstrap_toe(aln, tree=None, num_reps=100, sequential=False, opt_args=None):
+def bootstrap_toe(
+    aln, tree=None, num_reps=100, sequential=False, opt_args=None, verbose=False
+):
     """dynamically constructs a bootstrap app and performs the toe."""
     if isinstance(aln, NotCompleted):
         return aln
     hyp = toe_on_edge(
         aln, tree=tree, with_gtr=False, sequential=sequential, opt_args=opt_args
     )
-    bstrapper = bootstrap(hyp, num_reps)
+    bstrapper = bootstrap(hyp, num_reps, verbose=verbose)
     return bstrapper(aln)
