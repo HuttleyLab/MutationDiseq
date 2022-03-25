@@ -62,6 +62,9 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     model_names.extend([NULL_TOE, ALT_TOE])
 
     fg_edge = get_foreground(aln)
+    if fg_edge is None:
+        raise ValueError(f"alignment.info {aln.info!r} missing 'fg_edge' value")
+
     bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
