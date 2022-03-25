@@ -63,7 +63,6 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
 
     fg_edge = get_foreground(aln)
     bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
-    sm_args = dict(optimise_motif_probs=True)
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
     lf_args = dict(discrete_edges=bg_edges, expm="pade")
@@ -71,10 +70,10 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
         evo.model(
             mn,
             tree=tree,
-            sm_args=sm_args,
             opt_args=opt_args,
             lf_args=lf_args,
             time_het=dict(upper=RATE_PARAM_UPPER),
+            optimise_motif_probs=True,
         )
         for mn in model_names
     ]

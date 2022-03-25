@@ -29,10 +29,10 @@ def GS_sm(tree=None, discrete_edges=None, opt_args=None):
     return evo.model(
         GSN(),
         tree=tree,
-        sm_args=dict(optimise_motif_probs=True),
         opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
         upper=RATE_PARAM_UPPER,
+        optimise_motif_probs=True,
     )
 
 
@@ -43,10 +43,10 @@ def GN_sm(tree=None, discrete_edges=None, opt_args=None):
     return evo.model(
         "GN",
         tree=tree,
-        sm_args=dict(optimise_motif_probs=True),
         opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
         upper=RATE_PARAM_UPPER,
+        optimise_motif_probs=True,
     )
 
 

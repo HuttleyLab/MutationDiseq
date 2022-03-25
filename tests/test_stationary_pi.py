@@ -48,7 +48,7 @@ def likelihood_gtr(brca1_alignment):
 def likelihood_gn(brca1_alignment, likelihood_gtr):
     """optimised GS likelihood object initialised from GTR."""
 
-    gn = evo.model("GN", sm_args=dict(optimise_motif_probs=True), time_het="max")
+    gn = evo.model("GN", optimise_motif_probs=True, time_het="max")
     fitted_gn = gn(brca1_alignment)
     gn_lf = fitted_gn.lf
 
