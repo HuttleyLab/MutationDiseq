@@ -14,6 +14,7 @@ from cogent3.app.composable import (
 )
 from cogent3.app.result import bootstrap_result
 from cogent3.util import deserialise
+from tqdm import tqdm
 
 from mdeq.lrt import ALT_TOE, NULL_TOE, toe_on_edge
 from mdeq.model import GN_sm, GS_sm
@@ -141,11 +142,6 @@ class bootstrap(ComposableHypothesis):
         self._verbose = verbose
         self.func = self.run
 
-    def _fit_sim(self, rep_num):
-        sim_aln = self._null.simulate_alignment()
-        sim_aln.info.source = "%s - simalign %d" % (self._inpath, rep_num)
-        return self._hyp(sim_aln)
-
     def run(self, aln):
         result = compact_bootstrap_result(aln.info.source)
         try:
@@ -159,8 +155,16 @@ class bootstrap(ComposableHypothesis):
         result.observed = obs
         self._null = obs[NULL_TOE]
         self._inpath = aln.info.source
-        for i in range(self._num_reps):
-            sim_result = self._fit_sim(i)
+
+        series = range(self._num_reps)
+        if self._verbose:
+            series = tqdm(series)
+
+        for i in series:
+            sim_aln = self._null.simulate_alignment()
+            sim_aln.info.update(aln.info)
+            sim_aln.info.source = f"{self._inpath} - simalign {i}"
+            sim_result = self._hyp(sim_aln)
             if not sim_result:
                 continue
 
