@@ -27,7 +27,7 @@ def GS_sm(tree=None, discrete_edges=None, opt_args=None):
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
     return evo.model(
-        GSN(),
+        "GSN",
         tree=tree,
         opt_args=opt_args,
         lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
