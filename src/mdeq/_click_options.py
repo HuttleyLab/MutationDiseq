@@ -152,3 +152,9 @@ _just_continuous = click.option(
     is_flag=True,
     help="no discrete-time edges",
 )
+_sequential = click.option(
+    "-q",
+    "--sequential",
+    is_flag=True,
+    help="MLEs from simpler models are used to seed more complex ones",
+)

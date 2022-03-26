@@ -31,6 +31,7 @@ from mdeq._click_options import (
     _parallel,
     _process_comma_seq,
     _seed,
+    _sequential,
     _share_mprobs,
     _testrun,
     _treepath,
@@ -127,6 +128,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 @_treepath
 @_outpath
 @_bg_edge
+@_sequential
 @_num_reps
 @_parallel
 @_mpi
@@ -139,6 +141,7 @@ def toe(
     treepath,
     outpath,
     background_edges,
+    sequential,
     num_reps,
     parallel,
     mpi,
@@ -163,7 +166,9 @@ def toe(
 
     loader = io.load_db()
     opt_args = get_opt_settings(testrun)
-    bstrapper = bootstrap_toe(tree=treepath, num_reps=num_reps, opt_args=opt_args)
+    bstrapper = bootstrap_toe(
+        tree=treepath, num_reps=num_reps, opt_args=opt_args, sequential=sequential
+    )
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
