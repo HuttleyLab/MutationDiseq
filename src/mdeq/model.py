@@ -26,11 +26,15 @@ def GSN(**kwargs):
 def GS_sm(tree=None, discrete_edges=None, opt_args=None):
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
+
+    # turning off selection of pade for now, possibly related to
+    # cogent3 issue #993
+
     return evo.model(
         "GSN",
         tree=tree,
         opt_args=opt_args,
-        lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
+        lf_args=dict(discrete_edges=discrete_edges, expm=None),
         upper=RATE_PARAM_UPPER,
         optimise_motif_probs=True,
     )
@@ -44,7 +48,7 @@ def GN_sm(tree=None, discrete_edges=None, opt_args=None):
         "GN",
         tree=tree,
         opt_args=opt_args,
-        lf_args=dict(discrete_edges=discrete_edges, expm="pade"),
+        lf_args=dict(discrete_edges=discrete_edges, expm=None),
         upper=RATE_PARAM_UPPER,
         optimise_motif_probs=True,
     )

@@ -68,7 +68,9 @@ def toe_on_edge(aln, tree=None, with_gtr=False, sequential=False, opt_args=None)
     bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
     opt_args = opt_args or {}
     opt_args = {"max_restarts": 5, "tolerance": 1e-8, **opt_args}
-    lf_args = dict(discrete_edges=bg_edges, expm="pade")
+    # turning off selection of pade for now, possibly related to
+    # cogent3 issue #993
+    lf_args = dict(discrete_edges=bg_edges, expm=None)
     models = [
         evo.model(
             mn,
