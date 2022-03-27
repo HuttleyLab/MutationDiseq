@@ -95,11 +95,11 @@ _testrun = click.option(
     help="don't write anything, quick (but inaccurate) optimisation",
 )
 _fg_edge = click.option(
-    "-fg", "--foreground_edge", help="foreground edge to test for equilibrium"
+    "-fg", "--fg_edge", default=None, help="foreground edge to test for equilibrium"
 )
 _bg_edge = click.option(
     "-bg",
-    "--background_edges",
+    "--bg_edges",
     callback=_process_comma_seq,
     help="apply discrete-time process to these edges",
 )
@@ -150,7 +150,7 @@ _just_continuous = click.option(
     "-J",
     "--just_continuous",
     is_flag=True,
-    help="no discrete-time edges",
+    help="No discrete-time edges. Overrides any fg_edge settings in alignment.",
 )
 _sequential = click.option(
     "-q",

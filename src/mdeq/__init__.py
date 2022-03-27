@@ -17,12 +17,13 @@ from mdeq import (
 )
 from mdeq._click_options import (
     _analysis,
-    _bg_edge,
     _controls,
     _edge_names,
+    _fg_edge,
     _gene_order,
     _gene_order_table,
     _inpath,
+    _just_continuous,
     _limit,
     _mpi,
     _num_reps,
@@ -50,7 +51,7 @@ from mdeq.eop import (
     temporal_eop,
 )
 from mdeq.toe import ALT_TOE, NULL_TOE
-from mdeq.utils import configure_parallel, get_obj_type
+from mdeq.utils import configure_parallel, get_obj_type, set_fg_edge
 
 
 __author__ = "Gavin Huttley"
@@ -127,7 +128,8 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 @_inpath
 @_treepath
 @_outpath
-@_bg_edge
+@_just_continuous
+@_fg_edge
 @_sequential
 @_num_reps
 @_parallel
@@ -140,7 +142,8 @@ def toe(
     inpath,
     treepath,
     outpath,
-    background_edges,
+    just_continuous,
+    fg_edge,
     sequential,
     num_reps,
     parallel,
@@ -165,18 +168,48 @@ def toe(
         exit(1)
 
     loader = io.load_db()
+
+    # check consistency of just_continuous / fg_edge / aln.info
+    _aln = loader(dstore[0])
+    if just_continuous and fg_edge is not None:
+        click.secho(
+            f"WARN: setting just_continuous overrides {fg_edge!r} setting", fg="yellow"
+        )
+
+    # if fg_edge is specified then this value is checked for existence in alignment
+    if fg_edge is not None:
+        if fg_edge not in _aln.names:
+            click.secho(f"FAIL: {fg_edge!r} name not present in {_aln.names}", fg="red")
+            exit(1)
+
+        info_val = _aln.info.get("fg_edge", None)
+        if info_val and info_val != fg_edge:
+            click.secho(
+                f"WARN: fg_edge={fg_edge!r} will override aln.info.fg_edge={info_val!r}",
+                fg="yellow",
+            )
+
+    inject_fg = set_fg_edge(fg_edge=fg_edge) if fg_edge else None
     opt_args = get_opt_settings(testrun)
     bstrapper = bootstrap_toe(
-        tree=treepath, num_reps=num_reps, opt_args=opt_args, sequential=sequential
+        tree=treepath,
+        num_reps=num_reps,
+        opt_args=opt_args,
+        sequential=sequential,
+        just_continuous=just_continuous,
     )
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
-    process = loader + bstrapper + writer
+    if inject_fg:
+        app = loader + inject_fg + bstrapper + writer
+    else:
+        app = loader + bstrapper + writer
+
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     if mpi:
         kwargs["par_kw"]["chunksize"] = 1
-    process.apply_to(
+    app.apply_to(
         dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
     )
     func_name = inspect.stack()[0].function
