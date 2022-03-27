@@ -111,7 +111,7 @@ def test_select_teop(apes_dstore, opt_args):
 
 
 def test_gen_toe_null(toe_result):
-    from mdeq.lrt import NULL_TOE
+    from mdeq.toe import NULL_TOE
 
     selector = control.select_model_result(NULL_TOE)
     gen = control.control_generator(selector)
@@ -123,7 +123,7 @@ def test_gen_toe_null(toe_result):
 
 
 def test_gen_toe_alt(toe_result):
-    from mdeq.lrt import ALT_TOE
+    from mdeq.toe import ALT_TOE
 
     selector = control.select_model_result(ALT_TOE)
     gen = control.control_generator(selector)

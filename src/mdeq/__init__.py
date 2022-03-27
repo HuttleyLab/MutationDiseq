@@ -49,7 +49,7 @@ from mdeq.eop import (
     adjacent_eop,
     temporal_eop,
 )
-from mdeq.lrt import ALT_TOE, NULL_TOE
+from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import configure_parallel, get_obj_type
 
 

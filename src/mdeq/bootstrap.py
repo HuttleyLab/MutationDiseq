@@ -16,8 +16,8 @@ from cogent3.app.result import bootstrap_result
 from cogent3.util import deserialise
 from tqdm import tqdm
 
-from mdeq.lrt import ALT_TOE, NULL_TOE, toe_on_edge
 from mdeq.model import GN_sm, GS_sm
+from mdeq.toe import ALT_TOE, NULL_TOE, toe_on_edge
 
 
 __author__ = "Katherine Caley"
