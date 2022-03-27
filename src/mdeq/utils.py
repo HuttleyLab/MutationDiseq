@@ -2,6 +2,12 @@ import json
 
 from dataclasses import asdict
 
+from cogent3.app.composable import (
+    ALIGNED_TYPE,
+    SERIALISABLE_TYPE,
+    NotCompleted,
+    appify,
+)
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
 
@@ -79,3 +85,25 @@ def configure_parallel(parallel: bool, mpi: int) -> dict:
     par_kw = dict(max_workers=mpi, use_mpi=True) if mpi else None
 
     return {"parallel": parallel, "par_kw": par_kw}
+
+
+@appify((ALIGNED_TYPE, SERIALISABLE_TYPE), (ALIGNED_TYPE, SERIALISABLE_TYPE))
+def set_fg_edge(aln, fg_edge=None):
+    """sets aln.info_fg_edge to fg_edge"""
+    if fg_edge is None:
+        raise ValueError("fg_edge not set")
+
+    if isinstance(aln, NotCompleted):
+        return aln
+
+    assert fg_edge is not None
+    if fg_edge not in aln.names:
+        return NotCompleted(
+            "ERROR",
+            set_fg_edge.__name__,
+            f"{fg_edge!r} not in {aln.names}",
+            source=aln.info.source,
+        )
+
+    aln.info.fg_edge = fg_edge
+    return aln

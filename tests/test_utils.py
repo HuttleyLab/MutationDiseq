@@ -2,7 +2,12 @@ import pytest
 
 from cogent3 import make_aligned_seqs
 
-from mdeq.utils import configure_parallel, foreground_from_jsd, get_foreground
+from mdeq.utils import (
+    configure_parallel,
+    foreground_from_jsd,
+    get_foreground,
+    set_fg_edge,
+)
 
 
 __author__ = "Katherine Caley"
@@ -46,3 +51,27 @@ def test_configure_par():
     assert got == dict(parallel=True, par_kw=dict(max_workers=3, use_mpi=True))
     got = configure_parallel(True, 0)
     assert got == dict(parallel=True, par_kw=None)
+
+
+def test_set_fg_edge():
+    from cogent3.app.composable import NotCompleted
+
+    data = dict(a="ACCGG", b="ACCGG", c="ACCGG")
+    aln = make_aligned_seqs(data, info=dict(source="blah"))
+    app = set_fg_edge(fg_edge="c")
+    got = app(aln)
+    assert got.info.fg_edge == "c"
+
+    # returns NotCompleted with message ValueError if no fg_edge value provided
+    app = set_fg_edge(fg_edge=None)
+    got = app(aln)
+    assert "ValueError" in got.message
+
+    # fg_edge not in alignment
+    app = set_fg_edge(fg_edge="d")
+    got = app(aln)
+    assert isinstance(got, NotCompleted)
+
+    # calling with NotCompleted just returns the same NotCompleted
+    got2 = app(got)
+    assert got2 is got
