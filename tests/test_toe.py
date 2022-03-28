@@ -85,7 +85,11 @@ def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
-    process = reader + get_no_init_hypothesis(just_continuous=False, opt_args=opt_args) + writer
+    process = (
+        reader
+        + get_no_init_hypothesis(just_continuous=False, opt_args=opt_args)
+        + writer
+    )
 
     process.apply_to(dstore_instance[:1])
 
@@ -96,7 +100,9 @@ def test_get_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
     reader = io.load_db()
     outpath = tmp_path / "tempdir.tinydb"
     writer = io.write_db(outpath)
-    process = reader + get_init_hypothesis(just_continuous=False, opt_args=opt_args) + writer
+    process = (
+        reader + get_init_hypothesis(just_continuous=False, opt_args=opt_args) + writer
+    )
 
     process.apply_to(dstore_instance[:1])
 
