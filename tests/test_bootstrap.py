@@ -19,6 +19,18 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
+@pytest.fixture(scope="session")
+def tmp_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("tinydb")
+
+
+@pytest.fixture(autouse=True)
+def workingdir(tmp_dir, monkeypatch):
+    # this set's the working directory for all tests in this module
+    # as a tmp dir
+    monkeypatch.chdir(tmp_dir)
+
+
 @pytest.fixture()
 def opt_args():
     return {"max_evaluations": 100, "limit_action": "ignore", "max_restarts": 1}

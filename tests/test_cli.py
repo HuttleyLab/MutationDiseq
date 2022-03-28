@@ -28,6 +28,13 @@ def tmp_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("tinydb")
 
 
+@pytest.fixture(autouse=True)
+def workingdir(tmp_dir, monkeypatch):
+    # this set's the working directory for all tests in this module
+    # as a tmp dir
+    monkeypatch.chdir(tmp_dir)
+
+
 def test_validation_input_path():
     valid = DATADIR / "300bp.tinydb"
     assert _valid_tinydb_input(*[valid])
