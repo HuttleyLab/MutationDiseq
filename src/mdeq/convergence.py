@@ -16,6 +16,7 @@ from numpy.linalg import norm
 from scipy.linalg import expm
 from scipy.optimize import minimize_scalar
 
+from mdeq.toe import ALT_TOE
 from mdeq.utils import SerialisableMixin
 
 
@@ -236,8 +237,8 @@ def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
     if isinstance(result, NotCompleted):
         return result
 
-    null_results = [r["GN"] for k, r in result.items() if k != "observed"]
-    obs_result = result["observed"]["GN"]
+    null_results = [r[ALT_TOE] for k, r in result.items() if k != "observed"]
+    obs_result = result["observed"][ALT_TOE]
     return get_delta_nabla(
         obs_result, null_results, fg_edge=fg_edge, wrt_nstat=wrt_nstat
     )
