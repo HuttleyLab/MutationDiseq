@@ -133,7 +133,7 @@ def test_convergence(runner, tmp_dir):
 
 
 @pytest.fixture(scope="session")
-def test_make_adjacent(runner, tmp_dir):
+def adjacent_path(runner, tmp_dir):
     from cogent3.app import io
 
     from mdeq.adjacent import grouped
@@ -156,9 +156,9 @@ def test_make_adjacent(runner, tmp_dir):
     return outpath
 
 
-def test_aeop_exercise(runner, tmp_dir, test_make_adjacent):
-    # We're using the result created in test_make_adjacent as input here
-    inpath = test_make_adjacent
+def test_aeop_exercise(runner, tmp_dir, adjacent_path):
+    # We're using the result created in adjacent_path as input here
+    inpath = adjacent_path
     outpath = tmp_dir / "aeop.tinydb"
     args = [f"-i{inpath}", f"-o{outpath}", "-t", "-O"]
     r = runner.invoke(aeop, args)
@@ -173,9 +173,9 @@ def test_aeop_exercise(runner, tmp_dir, test_make_adjacent):
     assert "not one of the expected types" in r.output
 
 
-def test_aeop_exercise_shared_mprobs(runner, tmp_dir, test_make_adjacent):
-    # We're using the result created in test_make_adjacent as input here
-    inpath = test_make_adjacent
+def test_aeop_exercise_shared_mprobs(runner, tmp_dir, adjacent_path):
+    # We're using the result created in adjacent_path as input here
+    inpath = adjacent_path
     outpath = tmp_dir / "aeop.tinydb"
     r = runner.invoke(
         aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"]
@@ -186,7 +186,7 @@ def test_aeop_exercise_shared_mprobs(runner, tmp_dir, test_make_adjacent):
 def test_teop_exercise(runner, tmp_dir):
     from cogent3.app import io, result
 
-    # We're using the result created in test_make_adjacent as input here
+    # We're using the result created in adjacent_path as input here
     inpath = DATADIR / "apes-align.tinydb"
     outpath = tmp_dir / "teop.tinydb"
     args = [f"-i{inpath}", f"-o{outpath}", "-e'Human,Chimp'", "-t", "-O"]
