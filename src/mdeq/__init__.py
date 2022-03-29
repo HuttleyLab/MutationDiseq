@@ -103,7 +103,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     """makes tinydb of adjacent alignment records."""
     LOGGER = CachingLogger(create_dir=True)
 
-    LOGGER.log_file_path = f"{outpath.stem}-mdeq-make_adjacent.log"
+    LOGGER.log_file_path = outpath.parent / f"{outpath.stem}-mdeq-make_adjacent.log"
     LOGGER.log_args()
 
     # we get member names from input dstore
@@ -119,6 +119,11 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     for pair in tqdm(paired):
         record = group_loader(pair)
         writer(record)
+
+    log_file_path = LOGGER.log_file_path
+    LOGGER.shutdown()
+    writer.data_store.add_file(log_file_path, cleanup=True, keep_suffix=True)
+    writer.data_store.close()
 
     writer.data_store.close()
     func_name = inspect.stack()[0].function
@@ -345,7 +350,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     process = loader + to_delta_nabla + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     r = process.apply_to(
-        dstore, logger=True, cleanup=True, show_progress=verbose > 1, **kwargs
+        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1, **kwargs
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
@@ -371,7 +376,7 @@ def make_controls(
     A single simulated record is produced for each input record.
     """
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = f"{outpath.stem}-mdeq-make_controls.log"
+    LOGGER.log_file_path = outpath.parent / f"{outpath.stem}-mdeq-make_controls.log"
     LOGGER.log_args()
     # create loader, read a single result and validate the type matches the controls choice
     # validate the model choice too
