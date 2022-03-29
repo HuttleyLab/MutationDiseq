@@ -37,6 +37,7 @@ from mdeq._click_options import (
     _testrun,
     _treepath,
     _verbose,
+    _wrt_nstat,
 )
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
@@ -319,12 +320,13 @@ def aeop(
 @main.command()
 @_inpath
 @_outpath
+@_wrt_nstat
 @_parallel
 @_mpi
 @_limit
 @_overwrite
 @_verbose
-def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
+def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
@@ -336,7 +338,7 @@ def convergence(inpath, outpath, parallel, mpi, limit, overwrite, verbose):
         exit(1)
 
     loader = io.load_db()
-    to_delta_nabla = bootstrap_to_nabla()
+    to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )

@@ -158,3 +158,10 @@ _sequential = click.option(
     is_flag=True,
     help="MLEs from simpler models are used to seed more complex ones",
 )
+_wrt_nstat = click.option(
+    "-w",
+    "--wrt_nstat",
+    is_flag=True,
+    help="nabla estimated using non-stationary calibrated Q. Otherwise, "
+    "a stationary calibrated Q.",
+)
