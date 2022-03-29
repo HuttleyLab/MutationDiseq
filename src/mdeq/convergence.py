@@ -81,6 +81,7 @@ def convergence(pi_0: ndarray, Q: ndarray, t: float, wrt_nstat=False) -> float:
 class delta_nabla(SerialisableMixin):
     obs_nabla: float
     null_nabla: tuple[float]
+    fg_edge: str
     size_null: int = None
     source: str = None
 
@@ -92,7 +93,7 @@ class delta_nabla(SerialisableMixin):
         self.size_null = len(self.null_nabla)
 
     def __hash__(self):
-        return id((self.obs_nabla, self.null_nabla))
+        return id((self.source, self.fg_edge, self.obs_nabla, self.null_nabla))
 
     @property
     @lru_cache()
@@ -121,7 +122,9 @@ def deserialise_delta_nabla(data: dict):
 
 
 @singledispatch
-def get_nabla(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
+def get_nabla(
+    fg_edge, gn_result=None, time_delta=None, wrt_nstat=False
+) -> tuple[str, float]:
     """returns the convergence statistic from a model_result object.
 
     Parameters
@@ -150,18 +153,18 @@ def get_nabla(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> floa
 
 
 @get_nabla.register(str)
-def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
+def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> tuple[str, float]:
     # this is triggered when a fg_edge IS specified as a str
     # we infer the time_delta from that edge if it wasn't provided
     assert isinstance(time_delta, (NoneType, float))
     pi_0 = gn_result.lf.get_param_value("mprobs")
     time_delta = time_delta or gn_result.lf.get_param_value("length", edge=fg_edge)
     Q = gn_result.lf.get_rate_matrix_for_edge(fg_edge).to_array()
-    return convergence(pi_0, Q, time_delta, wrt_nstat=wrt_nstat)
+    return fg_edge, convergence(pi_0, Q, time_delta, wrt_nstat=wrt_nstat)
 
 
 @get_nabla.register(NoneType)
-def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
+def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> tuple[str, float]:
     # this is triggered when fg_edge is None (i.e. not specified), in which
     # case we need to identify whether there's a clear fg_edge candidate or
     # select an edge as a representative
@@ -192,7 +195,8 @@ def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> float:
             raise NotImplementedError(
                 f"either one or all {len(names)} edges are continuous-time, not {num_Q}"
             )
-        fg_edge = name  # just use last edge name
+        # use a tip name, to facilitate testing
+        fg_edge = tree.get_tip_names()[0]
         time_delta = time_delta or 0.1  # we want a set length
 
     return get_nabla(
@@ -221,9 +225,9 @@ def get_delta_nabla(
 
     """
     kwargs = dict(wrt_nstat=wrt_nstat)
-    obs_nabla = get_nabla(fg_edge, gn_result=obs_result, **kwargs)
-    sim_nabla = [get_nabla(fg_edge, gn_result=r, **kwargs) for r in sim_results]
-    return delta_nabla(obs_nabla, sim_nabla, source=obs_result.source)
+    fg_edge, obs_nabla = get_nabla(fg_edge, gn_result=obs_result, **kwargs)
+    sim_nabla = tuple(get_nabla(fg_edge, gn_result=r, **kwargs)[1] for r in sim_results)
+    return delta_nabla(obs_nabla, tuple(sim_nabla), fg_edge, source=obs_result.source)
 
 
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)

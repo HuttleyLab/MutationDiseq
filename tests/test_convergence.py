@@ -141,8 +141,9 @@ def test_convergence_GTR(pi_Q_gtr):
 def test_make_delta_nabla():
     """works if list, tuple or numpy array used."""
     data = [0.2, 1, 1.8]
+    fg_edge = "blah"
     for _type_ in (tuple, list, array):
-        obj = delta_nabla(3.0, _type_(data))
+        obj = delta_nabla(3.0, _type_(data), fg_edge)
         assert obj.mean_null == 1
         assert obj.size_null == 3
 
@@ -152,7 +153,7 @@ def test_fail_make_delta_nabla():
     for _type_ in (tuple, list, array):
         for data in ([], [2]):
             with pytest.raises(ValueError):
-                delta_nabla(3.0, _type_(data), 3)
+                delta_nabla(3.0, _type_(data), "blah", 3)
 
 
 def test_delta_nabla_value():
@@ -161,9 +162,10 @@ def test_delta_nabla_value():
     size = 67
     obs_nabla = rng.uniform(low=1e-6, high=100, size=1)[0]
     null_nabla = rng.uniform(low=1e-6, high=100, size=size)
-    dnab = delta_nabla(obs_nabla, null_nabla)
+    dnab = delta_nabla(obs_nabla, null_nabla, "blah")
     assert dnab.obs_nabla == obs_nabla
     assert dnab.size_null == size
+    assert dnab.fg_edge == "blah"
     mean_null = mean(null_nabla)
     assert mean_null == dnab.mean_null
     std_null = std(null_nabla, ddof=1)
@@ -174,7 +176,7 @@ def test_delta_nabla_value():
 
 def test_rich_dict():
     """dict can be json formatted."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
     got = obj.to_rich_dict()
     _ = json.dumps(got)  # should not fail
     # type value has correct name
@@ -183,7 +185,7 @@ def test_rich_dict():
 
 def test_roundtrip_json():
     """direct deserialisation works."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
     j = obj.to_json()
     g = delta_nabla.from_dict(json.loads(j))
     assert g == obj
@@ -191,7 +193,7 @@ def test_roundtrip_json():
 
 def test_cogent3_deserialisation():
     """works with deserialise_object."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8))
+    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
     j = obj.to_json()
     g = deserialise_object(j)
     assert isinstance(g, delta_nabla)
@@ -201,9 +203,9 @@ def test_cogent3_deserialisation():
 def test_get_nabla(toe_bstrap):
     """correctly computes nabla stats."""
     result = toe_bstrap[0]
-    null_results = [r["GN"] for k, r in result.items() if k != "observed"]
     obs_result = result["observed"]["GN"]
-    n = get_nabla(None, obs_result)
+    fg_edge, n = get_nabla(None, obs_result)
+    assert fg_edge in obs_result.lf.tree.get_tip_names()
     assert isinstance(n, float)
     with pytest.raises(AssertionError):
         get_nabla(None, gn_result=obs_result, time_delta=obs_result)
@@ -233,8 +235,9 @@ def test_get_nabla_mixes(alignment_tree, opt_args):
     # but works for all Q
     mod = GN_sm(tree=tree, opt_args=opt_args)
     result = mod(aln)
-    nabla = get_nabla(None, result)
+    fg_edge, nabla = get_nabla(None, result)
     assert isinstance(nabla, float)
+    assert fg_edge in aln.names
 
 
 @pytest.fixture(scope="session")
