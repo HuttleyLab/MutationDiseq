@@ -1,7 +1,7 @@
 from copy import deepcopy
 from json import loads
-from zlib import compress, decompress
 
+from blosc2 import compress, decompress
 from cogent3.app import evo
 from cogent3.app.composable import (
     ALIGNED_TYPE,
@@ -81,7 +81,7 @@ class compact_bootstrap_result(bootstrap_result):
         # ignore validation checks, put compressed json straight
         # into self._store
         # NOTE: json requires less memory and is faster than using pickle
-        self._store[key] = compress(data.to_json().encode("utf8"))
+        self._store[key] = compress(data.to_json().encode("utf8"), typesize=8)
 
     def __getitem__(self, key):
         # decompress the values on the fly
