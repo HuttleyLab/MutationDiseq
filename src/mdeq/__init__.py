@@ -1,6 +1,8 @@
 """mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
+from mdeq import _block_threading  # isort: skip
+
 import inspect
 import sys
 
