@@ -13,7 +13,7 @@ from mdeq.adjacent import (
     physically_adjacent,
     sequential_groups,
 )
-from mdeq.eop import adjacent_eop
+from mdeq.eop import adjacent_eop, NULL_AEOP, ALT_AEOP
 
 
 __author__ = "Gavin Huttley"
@@ -161,14 +161,14 @@ def test_new_adjacent_eop():
         opt_args={"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
     )
     got = eop(data)
-    assert len(got["null"]) == 1
-    assert len(got["alt"]) == 2
+    assert len(got[NULL_AEOP]) == 1
+    assert len(got[ALT_AEOP]) == 2
     for k in got:
         assert isinstance(got[k].lnL, float)
         assert isinstance(got[k].nfp, int)
 
     # alt has more parameters than null
-    assert got["alt"].nfp > got["null"].nfp
+    assert got[ALT_AEOP].nfp > got[NULL_AEOP].nfp
 
 
 def test_physically_adjacent():

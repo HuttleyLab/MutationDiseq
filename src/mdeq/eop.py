@@ -14,11 +14,11 @@ from mdeq.utils import get_foreground
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
-NULL_AEOP = "null"
-ALT_AEOP = "alt"
+NULL_AEOP = "GN-aeop-null"
+ALT_AEOP = "GN-aeop-alt"
 
-NULL_TEOP = "GN-teop"
-ALT_TEOP = "GN"
+NULL_TEOP = "GN-teop-null"
+ALT_TEOP = "GN-teop-alt"
 
 
 class adjacent_eop(ComposableAligned):
@@ -110,7 +110,7 @@ class adjacent_eop(ComposableAligned):
             lf.name = aln.info.name
             alt_results[locus] = lf
 
-        combined = c3_result.hypothesis_result("null", source=data.source)
+        combined = c3_result.hypothesis_result(NULL_AEOP, source=data.source)
         combined[NULL_AEOP] = null_result
         combined[ALT_AEOP] = alt_results
         return combined
@@ -118,6 +118,19 @@ class adjacent_eop(ComposableAligned):
 
 class temporal_eop(ComposableAligned):
     def __init__(self, edge_names, tree=None, opt_args=None):
+        """performs the temporal Equivalence of Process LRT
+
+        Parameters
+        ----------
+        edge_names : list[str]
+            names of edges whose EOP is to be assessed
+        tree : str, TreeNode, None
+            newick formatted, a  cogent3 TreeNode instance or None. If None,
+            the alignments MUST only have 3 sequences and a star tree will
+            be consructed.
+        opt_args : dict
+            arguments for the numerical optimisations step
+        """
         super(temporal_eop, self).__init__(
             input_types=SERIALISABLE_TYPE,
             output_types=SERIALISABLE_TYPE,
@@ -156,6 +169,7 @@ class temporal_eop(ComposableAligned):
                 name=NULL_TEOP,
                 opt_args=self._opt_args,
                 upper=RATE_PARAM_UPPER,
+                optimise_motif_probs=True,
             )
             alt = evo.model(
                 "GN",
@@ -169,6 +183,7 @@ class temporal_eop(ComposableAligned):
                     )
                 ],
                 upper=RATE_PARAM_UPPER,
+                optimise_motif_probs=True,
             )
             self._hyp = evo.hypothesis(null, alt)
         return self._hyp

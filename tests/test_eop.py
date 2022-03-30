@@ -7,7 +7,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import hypothesis_result
 
-from mdeq.eop import adjacent_eop, temporal_eop
+from mdeq.eop import adjacent_eop, temporal_eop, NULL_TEOP, ALT_TEOP
 
 
 __author__ = "Katherine Caley"
@@ -139,4 +139,4 @@ def test_temporal_eop(opt_args):
     app = temporal_eop(edge_names=edge_names, opt_args=opt_args)
     result = app(aln)
     assert isinstance(result, hypothesis_result)
-    assert result["GN"] is result.alt and result["GN-teop"] is result.null
+    assert result[ALT_TEOP] is result.alt and result[NULL_TEOP] is result.null
