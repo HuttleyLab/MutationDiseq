@@ -80,7 +80,12 @@ def physically_adjacent(table: Table, sample_ids: set[str]) -> tuple[grouped, ..
     sample_ids
         sample ID's
     """
+    required_columns = {"name", "coord_name", "start"}
+    missing = required_columns - set(table.header)
+    if missing:
+        raise ValueError("{missing!r} columns missing from table")
 
+    table = table.sorted(columns=["coord_name", "start"])
     all_adjacent = []
     for coord_name in table.distinct_values("coord_name"):
         sub_table = table.filtered(lambda x: x == coord_name, columns="coord_name")

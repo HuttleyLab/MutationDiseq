@@ -192,3 +192,6 @@ def test_physically_adjacent():
             ("ENSG00000158477", "ENSG00000162739"),
         ]
     }
+
+    with pytest.raises(ValueError):
+        physically_adjacent(table[:, ["name", "start"]], sample_ids)
