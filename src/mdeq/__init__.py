@@ -11,8 +11,8 @@ from warnings import filterwarnings
 import click
 
 from cogent3.app import io
+from rich.progress import track
 from scitrack import CachingLogger
-from tqdm import tqdm
 
 from mdeq import (
     model as _model,  # required to ensure registration of define substitution models
@@ -118,7 +118,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     paired = physically_adjacent(gene_order, sample_ids)
     # make the grouped data app
     group_loader = load_data_group(inpath)
-    for pair in tqdm(paired):
+    for pair in track(paired, refresh_per_second=5):
         record = group_loader(pair)
         writer(record)
 

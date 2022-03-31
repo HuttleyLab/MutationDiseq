@@ -107,3 +107,29 @@ def set_fg_edge(aln, fg_edge=None):
 
     aln.info.fg_edge = fg_edge
     return aln
+
+
+def rich_display(c3t, title_justify="left"):
+    """converts a cogent3 Table to a Rich Table and displays it"""
+    from cogent3.format.table import formatted_array
+    from rich.console import Console
+    from rich.table import Table
+
+    cols = c3t.columns
+    columns = [formatted_array(cols[c], pad=False)[0] for c in c3t.header]
+    rich_table = Table(
+        title=c3t.title,
+        highlight=True,
+        title_justify=title_justify,
+        title_style="bold blue",
+    )
+    for col in c3t.header:
+        numeric_type = "str" not in cols[col].dtype.name
+        j = "right" if numeric_type else "left"
+        rich_table.add_column(col, justify=j, no_wrap=numeric_type)
+
+    for row in zip(*columns):
+        rich_table.add_row(*row)
+
+    console = Console()
+    console.print(rich_table)
