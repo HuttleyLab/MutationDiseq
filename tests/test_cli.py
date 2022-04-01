@@ -13,6 +13,7 @@ from mdeq import (
     make_controls,
     teop,
     toe,
+tinydb_summary
 )
 from mdeq._click_options import _valid_tinydb_input, _valid_tinydb_output
 
@@ -271,3 +272,8 @@ def test_make_controls_toe_exercise(runner, tmp_dir):
 
     inpath = DATADIR / "toe-300bp.tinydb"
     exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
+
+def test_tinydb_summary(runner):
+    inpath = DATADIR / "toe-300bp.tinydb"
+    r = runner.invoke(tinydb_summary, ["-i", inpath])
+    assert r.exit_code == 0, r.output
