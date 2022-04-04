@@ -435,7 +435,7 @@ def make_controls(
         dstore = [
             dstore[i] for i in generator.rng.sample(range(len(dstore)), sample_size)
         ]
-        if verbose:
+        if verbose > 3:
             print(f"{dstore!r}")
 
     writer = io.write_db(
