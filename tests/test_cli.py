@@ -211,13 +211,13 @@ def test_teop_exercise(runner, tmp_dir):
 def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
     from cogent3.app import io
 
-    outpaths = (
-        f"{analysis}-negative_controls.tinydb",
-        f"{analysis}-positive_controls.tinydb",
+    controls = (
+        "neg_control",
+        "pos_control",
     )
-    for path in outpaths:
-        control = "-ve" if "neg" in path else "+ve"
-        outpath = tmp_dir / path
+    for ctl in controls:
+        outpath = tmp_dir / pathlib.Path(f"{analysis}-{ctl}-{inpath.stem}.tinydb")
+        control = "-ve" if "neg" in ctl else "+ve"
         for seed in (None, 123):
             args = [
                 "-i",
@@ -226,8 +226,8 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
                 analysis,
                 "--controls",
                 control,
-                "-o",
-                f"{outpath}",
+                "-od",
+                f"{tmp_dir}",
                 "-O",
                 f"-s{seed}",
             ]
@@ -272,6 +272,7 @@ def test_make_controls_toe_exercise(runner, tmp_dir):
 
     inpath = DATADIR / "toe-300bp.tinydb"
     exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
+
 
 def test_tinydb_summary(runner):
     inpath = DATADIR / "toe-300bp.tinydb"

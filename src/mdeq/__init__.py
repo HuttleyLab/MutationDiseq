@@ -5,6 +5,7 @@ from mdeq import _block_threading  # isort: skip
 import inspect
 import sys
 
+from pathlib import Path
 from warnings import filterwarnings
 
 import click
@@ -28,6 +29,7 @@ from mdeq._click_options import (
     _limit,
     _mpi,
     _num_reps,
+    _outdir,
     _outpath,
     _overwrite,
     _parallel,
@@ -359,7 +361,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 
 @main.command()
 @_inpath
-@_outpath
+@_outdir
 @_analysis
 @_controls
 @_seed
@@ -368,7 +370,16 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 @_verbose
 @_testrun
 def make_controls(
-    inpath, outpath, analysis, controls, seed, limit, overwrite, verbose, testrun
+    inpath,
+    outdir,
+    analysis,
+    controls,
+    sample_size,
+    seed,
+    limit,
+    overwrite,
+    verbose,
+    testrun,
 ):
     """simulate negative and positive controls
 
@@ -377,8 +388,12 @@ def make_controls(
     A single simulated record is produced for each input record.
     """
     LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = outpath.parent / f"{outpath.stem}-mdeq-make_controls.log"
     LOGGER.log_args()
+
+    ctl_txt = "neg_control" if controls == "-ve" else "pos_control"
+    outpath = outdir / Path(f"{analysis}-{ctl_txt}-{inpath.stem}.tinydb")
+    LOGGER.log_file_path = outdir / f"{outpath.stem}-make_controls.log"
+
     # create loader, read a single result and validate the type matches the controls choice
     # validate the model choice too
     dstore = io.get_data_store(inpath, limit=limit)

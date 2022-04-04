@@ -69,6 +69,12 @@ _outpath = click.option(
     callback=_valid_tinydb_output,
     help="path to create a result tinydb",
 )
+_outdir = click.option(
+    "-od",
+    "--outdir",
+    type=pathlib.Path,
+    help="directory to write output",
+)
 _treepath = click.option(
     "-T",
     "--treepath",
