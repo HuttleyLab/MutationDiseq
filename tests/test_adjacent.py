@@ -13,7 +13,7 @@ from mdeq.adjacent import (
     physically_adjacent,
     sequential_groups,
 )
-from mdeq.eop import adjacent_eop, NULL_AEOP, ALT_AEOP
+from mdeq.eop import ALT_AEOP, NULL_AEOP, adjacent_eop
 
 
 __author__ = "Gavin Huttley"

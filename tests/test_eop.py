@@ -7,7 +7,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.result import hypothesis_result
 
-from mdeq.eop import adjacent_eop, temporal_eop, NULL_TEOP, ALT_TEOP
+from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
 
 
 __author__ = "Katherine Caley"

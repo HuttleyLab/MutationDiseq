@@ -12,8 +12,8 @@ from mdeq import (
     make_adjacent,
     make_controls,
     teop,
+    tinydb_summary,
     toe,
-tinydb_summary
 )
 from mdeq._click_options import _valid_tinydb_input, _valid_tinydb_output
 
