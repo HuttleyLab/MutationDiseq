@@ -27,7 +27,6 @@ class select_model_result:
         self._name = model_name
 
     def __call__(self, result):
-        result.deserialised_values()
         if isinstance(result, model_result):
             return result
 
@@ -55,7 +54,10 @@ class control_generator(Composable):
         source = pathlib.Path(result.source).stem
         # conventional model object
         model = self._select_model(result)
-        sim = model.lf.simulate_alignment(seed=self._rng)
+        if isinstance(model.lf, dict):
+            model.deserialise_values()
+
+        sim = model.lf.simulate_alignment(seed=self.rng)
         sim.info.source = source
         return sim
 
@@ -86,6 +88,7 @@ class control_generator(Composable):
         # simulated alignments into a grouped instance
 
         model = self._select_model(result)
+        model.deserialised_values()
         source = pathlib.Path(result.source).stem
         sims = []
         ids = []
