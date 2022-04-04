@@ -46,8 +46,8 @@ class control_generator(Composable):
             output_types=(SERIALISABLE_TYPE, ALIGNED_TYPE),
         )
         self._select_model = model_selector
-        self._rng = Random()
-        self._rng.seed(a=seed)
+        self.rng = Random()
+        self.rng.seed(a=seed)
         self.func = self.gen
 
     def _from_single_model_single_locus(self, result) -> ArrayAlignment:

@@ -84,6 +84,13 @@ _treepath = click.option(
 _num_reps = click.option(
     "-n", "num_reps", type=int, default=100, help="number of samples to simulate"
 )
+_sample_size = click.option(
+    "-z",
+    "sample_size",
+    type=int,
+    default=None,
+    help="number of observed alignments to sample, defaults to size of observed",
+)
 _seed = click.option(
     "-s",
     "--seed",

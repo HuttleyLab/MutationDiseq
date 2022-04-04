@@ -34,6 +34,7 @@ from mdeq._click_options import (
     _overwrite,
     _parallel,
     _process_comma_seq,
+    _sample_size,
     _seed,
     _sequential,
     _share_mprobs,
@@ -364,6 +365,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 @_outdir
 @_analysis
 @_controls
+@_sample_size
 @_seed
 @_limit
 @_overwrite
@@ -384,8 +386,8 @@ def make_controls(
     """simulate negative and positive controls
 
     Notes
-    -----
-    A single simulated record is produced for each input record.
+
+    A single simulated record is produced for an input record.
     """
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_args()
@@ -423,6 +425,19 @@ def make_controls(
 
     loader = io.load_db()
     generator = control_generator(model_selector, seed=seed)
+
+    # now use that rng to randomly select sample_size from dstore
+    if verbose:
+        print(f"{dstore!r}")
+
+    if sample_size is not None:
+        # sample without replacement
+        dstore = [
+            dstore[i] for i in generator.rng.sample(range(len(dstore)), sample_size)
+        ]
+        if verbose:
+            print(f"{dstore!r}")
+
     writer = io.write_db(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
