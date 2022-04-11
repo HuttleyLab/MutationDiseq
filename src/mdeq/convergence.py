@@ -17,7 +17,7 @@ from scipy.linalg import expm
 from scipy.optimize import minimize_scalar
 
 from mdeq.toe import ALT_TOE
-from mdeq.utils import SerialisableMixin
+from mdeq.utils import CompressedValue, SerialisableMixin
 
 
 __author__ = "Katherine Caley"
@@ -234,11 +234,25 @@ def get_delta_nabla(
 @appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
 def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
     """returns delta nabla stats from bootstrap result."""
+    from mdeq.bootstrap import deserialise_single_hyp
+
     if isinstance(result, NotCompleted):
         return result
 
-    null_results = [r[ALT_TOE] for k, r in result.items() if k != "observed"]
-    obs_result = result["observed"][ALT_TOE]
+    null_results = []
+    obs_result = result.observed
+    if "data" in obs_result:
+        obs_result = deserialise_single_hyp(obs_result)
+
+    obs_result = obs_result[ALT_TOE]
+
+    for k, v in result.items():
+        if k == "observed":
+            continue
+        if "data" in v:
+            v = deserialise_single_hyp(v)
+        null_results.append(v[ALT_TOE])
+
     return get_delta_nabla(
         obs_result, null_results, fg_edge=fg_edge, wrt_nstat=wrt_nstat
     )

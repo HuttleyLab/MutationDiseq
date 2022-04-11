@@ -7,6 +7,7 @@ from cogent3.core.alignment import ArrayAlignment
 
 from mdeq import control
 from mdeq.adjacent import grouped
+from mdeq.sqlite_data_store import sql_loader
 
 
 __author__ = "Gavin Huttley"
@@ -22,25 +23,25 @@ def opt_args():
 
 @pytest.fixture()
 def apes_dstore():
-    return io.get_data_store(DATADIR / "apes-align.tinydb")
+    return io.get_data_store(DATADIR / "apes-align.sqlitedb")
 
 
 @pytest.fixture(scope="session")
 def toe_result():
-    inpath = DATADIR / "toe-300bp.tinydb"
-    loader = io.load_db()
+    from mdeq.sqlite_data_store import sql_loader
+
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    loader = sql_loader()
 
     dstore = io.get_data_store(inpath)
-    return loader(dstore[0])
+    result = loader(dstore[0])
+    result.deserialised_values()
+    return result
 
 
 @pytest.fixture(scope="session")
-def model_result():
-    inpath = DATADIR / "toe-300bp.tinydb"
-    loader = io.load_db()
-
-    dstore = io.get_data_store(inpath)
-    return loader(dstore[0]).observed["GSN"]
+def model_result(toe_result):
+    return toe_result.observed["GSN"]
 
 
 def test_select_model_result(toe_result):
@@ -68,7 +69,7 @@ def test_select_aeop(apes_dstore, opt_args):
         selector = control.select_model_result(name)
         return selector(result)
 
-    loader = io.load_db()
+    loader = sql_loader()
     alns = [loader(apes_dstore[i]) for i in (2, 4)]
     for n, a in zip(("a", "b"), alns):
         a.info.name = n
@@ -98,7 +99,7 @@ def test_select_teop(apes_dstore, opt_args):
         selector = control.select_model_result(name)
         return selector(result)
 
-    loader = io.load_db()
+    loader = sql_loader()
     aln = loader(apes_dstore[0])
 
     opt_args["max_evaluations"] = 10
@@ -133,19 +134,19 @@ def test_gen_toe_alt(toe_result):
 
 @pytest.fixture(scope="session")
 def aeop_result():
-    inpath = DATADIR / "aeop-apes.tinydb"
+    inpath = DATADIR / "aeop-apes.sqlitedb"
 
     dstore = io.get_data_store(inpath)
-    loader = io.load_db()
+    loader = sql_loader()
     return [loader(m) for m in dstore]
 
 
 @pytest.fixture(scope="session")
 def teop_result():
-    inpath = DATADIR / "teop-apes.tinydb"
+    inpath = DATADIR / "teop-apes.sqlitedb"
 
     dstore = io.get_data_store(inpath)
-    loader = io.load_db()
+    loader = sql_loader()
     return [loader(m) for m in dstore]
 
 

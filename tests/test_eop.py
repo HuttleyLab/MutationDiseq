@@ -8,6 +8,7 @@ from cogent3.app import io
 from cogent3.app.result import hypothesis_result
 
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
+from mdeq.sqlite_data_store import sql_loader
 
 
 __author__ = "Katherine Caley"
@@ -18,7 +19,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture(scope="session")
 def tmp_dir(tmpdir_factory):
-    return tmpdir_factory.mktemp("tinydb")
+    return tmpdir_factory.mktemp("sqlitedb")
 
 
 @pytest.fixture(scope="session")
@@ -26,9 +27,9 @@ def opt_args():
     return dict(max_restarts=1, max_evaluations=50, limit_action="ignore")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def dstore_instance():
-    return io.get_data_store(DATADIR / "3000bp.tinydb")
+    return io.get_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
@@ -76,7 +77,7 @@ def diff_length_alns():
     return [aln1, aln2]
 
 
-loader = io.load_db()
+loader = sql_loader()
 
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
@@ -131,7 +132,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
 def test_temporal_eop(opt_args):
     from cogent3.app import evo
 
-    inpath = DATADIR / "apes-align.tinydb"
+    inpath = DATADIR / "apes-align.sqlitedb"
     dstore = io.get_data_store(inpath)
     aln = loader(dstore[4])
     opt_args["max_evaluations"] = 100

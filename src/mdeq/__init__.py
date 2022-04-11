@@ -14,9 +14,9 @@ from cogent3.app import io
 from rich.progress import track
 from scitrack import CachingLogger
 
-from mdeq import (
-    model as _model,  # required to ensure registration of define substitution models
-)
+# required to ensure registration of define substitution models
+from mdeq import model as _model
+from mdeq import sqlite_data_store as _sqldstore
 from mdeq._click_options import (
     _analysis,
     _controls,
@@ -55,6 +55,7 @@ from mdeq.eop import (
     adjacent_eop,
     temporal_eop,
 )
+from mdeq.sqlite_data_store import sql_loader, sql_writer
 from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import configure_parallel, get_obj_type, set_fg_edge
 
@@ -104,7 +105,7 @@ def main():
 @_verbose
 @_testrun
 def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
-    """makes tinydb of adjacent alignment records."""
+    """makes sqlitedb of adjacent alignment records."""
     LOGGER = CachingLogger(create_dir=True)
 
     LOGGER.log_file_path = outpath.parent / f"{outpath.stem}-mdeq-make_adjacent.log"
@@ -112,7 +113,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 
     # we get member names from input dstore
     dstore = io.get_data_store(inpath, limit=limit)
-    writer = io.write_db(
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
 
@@ -177,7 +178,7 @@ def toe(
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = io.load_db()
+    loader = sql_loader()
 
     # check consistency of just_continuous / fg_edge / aln.info
     _aln = loader(dstore[0])
@@ -208,7 +209,7 @@ def toe(
         sequential=sequential,
         just_continuous=just_continuous,
     )
-    writer = io.write_db(
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     if inject_fg:
@@ -261,10 +262,10 @@ def teop(
         exit(1)
 
     # construct hypothesis app, null constrains edge_names to same process
-    loader = io.load_db()
+    loader = sql_loader()
     opt_args = get_opt_settings(testrun)
     teop = temporal_eop(edge_names, tree=treepath, opt_args=opt_args)
-    writer = io.write_db(
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     process = loader + teop + writer
@@ -310,8 +311,8 @@ def aeop(
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = io.load_db()
-    writer = io.write_db(
+    loader = sql_loader()
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     test_adjacent = adjacent_eop(
@@ -346,9 +347,9 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = io.load_db()
+    loader = sql_loader(fully_deserialise=True)
     to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
-    writer = io.write_db(
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     process = loader + to_delta_nabla + writer
@@ -393,7 +394,7 @@ def make_controls(
     LOGGER.log_args()
 
     ctl_txt = "neg_control" if controls == "-ve" else "pos_control"
-    outpath = outdir / Path(f"{analysis}-{ctl_txt}-{inpath.stem}.tinydb")
+    outpath = outdir / Path(f"{analysis}-{ctl_txt}-{inpath.stem}.sqlitedb")
     LOGGER.log_file_path = outdir / f"{outpath.stem}-make_controls.log"
 
     # create loader, read a single result and validate the type matches the controls choice
@@ -423,7 +424,7 @@ def make_controls(
     model_name = control_name[analysis][controls]
     model_selector = select_model_result(model_name)
 
-    loader = io.load_db()
+    loader = sql_loader()
     generator = control_generator(model_selector, seed=seed)
 
     # now use that rng to randomly select sample_size from dstore
@@ -438,7 +439,7 @@ def make_controls(
         if verbose > 3:
             print(f"{dstore!r}")
 
-    writer = io.write_db(
+    writer = sql_writer(
         outpath, create=True, if_exists="overwrite" if overwrite else "raise"
     )
     proc = loader + generator + writer
@@ -450,8 +451,8 @@ def make_controls(
 # todo postprocess functions, generate figures, tabulate data
 @main.command()
 @_inpath
-def tinydb_summary(inpath):
-    """displays summary information about a tinydb"""
+def db_summary(inpath):
+    """displays summary information about a db"""
     import json
     import pathlib
     import re
@@ -467,11 +468,15 @@ def tinydb_summary(inpath):
 
     dstore = io.get_data_store(inpath)
     record_type = get_obj_type(dstore)
+
     cmnds = []
     args = []
     params = []
+    timestamp = ""
     for log in dstore.logs:
-        log = log.read().splitlines()
+        log = log.deserialised.splitlines()
+        if not log:
+            continue
         timestamp = " ".join(log[0].split()[:2])
         for line in log:
             if _cmnd.search(line):

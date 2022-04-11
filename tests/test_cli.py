@@ -3,19 +3,21 @@ import pathlib
 import pytest
 
 from click.testing import CliRunner
+from cogent3.app import io
 
 from mdeq import (
     _gene_order_table,
     aeop,
     convergence,
+    db_summary,
     get_obj_type,
     make_adjacent,
     make_controls,
+    sql_loader,
     teop,
-    tinydb_summary,
     toe,
 )
-from mdeq._click_options import _valid_tinydb_input, _valid_tinydb_output
+from mdeq._click_options import _valid_sqlitedb_input, _valid_sqlitedb_output
 
 
 __author__ = "Gavin Huttley"
@@ -26,7 +28,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 @pytest.fixture(scope="session")
 def tmp_dir(tmpdir_factory):
-    return tmpdir_factory.mktemp("tinydb")
+    return tmpdir_factory.mktemp("sqlitedb")
 
 
 @pytest.fixture(autouse=True)
@@ -37,23 +39,23 @@ def workingdir(tmp_dir, monkeypatch):
 
 
 def test_validation_input_path():
-    valid = DATADIR / "300bp.tinydb"
-    assert _valid_tinydb_input(*[valid])
+    valid = DATADIR / "300bp.sqlitedb"
+    assert _valid_sqlitedb_input(*[valid])
     invalid_suffix = DATADIR / "brca1.fasta"
     with pytest.raises(ValueError):
-        _valid_tinydb_input(*[invalid_suffix])
+        _valid_sqlitedb_input(*[invalid_suffix])
 
     invalid_path = DATADIR / "300bp.t"
     with pytest.raises(ValueError):
-        _valid_tinydb_input(*[invalid_path])
+        _valid_sqlitedb_input(*[invalid_path])
 
 
 def test_validation_output_path():
-    valid = "300bp.tinydb"
-    assert _valid_tinydb_output(*[valid])
+    valid = "300bp.sqlitedb"
+    assert _valid_sqlitedb_output(*[valid])
     invalid_suffix = DATADIR / "brca1.fasta"
     with pytest.raises(ValueError):
-        _valid_tinydb_output(*[invalid_suffix])
+        _valid_sqlitedb_output(*[invalid_suffix])
 
 
 def test_assert_valid_gene_order_table(tmp_dir):
@@ -80,25 +82,23 @@ def runner():
 
 
 def test_get_obj_type():
-    from cogent3.app.io import get_data_store
-
     types = {
-        "300bp.tinydb": "ArrayAlignment",
-        "toe-300bp.tinydb": "compact_bootstrap_result",
+        "300bp.sqlitedb": "ArrayAlignment",
+        "toe-300bp.sqlitedb": "compact_bootstrap_result",
     }
     for path, expect in types.items():
-        dstore = get_data_store(DATADIR / path)
+        dstore = io.get_data_store(DATADIR / path)
         ty = get_obj_type(dstore)
         assert ty == expect
 
 
 def test_toe_exercise(runner, tmp_dir):
-    inpath = DATADIR / "300bp.tinydb"
-    outpath = tmp_dir / "toe.tinydb"
+    inpath = DATADIR / "300bp.sqlitedb"
+    outpath = tmp_dir / "toe.sqlitedb"
     r = runner.invoke(toe, [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"])
     assert r.exit_code == 0, r.output
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp.tinydb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     r = runner.invoke(
         toe, ["-i", f"{invalidinput}", "-o", f"{outpath}", "-t", "-n4", "-O"]
     )
@@ -107,25 +107,28 @@ def test_toe_exercise(runner, tmp_dir):
     assert "not one of the expected types" in r.output
 
 
+loader = sql_loader()
+
+
 def test_convergence(runner, tmp_dir):
     from cogent3.app import io
 
     from mdeq.convergence import delta_nabla
 
-    inpath = DATADIR / "toe-300bp.tinydb"
-    outpath = tmp_dir / "delme.tinydb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    outpath = tmp_dir / "delme.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-O"]
+    # convergence(args)
     r = runner.invoke(convergence, args)
     assert r.exit_code == 0, r.output
     # now load the saved records and check they're delta_nabla instances
     dstore = io.get_data_store(outpath)
-    loader = io.load_db()
     results = [loader(m) for m in dstore]
     assert {type(r) for r in results} == {delta_nabla}
     assert len(dstore) == len(results)
 
     # now with incorrect input
-    invalidinput = DATADIR / "300bp.tinydb"
+    invalidinput = DATADIR / "300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     r = runner.invoke(convergence, args)
     assert r.exit_code != 0
@@ -139,15 +142,14 @@ def adjacent_path(runner, tmp_dir):
 
     from mdeq.adjacent import grouped
 
-    inpath = DATADIR / "apes-align.tinydb"
+    inpath = DATADIR / "apes-align.sqlitedb"
     gene_order = DATADIR / "gene_order.tsv"
-    outpath = tmp_dir / "adjacent.tinydb"
+    outpath = tmp_dir / "adjacent.sqlitedb"
     r = runner.invoke(
         make_adjacent, [f"-i{inpath}", f"-g{gene_order}", f"-o{outpath}", "-t", "-O"]
     )
     assert r.exit_code == 0, r.output
 
-    loader = io.load_db()
     dstore = io.get_data_store(outpath)
     results = [loader(m) for m in dstore]
     for r in results:
@@ -160,13 +162,13 @@ def adjacent_path(runner, tmp_dir):
 def test_aeop_exercise(runner, tmp_dir, adjacent_path):
     # We're using the result created in adjacent_path as input here
     inpath = adjacent_path
-    outpath = tmp_dir / "aeop.tinydb"
+    outpath = tmp_dir / "aeop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-t", "-O"]
     r = runner.invoke(aeop, args)
     assert r.exit_code == 0, r.output
 
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp.tinydb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     r = runner.invoke(aeop, args)
     assert r.exit_code != 0
@@ -177,7 +179,7 @@ def test_aeop_exercise(runner, tmp_dir, adjacent_path):
 def test_aeop_exercise_shared_mprobs(runner, tmp_dir, adjacent_path):
     # We're using the result created in adjacent_path as input here
     inpath = adjacent_path
-    outpath = tmp_dir / "aeop.tinydb"
+    outpath = tmp_dir / "aeop.sqlitedb"
     r = runner.invoke(
         aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"]
     )
@@ -188,21 +190,21 @@ def test_teop_exercise(runner, tmp_dir):
     from cogent3.app import io, result
 
     # We're using the result created in adjacent_path as input here
-    inpath = DATADIR / "apes-align.tinydb"
-    outpath = tmp_dir / "teop.tinydb"
+    inpath = DATADIR / "apes-align.sqlitedb"
+    outpath = tmp_dir / "teop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-e'Human,Chimp'", "-t", "-O"]
     r = runner.invoke(teop, args)
     assert r.exit_code == 0, r.output
 
-    loader = io.load_db()
     dstore = io.get_data_store(outpath)
     results = [loader(m) for m in dstore]
     for r in results:
         assert isinstance(r, result.hypothesis_result)
 
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp.tinydb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
+    # teop(args)
     r = runner.invoke(teop, args)
     assert r.exit_code != 0
     assert "not one of the expected types" in r.output
@@ -216,7 +218,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
         "pos_control",
     )
     for ctl in controls:
-        outpath = tmp_dir / pathlib.Path(f"{analysis}-{ctl}-{inpath.stem}.tinydb")
+        outpath = tmp_dir / pathlib.Path(f"{analysis}-{ctl}-{inpath.stem}.sqlitedb")
         control = "-ve" if "neg" in ctl else "+ve"
         for seed in (None, 123):
             args = [
@@ -236,7 +238,6 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
             r = runner.invoke(make_controls, args)
             assert r.exit_code == 0, r.output
 
-            loader = io.load_db()
             dstore = io.get_data_store(outpath)
             results = [loader(m) for m in dstore]
             for r in results:
@@ -245,7 +246,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
             dstore.close()
 
     # now with incorrect input
-    invalidinput = DATADIR / "300bp.tinydb"
+    invalidinput = DATADIR / "300bp.sqlitedb"
     args[1] = f"{invalidinput}"
     r = runner.invoke(make_controls, args)
     assert r.exit_code != 0
@@ -256,25 +257,25 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
 def test_make_controls_aeop_exercise(runner, tmp_dir):
     from mdeq.adjacent import grouped
 
-    inpath = DATADIR / "aeop-apes.tinydb"
+    inpath = DATADIR / "aeop-apes.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "aeop", grouped)
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
     from cogent3 import ArrayAlignment
 
-    inpath = DATADIR / "teop-apes.tinydb"
+    inpath = DATADIR / "teop-apes.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "teop", ArrayAlignment)
 
 
 def test_make_controls_toe_exercise(runner, tmp_dir):
     from cogent3 import ArrayAlignment
 
-    inpath = DATADIR / "toe-300bp.tinydb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
 
 
-def test_tinydb_summary(runner):
-    inpath = DATADIR / "toe-300bp.tinydb"
-    r = runner.invoke(tinydb_summary, ["-i", inpath])
+def test_sqlitedb_summary(runner):
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    r = runner.invoke(db_summary, ["-i", inpath])
     assert r.exit_code == 0, r.output

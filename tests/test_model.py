@@ -34,10 +34,17 @@ def test_make_gsn_app():
 def test_mles_at_bounds():
     from cogent3.app import composable, io
 
-    loader = io.load_db()
-    path = DATADIR / "toe-300bp.tinydb"
+    from mdeq.sqlite_data_store import sql_loader
+
+    loader = sql_loader()
+    path = DATADIR / "toe-300bp.sqlitedb"
     dstore = io.get_data_store(path, limit=1)
-    models = [loader(dstore[0]).observed[mod] for mod in ("GSN", "GN")]
+    r = loader(dstore[0])
+    r.deserialised_values()
+    models = []
+    for mod in ("GSN", "GN"):
+        models.append(r.observed[mod])
+
     app = model.mles_within_bounds()
     for mod in models:
         got = app(mod)

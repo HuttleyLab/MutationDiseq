@@ -41,17 +41,17 @@ def _valid_path(path, must_exist):
     if must_exist and not path.exists():
         raise ValueError(f"{path!r} does not exist")
 
-    if path.suffix != ".tinydb":
-        raise ValueError(f"{path!r} is not a tinydb")
+    if path.suffix != ".sqlitedb":
+        raise ValueError(f"{path!r} is not a sqlitedb")
     return path
 
 
-def _valid_tinydb_input(*args):
+def _valid_sqlitedb_input(*args):
     # input path must exist!
     return _valid_path(args[-1], True)
 
 
-def _valid_tinydb_output(*args):
+def _valid_sqlitedb_output(*args):
     return _valid_path(args[-1], False)
 
 
@@ -61,13 +61,16 @@ def _load_tree(*args):
 
 
 _inpath = click.option(
-    "-i", "--inpath", callback=_valid_tinydb_input, help="path to a tinydb of aligments"
+    "-i",
+    "--inpath",
+    callback=_valid_sqlitedb_input,
+    help="path to a sqlitedb of aligments",
 )
 _outpath = click.option(
     "-o",
     "--outpath",
-    callback=_valid_tinydb_output,
-    help="path to create a result tinydb",
+    callback=_valid_sqlitedb_output,
+    help="path to create a result sqlitedb",
 )
 _outdir = click.option(
     "-od",

@@ -11,6 +11,7 @@ from mdeq.bootstrap import (
     compact_bootstrap_result,
     create_bootstrap_app,
 )
+from mdeq.sqlite_data_store import sql_loader, sql_writer
 
 
 __author__ = "Katherine Caley"
@@ -48,12 +49,12 @@ def aln():
 
 @pytest.fixture()
 def aligns_dstore():
-    return io.get_data_store(DATADIR / "3000bp.tinydb")
+    return io.get_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
 def bstrap_result_dstore():
-    return io.get_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.tinydb")
+    return io.get_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
 
 
 def test_create_bootstrap_app(aln, opt_args):
@@ -76,18 +77,17 @@ def test_deserialise_compact_boostrap_result(aln, opt_args):
 
 
 def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
-    reader = io.load_db()
-    outpath = tmp_path / "tempdir.tinydb"
-    writer = io.write_db(outpath)
+    reader = sql_loader()
+    outpath = tmp_path / "tempdir.sqlitedb"
+    writer = sql_writer(outpath)
     bstrap = create_bootstrap_app(num_reps=2, opt_args=opt_args)
     process = reader + bstrap + writer
 
-    process.apply_to(aligns_dstore[:1])
-    assert len(process.data_store.summary_incomplete) == 0
-    writer.data_store.close()
-
-    loader = io.load_db()
+    process.apply_to(aligns_dstore[:1], show_progress=False)
     dstore = io.get_data_store(outpath)
+    assert len(dstore.summary_incomplete) == 0
+
+    loader = sql_loader()
     result = loader(dstore[0])
     assert isinstance(result, compact_bootstrap_result)
     pvalue = result.pvalue
@@ -95,22 +95,22 @@ def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
 
 
 def test_estimate_pval(bstrap_result_dstore):
-    loader = io.load_db()
+    loader = sql_loader()
     result = loader(bstrap_result_dstore[0])
     assert isinstance(result.pvalue, float)
 
-    num_reps = sum(k != "observed" for k in result)
-    obs_lr = result.observed.get_hypothesis_result("GSN", "GN").LR
+    num_reps = sum(v.LR >= 0 for v in result.values()) - 1
+    obs_lr = result.observed.LR
     num_ge_obs = (
-        sum(result[k].get_hypothesis_result("GSN", "GN").LR >= obs_lr for k in result)
-        - 1
+        sum(result[k].LR >= obs_lr for k in result) - 1
     )  # adjust for comparing observed to itself
-    assert result.pvalue == num_ge_obs / num_reps
+    got = result.pvalue
+    assert got == num_ge_obs / num_reps
 
 
 @pytest.fixture(scope="session")
 def dstore4_tree():
-    inpath = DATADIR / "4otu-aligns.tinydb"
+    inpath = DATADIR / "4otu-aligns.sqlitedb"
     tree = "(Human,Platypus,(Mouse,Rat))"
     dstore = io.get_data_store(inpath)
     return dstore, tree
@@ -137,9 +137,10 @@ def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
         tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
     )
 
-    loader = io.load_db()
+    loader = sql_loader()
     aln = loader(dstore[0])
     result = bstrap(aln)
+    result.deserialised_values()
     assert isinstance(result, compact_bootstrap_result)
     n = num_discrete_edges(result.observed.null.lf)
     assert n == 0
@@ -153,9 +154,10 @@ def test_4otu_bootstrap_toe(dstore4_tree, opt_args):
         tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
     )
 
-    loader = io.load_db()
+    loader = sql_loader()
     aln = loader(dstore[0])
     result = bstrap(aln)
+    result.deserialised_values()
     assert isinstance(result, compact_bootstrap_result)
     n = num_discrete_edges(result.observed["GSN"].lf)
     assert n == 0

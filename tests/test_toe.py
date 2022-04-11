@@ -6,6 +6,7 @@ from cogent3 import make_aligned_seqs
 from cogent3.app import io
 from cogent3.app.evo import model_collection_result
 
+from mdeq.sqlite_data_store import sql_loader, sql_writer
 from mdeq.toe import (
     get_init_hypothesis,
     get_init_model_coll,
@@ -28,12 +29,7 @@ def opt_args():
 
 @pytest.fixture()
 def dstore_instance():
-    return io.get_data_store(DATADIR / "3000bp.tinydb")
-
-
-@pytest.fixture()
-def mcr_dstore():
-    return io.get_data_store(DATADIR / "mcr.tinydb")
+    return io.get_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
@@ -81,37 +77,30 @@ def test_no_fg(get_aln_no_fg, opt_args):
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
 
 
+reader = sql_loader()
+
+
 def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
-    reader = io.load_db()
-    outpath = tmp_path / "tempdir.tinydb"
-    writer = io.write_db(outpath)
+    outpath = tmp_path / "tempdir.sqlitedb"
+    writer = sql_writer(outpath)
+    reader.disconnect()
     process = (
         reader
         + get_no_init_hypothesis(just_continuous=False, opt_args=opt_args)
         + writer
     )
-
     process.apply_to(dstore_instance[:1])
-
-    assert len(process.data_store.summary_incomplete) == 0
+    dstore = io.get_data_store(outpath)
+    assert len(dstore.summary_incomplete) == 0
 
 
 def test_get_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args):
-    reader = io.load_db()
-    outpath = tmp_path / "tempdir.tinydb"
-    writer = io.write_db(outpath)
+    outpath = tmp_path / "tempdir.sqlitedb"
+    writer = sql_writer(outpath)
+    reader.disconnect()
     process = (
         reader + get_init_hypothesis(just_continuous=False, opt_args=opt_args) + writer
     )
-
     process.apply_to(dstore_instance[:1])
-
-    assert len(process.data_store.summary_incomplete) == 0
-
-
-def test_get_lrt(mcr_dstore):
-    loader = io.load_db()
-    gn_mc = loader(mcr_dstore[0])
-
-    hyp = get_lrt(gn_mc)
-    print(hyp)
+    dstore = io.get_data_store(outpath)
+    assert len(dstore.summary_incomplete) == 0

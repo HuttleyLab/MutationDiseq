@@ -129,7 +129,7 @@ def test_load_data_group():
             o = got.elements[i]
             assert o.info.name == n.replace(".json", "")
 
-    path = DATADIR / "300bp.tinydb"
+    path = DATADIR / "300bp.sqlitedb"
     dstore = io.get_data_store(path)
     names = [m.name for m in dstore]
     shuffle(names)
@@ -148,7 +148,7 @@ def test_new_adjacent_eop():
 
     from cogent3.app import io
 
-    path = DATADIR / "300bp.tinydb"
+    path = DATADIR / "300bp.sqlitedb"
     dstore = io.get_data_store(path)
     names = [m.name for m in dstore]
     shuffle(names)

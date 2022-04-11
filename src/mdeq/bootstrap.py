@@ -1,5 +1,5 @@
 from copy import deepcopy
-from json import loads
+from json import dumps, loads
 
 from blosc2 import compress, decompress
 from cogent3.app import evo
@@ -13,7 +13,7 @@ from cogent3.app.composable import (
     appify,
 )
 from cogent3.app.result import bootstrap_result
-from cogent3.util import deserialise
+from cogent3.util import deserialise, union_dict
 from tqdm import tqdm
 
 from mdeq.model import GN_sm, GS_sm
@@ -43,11 +43,31 @@ def deserialise_compact(data):
     result_obj = compact_bootstrap_result(**data["result_construction"])
 
     for key, item in data["items"]:
-        item = _reconstitute_collection(item)
-        item = deserialise.deserialise_object(item)
         result_obj[key] = item
 
     return result_obj
+
+
+def deserialise_single_hyp(data: dict):
+    """
+    custom deserialiser for compact bootstrap model_collection_results
+
+    Parameters
+    ----------
+    data : dict
+        will contain a single top level 'alignment' key
+
+    Returns
+    -------
+    model_collection_result
+    """
+    from cogent3.util.deserialise import deserialise_object
+
+    from mdeq.utils import CompressedValue
+
+    data = CompressedValue(data["data"]).deserialised
+    _reconstitute_collection(data)
+    return deserialise_object(data)
 
 
 def _eliminated_redundant_aln_in_place(hyp_result):
@@ -81,32 +101,57 @@ class compact_bootstrap_result(bootstrap_result):
         # ignore validation checks, put compressed json straight
         # into self._store
         # NOTE: json requires less memory and is faster than using pickle
-        self._store[key] = compress(data.to_json().encode("utf8"), typesize=8)
+        # I create an intermediate dict that contains top level statistics (LR, df, pvalue)
+        # so we can delay decompression
+        if hasattr(data, "get_hypothesis_result"):
+            hyp = data.get_hypothesis_result(NULL_TOE, ALT_TOE)
+
+        if isinstance(data, dict):
+            data = union_dict.UnionDict(**data)
+            self._store[key] = data
+            return
+
+        rd = data.to_rich_dict()
+        _eliminated_redundant_aln_in_place(rd)
+
+        data = union_dict.UnionDict(
+            LR=hyp.LR,
+            df=hyp.df,
+            pvalue=hyp.pvalue,
+            data=compress(dumps(rd).encode("utf8")),
+        )
+
+        self._store[key] = data
 
     def __getitem__(self, key):
         # decompress the values on the fly
-        rd = loads(decompress(self._store[key]))
-        return deserialise.deserialise_object(rd)
+        return self._store[key]
 
-    def to_rich_dict(self):
+    def to_rich_dict(self, to_json=True):
         rd = super(self.__class__, self).to_rich_dict()
-        # dict is modified within _eliminated_redundant_aln_in_place(
+        if not to_json:
+            # this for the sqlitedb version where values can be binary
+            return rd
+
+        # decompress values if fit new slitedb storeage pattern for this
+        # result type
         for item in rd["items"]:
-            _eliminated_redundant_aln_in_place(item[1])
+            if "data" in item[1]:
+                item[1]["data"] = decompress(item[1]["data"]).decode("utf8")
 
         return rd
 
     @property
     def pvalue(self):
-        obs = self.observed.get_hypothesis_result(NULL_TOE, ALT_TOE).LR
+        obs = self.observed.LR
         if obs < 0:  # not optimised correctly?
             return 1.0
 
-        size_valid = 0
-        num_ge = 0
-        for k, v in self.items():
-            v = v.get_hypothesis_result(NULL_TOE, ALT_TOE)
-            if k == "observed" or v.LR < 0:
+        # subtract 1 for the observed
+        size_valid = -1
+        num_ge = -1
+        for v in self.values():
+            if v.LR < 0:
                 continue
 
             size_valid += 1
@@ -117,6 +162,18 @@ class compact_bootstrap_result(bootstrap_result):
             return 1.0
 
         return num_ge / size_valid
+
+    def deserialised_values(self):
+        """inflate all values"""
+        from cogent3.util.deserialise import deserialise_object
+
+        from mdeq.utils import CompressedValue
+
+        for k, v in self._store.items():
+            if "data" in v:
+                v = CompressedValue(v["data"]).deserialised
+                v = _reconstitute_collection(v)
+            self._store[k] = deserialise_object(v)
 
 
 class bootstrap(ComposableHypothesis):
