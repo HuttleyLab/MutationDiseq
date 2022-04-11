@@ -1,7 +1,10 @@
+import dataclasses
 import json
+import pickle
 
 from dataclasses import asdict
 
+from blosc2 import decompress
 from cogent3.app.composable import (
     ALIGNED_TYPE,
     SERIALISABLE_TYPE,
@@ -72,12 +75,15 @@ class SerialisableMixin:
 
 def get_obj_type(dstore):
     """returns the record type in dstore"""
-    from cogent3.app import data_store
     if len(dstore) == 0:
         return None
+    data = dstore[0].read()
+    if isinstance(data, str):
+        data = json.loads(data)
+        return data["type"].split(".")[-1]
 
-    data = json.loads(dstore[0].read())
-    return data["type"].split(".")[-1]
+    # already a dict with compressed values
+    return data["type"].deserialised.split(".")[-1]
 
 
 def configure_parallel(parallel: bool, mpi: int) -> dict:
@@ -135,3 +141,28 @@ def rich_display(c3t, title_justify="left"):
 
     console = Console()
     console.print(rich_table)
+
+
+@dataclasses.dataclass
+class CompressedValue:
+    """container class to support delayed decompression of serialised data"""
+
+    data: bytes
+
+    @property
+    def decompressed(self) -> str:
+        return decompress(self.data) if self.data else ""
+
+    @property
+    def deserialised(self):
+        """decompresses and then deserialises"""
+        if not self.data:
+            return ""
+        try:
+            return json.loads(self.decompressed.decode("utf8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            try:
+                return pickle.loads(self.decompressed)
+            except pickle.UnpicklingError:
+                # a compressed plain string
+                return self.decompressed.decode("utf8")
