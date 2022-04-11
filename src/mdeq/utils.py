@@ -126,7 +126,7 @@ def rich_display(c3t, title_justify="left"):
         title_style="bold blue",
     )
     for col in c3t.header:
-        numeric_type = "str" not in cols[col].dtype.name
+        numeric_type = any(v in cols[col].dtype.name for v in ("int", "float"))
         j = "right" if numeric_type else "left"
         rich_table.add_column(col, justify=j, no_wrap=numeric_type)
 
