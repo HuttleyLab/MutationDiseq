@@ -10,9 +10,12 @@ from cogent3.app.composable import (
     SERIALISABLE_TYPE,
     Composable,
 )
-from cogent3.app.result import bootstrap_result, generic_result, model_result
+from cogent3.app.result import bootstrap_result, model_result
+from cogent3.util.deserialise import deserialise_object
 
-from mdeq.adjacent import grouped, make_identifier
+from mdeq.adjacent import grouped
+from mdeq.bootstrap import _reconstitute_collection
+from mdeq.utils import CompressedValue
 
 
 __author__ = "Gavin Huttley"
@@ -31,7 +34,13 @@ class select_model_result:
             return result
 
         if isinstance(result, bootstrap_result):
-            return result.observed[self._name]
+            if "data" in result.observed:
+                # only decompress the instance required
+                data = CompressedValue(result.observed["data"]).deserialised
+                data = _reconstitute_collection(data)
+                result = deserialise_object(data)
+            else:
+                result = result.observed
 
         return result[self._name]
 
