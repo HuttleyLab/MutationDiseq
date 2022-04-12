@@ -3,6 +3,7 @@ import json
 import pickle
 
 from dataclasses import asdict
+from pathlib import Path
 
 from blosc2 import decompress
 from cogent3.app.composable import (
@@ -166,3 +167,25 @@ class CompressedValue:
             except pickle.UnpicklingError:
                 # a compressed plain string
                 return self.decompressed.decode("utf8")
+
+
+def paths_to_sqlitedbs_matching(
+    indir: Path, pattern: str, recursive: bool
+) -> list[Path]:
+    """finds paths matching pattern in indir
+
+    Parameters
+    ----------
+    indir : Path
+        root directory to search within
+    pattern : str
+        glob pattern, inserted as {pattern}.sqlitedb. Defaults to defaults to *.sqlitedb
+
+    recursive : bool
+        descend into sub-directories
+    """
+    if not pattern:
+        pattern = "**/*.sqlitedb" if recursive else "*.sqlitedb"
+    else:
+        pattern = f"**/{pattern}.sqlitedb" if recursive else pattern
+    return list(indir.glob(pattern))

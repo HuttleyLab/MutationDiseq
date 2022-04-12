@@ -10,6 +10,7 @@ from mdeq import (
     aeop,
     convergence,
     db_summary,
+    extract_pvalues,
     get_obj_type,
     make_adjacent,
     make_controls,
@@ -280,3 +281,15 @@ def test_sqlitedb_summary(runner):
     inpath = DATADIR / "toe-300bp.sqlitedb"
     r = runner.invoke(db_summary, ["-i", inpath])
     assert r.exit_code == 0, r.output
+
+
+def test_extract_pvalues(runner, tmp_dir):
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    args = ["-id", str(DATADIR), "-g", "'toe*'"]
+    r = runner.invoke(extract_pvalues, args)
+    assert r.exit_code == 0, r.output
+
+    # should fail if I just give it the DATADIR due to data type mismatch
+    args = ["-id", str(DATADIR)]
+    r = runner.invoke(extract_pvalues, args)
+    assert r.exit_code == 1, r.output

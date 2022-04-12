@@ -1,4 +1,4 @@
-import pathlib
+from pathlib import Path
 
 import click
 
@@ -37,7 +37,7 @@ def _gene_order_table(*args):
 
 
 def _valid_path(path, must_exist):
-    path = pathlib.Path(path)
+    path = Path(path)
     if must_exist and not path.exists():
         raise ValueError(f"{path!r} does not exist")
 
@@ -75,7 +75,7 @@ _outpath = click.option(
 _outdir = click.option(
     "-od",
     "--outdir",
-    type=pathlib.Path,
+    type=Path,
     help="directory to write output",
 )
 _treepath = click.option(
@@ -181,3 +181,13 @@ _wrt_nstat = click.option(
     help="nabla estimated using non-stationary calibrated Q. Otherwise, "
     "a stationary calibrated Q.",
 )
+_indir = click.option(
+    "-id",
+    "--indir",
+    type=Path,
+    help="path containing data files",
+)
+_pattern = click.option(
+    "-g", "--pattern", default="", help="glob pattern for file names"
+)
+_recursive = click.option("-r", "--recursive", is_flag=True)

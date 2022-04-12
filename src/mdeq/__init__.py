@@ -5,11 +5,13 @@ from mdeq import _block_threading  # isort: skip
 import inspect
 import sys
 
+from collections import defaultdict
 from pathlib import Path
 from warnings import filterwarnings
 
 import click
 
+from cogent3 import make_table
 from cogent3.app import io
 from rich.progress import track
 from scitrack import CachingLogger
@@ -24,6 +26,7 @@ from mdeq._click_options import (
     _fg_edge,
     _gene_order,
     _gene_order_table,
+    _indir,
     _inpath,
     _just_continuous,
     _limit,
@@ -33,7 +36,9 @@ from mdeq._click_options import (
     _outpath,
     _overwrite,
     _parallel,
+    _pattern,
     _process_comma_seq,
+    _recursive,
     _sample_size,
     _seed,
     _sequential,
@@ -57,7 +62,12 @@ from mdeq.eop import (
 )
 from mdeq.sqlite_data_store import sql_loader, sql_writer
 from mdeq.toe import ALT_TOE, NULL_TOE
-from mdeq.utils import configure_parallel, get_obj_type, set_fg_edge
+from mdeq.utils import (
+    configure_parallel,
+    get_obj_type,
+    paths_to_sqlitedbs_matching,
+    set_fg_edge,
+)
 
 
 __author__ = "Gavin Huttley"
@@ -539,6 +549,56 @@ def db_summary(inpath):
         t = dstore.summary_incomplete
         t.title = "Summary of incomplete records"
         rich_display(t)
+
+
+@main.command()
+@_indir
+@_pattern
+@_recursive
+@_outdir
+@_limit
+@_overwrite
+@_verbose
+def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose):
+    """extracts p-values from TOE sqlitedb results
+
+    generates a tsv with same name in same location"""
+    if verbose:
+        print(indir[:2])
+
+    data_type = "compact_bootstrap_result"
+
+    reader = sql_loader()
+    paths = paths_to_sqlitedbs_matching(indir, pattern, recursive)
+    for path in paths:
+        if outdir:
+            outpath = outdir / f"{path.stem}.tsv"
+        else:
+            outpath = path.parent / f"{path.stem}.tsv"
+        if outpath.exists() and not overwrite:
+            if verbose:
+                click.secho(f"{outpath} exists, skipping", fg="green")
+            continue
+
+        dstore = io.get_data_store(path, limit=limit)
+        record_type = get_obj_type(dstore)
+        if record_type != data_type:
+            click.secho(
+                f"record type {record_type!r} in '{path}' does not match "
+                f"expected {data_type!r}",
+                fg="red",
+            )
+            exit(1)
+
+        data = defaultdict(list)
+        for m in track(dstore):
+            r = reader(m)
+            data["name"].append(m.name)
+            data["chisq_pval"].append(r.observed.pvalue)
+            data["boostrap_pval"].append(r.pvalue)
+
+        table = make_table(data=data)
+        table.write(outpath)
 
 
 if __name__ == "__main__":

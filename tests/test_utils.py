@@ -1,3 +1,5 @@
+import pathlib
+
 import pytest
 
 from cogent3 import make_aligned_seqs
@@ -6,12 +8,15 @@ from mdeq.utils import (
     configure_parallel,
     foreground_from_jsd,
     get_foreground,
+    paths_to_sqlitedbs_matching,
     set_fg_edge,
 )
 
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
+
+DATADIR = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.fixture()
@@ -75,3 +80,18 @@ def test_set_fg_edge():
     # calling with NotCompleted just returns the same NotCompleted
     got2 = app(got)
     assert got2 is got
+
+
+def test_paths_to_sqlitedbs_matching():
+    # test root has no sqlitedb
+    # check this with recurse False
+    got = paths_to_sqlitedbs_matching(DATADIR.parent, "", False)
+    assert got == []
+    # allowing recurse should match result of just using Pathlib
+    got = {p.name for p in paths_to_sqlitedbs_matching(DATADIR.parent, "", True)}
+    expect = {p.name for p in DATADIR.glob("*sqlitedb")}
+    assert got == expect
+    # specifying pattern should match hand-coded result
+    got = {p.name for p in paths_to_sqlitedbs_matching(DATADIR.parent, "4otu*", True)}
+    expect = {p.name for p in DATADIR.glob("4otu*.sqlitedb")}
+    assert got == expect
