@@ -25,7 +25,7 @@ import reprlib
 import sqlite3
 
 from collections import defaultdict
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 from blosc2 import compress
 from cogent3.app import io
@@ -508,7 +508,7 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
         self._members.append(m)
         return m
 
-    def write(self, data, identifier: str = None):
+    def write(self, identifier: Optional[Union[str, pathlib.Path]] = None, data=None):
         """writes as binary blob under identifier
 
         Parameters
