@@ -513,11 +513,11 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
 
         Parameters
         ----------
+        identifier : str
+            unique value to be written under
         data
             object with to_rich_dict() method, or a dict already
             ready for serialisation
-        identifier : str
-            unique value to be written under
 
         Notes
         -----
@@ -546,6 +546,10 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
             self._checksums[identifier] = get_text_hexdigest(data)
 
         return self._insert_record(table_name, identifier, data)
+
+    def write_incomplete(self, *args, **kwargs):
+        """alias for write"""
+        return self.write(*args, **kwargs)
 
     def add_file(self, path, cleanup=False, **kwargs):
         """alias to add_log()"""
@@ -694,7 +698,7 @@ class sql_writer(io._checkpointable):
         except AttributeError:
             out = data
 
-        stored = self.data_store.write(out, identifier=identifier)
+        stored = self.data_store.write(identifier=identifier, data=out)
         if hasattr(data, "info"):
             data.info["stored"] = stored
         else:

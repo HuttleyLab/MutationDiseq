@@ -33,7 +33,7 @@ def sql_dstore_path(ro_dir_dstore, tmp_dir):
     path = tmp_dir / "data.sqlitedb"
     wr = WriteableSqliteDataStore(path, if_exists="overwrite")
     for m in ro_dir_dstore:
-        wr.write({"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
+        wr.write(data={"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
     return path
 
 
@@ -101,7 +101,7 @@ def rw_sql_dstore_mem(ro_dir_dstore):
     """in memory dstore"""
     db = WriteableSqliteDataStore(":memory:")
     for m in ro_dir_dstore:
-        db.write({"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
+        db.write(data={"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
     return db
 
 
@@ -145,7 +145,7 @@ def test_sql_preserves_original_data(rw_sql_dstore_mem):
     backup = {**orig}
     assert backup is not orig
     assert backup == orig
-    rw_sql_dstore_mem.write(orig)
+    rw_sql_dstore_mem.write(data=orig)
     assert backup == orig
     m = rw_sql_dstore_mem.get_member("blah.json")
     data = m.read()
@@ -159,7 +159,7 @@ def test_sql_rw_incomplete(rw_sql_dstore_mem):
 
     ncomp = NotCompleted("FAIL", "somefunc", "checking", source="testing.json")
     assert len(rw_sql_dstore_mem.incomplete) == 0
-    rw_sql_dstore_mem.write(ncomp)
+    rw_sql_dstore_mem.write(data=ncomp)
     assert len(rw_sql_dstore_mem.incomplete) == 1
     got = rw_sql_dstore_mem.incomplete[0]
     data = got.read()
@@ -175,7 +175,7 @@ def test_sql_describe(rw_sql_dstore_mem):
     assert isinstance(desc, Table)
     assert desc[1, "number"] == 0
     ncomp = NotCompleted("FAIL", "somefunc", "checking", source="testing.json")
-    rw_sql_dstore_mem.write(ncomp)
+    rw_sql_dstore_mem.write(data=ncomp)
     desc = rw_sql_dstore_mem.describe
     assert desc[1, "number"] == 1
 
@@ -185,7 +185,7 @@ def test_sql_summary_incomplete(rw_sql_dstore_mem):
     from cogent3.util.table import Table
 
     ncomp = NotCompleted("FAIL", "somefunc", "checking", source="testing.json")
-    rw_sql_dstore_mem.write(ncomp)
+    rw_sql_dstore_mem.write(data=ncomp)
     summary = rw_sql_dstore_mem.summary_incomplete
     assert isinstance(summary, Table)
     assert summary[0, "num"] == 1
