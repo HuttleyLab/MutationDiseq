@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from cogent3.app import evo
 from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
 from cogent3.app.result import generic_result
@@ -13,6 +15,15 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 NULL_TOE = "GSN"
 ALT_TOE = "GN"
+
+
+@lru_cache
+def get_param_rules_upper_limit(model_name, upper):
+    """rules to set the upper value for rate matrix terms"""
+    from cogent3 import get_model
+
+    sm = get_model(model_name)
+    return [{"par_name": par_name, "upper": upper} for par_name in sm.get_param_list()]
 
 
 @appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
@@ -81,7 +92,7 @@ def test_of_existence(
             tree=tree,
             opt_args=opt_args,
             lf_args=lf_args,
-            time_het=dict(upper=RATE_PARAM_UPPER),
+            param_rules=get_param_rules_upper_limit(mn, RATE_PARAM_UPPER),
             optimise_motif_probs=True,
         )
         for mn in model_names
