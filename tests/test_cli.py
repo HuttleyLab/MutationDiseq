@@ -192,7 +192,8 @@ def test_teop_exercise(runner, tmp_dir):
     # We're using the result created in adjacent_path as input here
     inpath = DATADIR / "apes-align.sqlitedb"
     outpath = tmp_dir / "teop.sqlitedb"
-    args = [f"-i{inpath}", f"-o{outpath}", "-e'Human,Chimp'", "-t", "-O"]
+    args = [f"-i{inpath}", f"-o{outpath}", "-e", "Human,Chimp", "-t", "-O"]
+    # teop(args)
     r = runner.invoke(teop, args)
     assert r.exit_code == 0, r.output
 
