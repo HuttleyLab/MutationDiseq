@@ -603,7 +603,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
             r = reader(m)
             data["name"].append(m.name)
             data["chisq_pval"].append(r.observed.pvalue)
-            data["boostrap_pval"].append(r.pvalue)
+            data["bootstrap_pval"].append(r.pvalue)
 
         table = make_table(data=data)
         table.write(outpath)
