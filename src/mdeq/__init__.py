@@ -596,7 +596,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
                 f"record type {record_type!r} in '{path}' does not match "
                 f"expected {data_type!r}",
             )
-            exit(1)
+            continue
 
         data = defaultdict(list)
         for m in track(dstore):

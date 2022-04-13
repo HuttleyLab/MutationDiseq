@@ -289,7 +289,7 @@ def test_extract_pvalues(runner, tmp_dir):
     r = runner.invoke(extract_pvalues, args)
     assert r.exit_code == 0, r.output
 
-    # should fail if I just give it the DATADIR due to data type mismatch
+    # should not fail if I just give it the DATADIR due to data type mismatch since it will ignore dstores with wrong data type
     args = ["-id", str(DATADIR)]
     r = runner.invoke(extract_pvalues, args)
-    assert r.exit_code == 1, r.output
+    assert r.exit_code == 0, r.output
