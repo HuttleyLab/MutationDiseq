@@ -13,6 +13,7 @@ import click
 
 from cogent3 import make_table
 from cogent3.app import io
+from rich.console import Console
 from rich.progress import track
 from scitrack import CachingLogger
 
@@ -563,13 +564,20 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
     """extracts p-values from TOE sqlitedb results
 
     generates a tsv with same name in same location"""
+    console = Console()
     if verbose:
-        print(indir[:2])
+        console.print(f"[blue]{indir}")
 
     data_type = "compact_bootstrap_result"
 
     reader = sql_loader()
     paths = paths_to_sqlitedbs_matching(indir, pattern, recursive)
+    if not paths:
+        console.print(
+            f"[red]EXIT: no paths found for {indir=}, {recursive=!r}, " f"{pattern=!r}"
+        )
+        exit()
+
     for path in paths:
         if outdir:
             outpath = outdir / f"{path.stem}.tsv"
@@ -577,16 +585,16 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
             outpath = path.parent / f"{path.stem}.tsv"
         if outpath.exists() and not overwrite:
             if verbose:
-                click.secho(f"{outpath} exists, skipping", fg="green")
+                console.print(f"[green]{outpath} exists, skipping")
             continue
 
         dstore = io.get_data_store(path, limit=limit)
         record_type = get_obj_type(dstore)
         if record_type != data_type:
-            click.secho(
+            console.print(
+                "[yellow]SKIPPED: "
                 f"record type {record_type!r} in '{path}' does not match "
                 f"expected {data_type!r}",
-                fg="red",
             )
             exit(1)
 
@@ -599,6 +607,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
         table = make_table(data=data)
         table.write(outpath)
+    console.print("[green]Done!")
 
 
 if __name__ == "__main__":
