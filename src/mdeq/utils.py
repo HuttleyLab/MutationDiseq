@@ -152,7 +152,14 @@ class CompressedValue:
 
     @property
     def decompressed(self) -> str:
-        return decompress(self.data) if self.data else ""
+        if not self.data:
+            return b""
+        try:
+            return decompress(self.data)
+        except RuntimeError:
+            return self.data
+        except TypeError:
+            return self.data.encode("utf8")
 
     @property
     def deserialised(self):
