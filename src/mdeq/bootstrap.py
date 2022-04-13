@@ -29,6 +29,8 @@ _aln_key = "alignment"
 
 def _reconstitute_collection(data):
     """injects a top-level alignment into all individual model dicts."""
+    if _aln_key not in data:
+        return data
     aln = data.pop(_aln_key)
     # inject alignment into each model dict
     for _, mr in data["items"]:
