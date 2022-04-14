@@ -19,10 +19,12 @@ from mdeq import (
     toe,
 )
 from mdeq._click_options import _valid_sqlitedb_input, _valid_sqlitedb_output
+from mdeq.utils import CompressedValue
 
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
+
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
@@ -106,6 +108,14 @@ def test_toe_exercise(runner, tmp_dir):
     assert r.exit_code != 0
     # checking the error message
     assert "not one of the expected types" in r.output
+    # load the result and check values
+    dstore = io.get_data_store(outpath)
+    read = sql_loader()
+    result = read(dstore[0])
+    assert isinstance(result.observed["data"], bytes)
+    assert isinstance(
+        CompressedValue(result.observed["data"]).decompressed.decode("utf8"), str
+    )
 
 
 loader = sql_loader()

@@ -1,3 +1,5 @@
+import json
+
 from copy import deepcopy
 from json import dumps, loads
 
@@ -129,7 +131,7 @@ class compact_bootstrap_result(bootstrap_result):
         # decompress the values on the fly
         return self._store[key]
 
-    def to_rich_dict(self, to_json=True):
+    def to_rich_dict(self, to_json=False):
         rd = super(self.__class__, self).to_rich_dict()
         if not to_json:
             # this for the sqlitedb version where values can be binary
@@ -142,6 +144,9 @@ class compact_bootstrap_result(bootstrap_result):
                 item[1]["data"] = decompress(item[1]["data"]).decode("utf8")
 
         return rd
+
+    def to_json(self):
+        return json.dumps(self.to_rich_dict(to_json=True))
 
     @property
     def pvalue(self):
