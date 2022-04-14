@@ -187,11 +187,10 @@ class ReadonlySqliteDataStore(ReadOnlyDataStoreBase):
         return self._db
 
     def close(self):
-        self.db.close()
-        self._open = False
+        with contextlib.suppress(sqlite3.ProgrammingError):
+            self.db.close()
 
-    def __del__(self):
-        self.close()
+        self._open = False
 
     def _select_members(self, table_name):
         limit = f"LIMIT {self._limit}" if self._limit else ""
