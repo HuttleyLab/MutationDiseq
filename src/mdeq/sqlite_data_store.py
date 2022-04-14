@@ -493,7 +493,9 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
             )
 
     def close(self):
-        self.unlock()
+        with contextlib.suppress(sqlite3.ProgrammingError):
+            self.unlock()
+            self.db.commit()
         super().close()
 
     def _insert_record(self, table_name, identifier, data):
