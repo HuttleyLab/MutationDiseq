@@ -71,6 +71,15 @@ from mdeq.utils import (
 )
 
 
+try:
+    from wakepy import set_keepawake, unset_keepawake
+except NotImplementedError:
+    # may not be installed, or on linux where this library doesn't work
+    make_none = type(None)
+
+    set_keepawake, unset_keepawake = make_none, make_none
+
+
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
 
@@ -349,6 +358,8 @@ def aeop(
 @_verbose
 def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
+    set_keepawake(keep_screen_awake=False)
+
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
     LOGGER.log_args()
@@ -370,6 +381,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
+    unset_keepawake()
 
 
 @main.command()
