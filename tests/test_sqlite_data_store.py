@@ -241,7 +241,7 @@ def test_db_creation(sql_dstore_path, tmp_path):
 def test_sql_loader(rw_sql_dstore_mem):
     loader = sql_loader()
     result = loader(rw_sql_dstore_mem[0])
-    print(result.keys())
+    assert isinstance(result, dict)
 
 
 def test_sql_writer(rw_sql_dstore_mem):
