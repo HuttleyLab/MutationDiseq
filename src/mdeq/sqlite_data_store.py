@@ -171,6 +171,14 @@ class ReadonlySqliteDataStore(ReadOnlyDataStoreBase):
         self._incomplete = []
         self._open = False
 
+    def __getstate__(self):
+        return {**self._persistent}
+
+    def __setstate__(self, state):
+        # this will reset connections to read only db's
+        obj = self.__class__(**state)
+        self.__dict__.update(obj.__dict__)
+
     def __contains__(self, identifier):
         """whether relative identifier has been stored"""
         if isinstance(identifier, DataStoreMember):
@@ -396,6 +404,12 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
         self._log_id = None
         self._source_create_delete(if_exists, create)
         self._members = []
+
+    def __getstate__(self):
+        raise TypeError(f"{self.__class__.__name__!r} cannot be pickled")
+
+    def __setstate__(self, state):
+        raise TypeError(f"{self.__class__.__name__!r} cannot be unpickled")
 
     def _source_create_delete(self, if_exists, create):
         # todo how well does this match other DataStore's behaviour?

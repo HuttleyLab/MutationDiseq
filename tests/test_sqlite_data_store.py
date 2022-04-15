@@ -267,3 +267,17 @@ def test_sql_writer(rw_sql_dstore_mem):
 
     obj = deserialise_object(got)
     assert obj.to_dict() == aln.to_dict()
+
+
+def test_pickling(ro_sql_dstore, rw_sql_dstore_mem):
+    from pickle import dumps, loads
+
+    # sqlitedb3 is not safe for multiprocess environments, so we block
+    # pickling (how objects are distributed)
+    with pytest.raises(TypeError):
+        dumps(rw_sql_dstore_mem)
+
+    # but they're fine in read-only mode (at least on the mac! needs checking
+    # on windows)
+    g = loads(dumps(ro_sql_dstore))
+    assert isinstance(g, ReadonlySqliteDataStore)
