@@ -708,12 +708,7 @@ class sql_writer(io._checkpointable):
 
         assert identifier is not None
 
-        try:
-            out = data.to_rich_dict()
-        except AttributeError:
-            out = data
-
-        stored = self.data_store.write(identifier=identifier, data=out)
+        stored = self.data_store.write(identifier=identifier, data=data)
         if hasattr(data, "info"):
             data.info["stored"] = stored
         else:
