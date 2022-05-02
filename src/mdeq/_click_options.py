@@ -144,7 +144,6 @@ _edge_names = click.option(
     help="comma separated edge names to test for equivalence",
 )
 _share_mprobs = click.option(
-    "-m",
     "--share_mprobs",
     is_flag=True,
     help="constrain loci to have the same motif probs",
