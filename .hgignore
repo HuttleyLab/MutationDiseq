@@ -34,3 +34,5 @@ doc/draw*
 dist/*
 working/*
 hg_old*
+*-shm
+*-wal

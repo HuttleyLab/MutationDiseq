@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# sqlite wal files
+*-shm
+*-wal
+
 # Distribution / packaging
 .Python
 build/
