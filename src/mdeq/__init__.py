@@ -561,7 +561,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
         console.print(
             f"[red]EXIT: no paths found for {indir=}, {recursive=!r}, " f"{pattern=!r}"
         )
-        exit()
+        exit(1)
 
     for path in paths:
         if outdir:
