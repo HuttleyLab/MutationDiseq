@@ -190,3 +190,23 @@ _pattern = click.option(
     "-g", "--pattern", default="", help="glob pattern for file names"
 )
 _recursive = click.option("-r", "--recursive", is_flag=True)
+# for sliding window analysis
+_window = click.option(
+    "-wz", "window_size", type=int, default=600, help="size of slice", show_default=True
+)
+_step = click.option(
+    "-st",
+    "step",
+    type=int,
+    default=10,
+    help="step sizes between slices",
+    show_default=True,
+)
+_min_length = click.option(
+    "-ml",
+    "min_length",
+    type=int,
+    default=300,
+    help="minimum length after filtering",
+    show_default=True,
+)

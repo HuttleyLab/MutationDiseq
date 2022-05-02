@@ -6,7 +6,6 @@ from click.testing import CliRunner
 from cogent3.app import io
 
 from mdeq import (
-    _gene_order_table,
     aeop,
     convergence,
     db_summary,
@@ -14,11 +13,16 @@ from mdeq import (
     get_obj_type,
     make_adjacent,
     make_controls,
+    slide,
     sql_loader,
     teop,
     toe,
 )
-from mdeq._click_options import _valid_sqlitedb_input, _valid_sqlitedb_output
+from mdeq._click_options import (
+    _gene_order_table,
+    _valid_sqlitedb_input,
+    _valid_sqlitedb_output,
+)
 from mdeq.utils import CompressedValue
 
 
@@ -302,3 +306,34 @@ def test_extract_pvalues(runner, tmp_dir):
     args = ["-id", str(DATADIR), "-od", str(tmp_dir)]
     r = runner.invoke(extract_pvalues, args)
     assert r.exit_code == 0, r.output
+
+
+def test_slide(runner, tmp_dir):
+    """exercise slide"""
+    # produces expected number of sliced alignments with given input
+    # aligns are 3k long, window 700, setting step to 500 give 5 sub-alignments, times 5
+    # alignments gives 25
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
+    window_size = 600
+    step = 500
+    min_length = 200
+    args = f"-i {inpath} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
+    r = runner.invoke(slide, args)
+    assert r.exit_code == 0, r.output
+    dstore = io.get_data_store(outpath)
+    assert len(dstore) == 25, dstore
+    assert len(dstore.incomplete) == 0, dstore.incomplete
+    assert len(dstore.logs) == 1, dstore.logs
+    dstore.close()
+
+    # fails when invalid input data type
+    args = f"-i {DATADIR / 'teop-apes.sqlitedb'} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
+    r = runner.invoke(slide, args)
+    assert r.exit_code == 1, r.output
+
+    # setting minlength greater than window size causes exit
+    min_length = window_size + 1
+    args = f"-i {inpath} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
+    r = runner.invoke(slide, args)
+    assert r.exit_code == 1, r.output

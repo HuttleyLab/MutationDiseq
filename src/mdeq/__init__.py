@@ -17,38 +17,11 @@ from rich.console import Console
 from rich.progress import track
 from scitrack import CachingLogger
 
+import mdeq._click_options as _cli_opt
+
 # required to ensure registration of define substitution models
 from mdeq import model as _model
 from mdeq import sqlite_data_store as _sqldstore
-from mdeq._click_options import (
-    _analysis,
-    _controls,
-    _edge_names,
-    _fg_edge,
-    _gene_order,
-    _gene_order_table,
-    _indir,
-    _inpath,
-    _just_continuous,
-    _limit,
-    _mpi,
-    _num_reps,
-    _outdir,
-    _outpath,
-    _overwrite,
-    _parallel,
-    _pattern,
-    _process_comma_seq,
-    _recursive,
-    _sample_size,
-    _seed,
-    _sequential,
-    _share_mprobs,
-    _testrun,
-    _treepath,
-    _verbose,
-    _wrt_nstat,
-)
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import control_generator, select_model_result
@@ -117,13 +90,13 @@ def main():
 
 
 @main.command()
-@_inpath
-@_gene_order
-@_outpath
-@_limit
-@_overwrite
-@_verbose
-@_testrun
+@_cli_opt._inpath
+@_cli_opt._gene_order
+@_cli_opt._outpath
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+@_cli_opt._testrun
 def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testrun):
     """makes sqlitedb of adjacent alignment records."""
     LOGGER = CachingLogger(create_dir=True)
@@ -156,19 +129,19 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 
 
 @main.command()
-@_inpath
-@_treepath
-@_outpath
-@_just_continuous
-@_fg_edge
-@_sequential
-@_num_reps
-@_parallel
-@_mpi
-@_limit
-@_overwrite
-@_verbose
-@_testrun
+@_cli_opt._inpath
+@_cli_opt._treepath
+@_cli_opt._outpath
+@_cli_opt._just_continuous
+@_cli_opt._fg_edge
+@_cli_opt._sequential
+@_cli_opt._num_reps
+@_cli_opt._parallel
+@_cli_opt._mpi
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+@_cli_opt._testrun
 def toe(
     inpath,
     treepath,
@@ -248,16 +221,16 @@ def toe(
 
 
 @main.command()
-@_inpath
-@_outpath
-@_treepath
-@_edge_names
-@_parallel
-@_mpi
-@_limit
-@_overwrite
-@_verbose
-@_testrun
+@_cli_opt._inpath
+@_cli_opt._outpath
+@_cli_opt._treepath
+@_cli_opt._edge_names
+@_cli_opt._parallel
+@_cli_opt._mpi
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+@_cli_opt._testrun
 def teop(
     inpath,
     outpath,
@@ -298,16 +271,16 @@ def teop(
 
 
 @main.command()
-@_inpath
-@_outpath
-@_treepath
-@_share_mprobs
-@_parallel
-@_mpi
-@_limit
-@_overwrite
-@_verbose
-@_testrun
+@_cli_opt._inpath
+@_cli_opt._outpath
+@_cli_opt._treepath
+@_cli_opt._share_mprobs
+@_cli_opt._parallel
+@_cli_opt._mpi
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+@_cli_opt._testrun
 def aeop(
     inpath,
     outpath,
@@ -348,14 +321,14 @@ def aeop(
 
 
 @main.command()
-@_inpath
-@_outpath
-@_wrt_nstat
-@_parallel
-@_mpi
-@_limit
-@_overwrite
-@_verbose
+@_cli_opt._inpath
+@_cli_opt._outpath
+@_cli_opt._wrt_nstat
+@_cli_opt._parallel
+@_cli_opt._mpi
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
 def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
     set_keepawake(keep_screen_awake=False)
@@ -385,16 +358,16 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 
 
 @main.command()
-@_inpath
-@_outdir
-@_analysis
-@_controls
-@_sample_size
-@_seed
-@_limit
-@_overwrite
-@_verbose
-@_testrun
+@_cli_opt._inpath
+@_cli_opt._outdir
+@_cli_opt._analysis
+@_cli_opt._controls
+@_cli_opt._sample_size
+@_cli_opt._seed
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+@_cli_opt._testrun
 def make_controls(
     inpath,
     outdir,
@@ -473,7 +446,7 @@ def make_controls(
 
 # todo postprocess functions, generate figures, tabulate data
 @main.command()
-@_inpath
+@_cli_opt._inpath
 def db_summary(inpath):
     """displays summary information about a db"""
     import json
@@ -565,13 +538,13 @@ def db_summary(inpath):
 
 
 @main.command()
-@_indir
-@_pattern
-@_recursive
-@_outdir
-@_limit
-@_overwrite
-@_verbose
+@_cli_opt._indir
+@_cli_opt._pattern
+@_cli_opt._recursive
+@_cli_opt._outdir
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
 def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose):
     """extracts p-values from TOE sqlitedb results
 

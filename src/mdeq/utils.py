@@ -196,3 +196,8 @@ def paths_to_sqlitedbs_matching(
     else:
         pattern = f"**/{pattern}.sqlitedb" if recursive else pattern
     return [p for p in indir.glob(pattern) if p.suffix == ".sqlitedb"]
+
+
+def omit_suffixes_from_path(path: Path) -> str:
+    """removes all components of stem after '.'"""
+    return path.stem.split(".", maxsplit=1)[0]
