@@ -195,4 +195,4 @@ def paths_to_sqlitedbs_matching(
         pattern = "**/*.sqlitedb" if recursive else "*.sqlitedb"
     else:
         pattern = f"**/{pattern}.sqlitedb" if recursive else pattern
-    return list(indir.glob(pattern))
+    return [p for p in indir.glob(pattern) if p.suffix == ".sqlitedb"]
