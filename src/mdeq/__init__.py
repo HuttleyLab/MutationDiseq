@@ -14,7 +14,7 @@ import click
 from cogent3 import make_table
 from cogent3.app import io
 from rich.console import Console
-from rich.progress import track
+from rich.progress import Progress, track
 from scitrack import CachingLogger
 
 import mdeq._click_options as _cli_opt
@@ -39,6 +39,7 @@ from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import (
     configure_parallel,
     get_obj_type,
+    omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
     set_fg_edge,
 )
@@ -592,6 +593,76 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
         table = make_table(data=data)
         table.write(outpath)
+    console.print("[green]Done!")
+
+
+@main.command()
+@_cli_opt._inpath
+@_cli_opt._outpath
+@_cli_opt._window
+@_cli_opt._step
+@_cli_opt._min_length
+@_cli_opt._overwrite
+@_cli_opt._verbose
+def slide(
+    inpath,
+    outpath,
+    window_size,
+    step,
+    min_length,
+    overwrite,
+    verbose,
+):
+    """generate window sized sub-alignments. The source of each sub-alignment
+    is recorded as parent source with index position."""
+    # or check alignment.info for a fg_edge key -- all synthetic data
+    LOGGER = CachingLogger(create_dir=True)
+    LOGGER.log_file_path = f"{outpath.stem}-slide.log"
+    LOGGER.log_args()
+
+    console = Console()
+    if window_size < min_length:
+        console.print(
+            f"[red] {window_size=} is less than {min_length=}, should be other way around"
+        )
+        exit(1)
+
+    dstore = io.get_data_store(inpath)
+    expected_types = ("ArrayAlignment", "Alignment")
+    if get_obj_type(dstore) not in expected_types:
+        console.print(f"[red]records not one of the expected types {expected_types}")
+        exit(1)
+
+    loader = sql_loader()
+    writer = sql_writer(
+        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+    )
+    with Progress() as progress:
+        alignments = progress.add_task("[green]Alignment...", total=len(dstore))
+        for i, member in enumerate(dstore):
+            progress.update(alignments, completed=i + 1)
+            n = omit_suffixes_from_path(Path(member.name))
+            aln = loader(member)
+            num_windows = len(aln) - window_size + 1
+            windows = progress.add_task(
+                "[blue]slide...", total=num_windows, transient=True
+            )
+            for start in range(0, num_windows, step):
+                progress.update(windows, completed=start + 1)
+                sliced = aln[start : start + window_size]
+                sub = sliced.no_degenerates()
+                if sub is None or len(sub) < min_length:
+                    continue
+
+                sub.info.source = f"{n}-{start}"
+                sub.info.index = start
+                # write it
+                writer(sub)
+            progress.remove_task(windows)
+
+    log_file_path = LOGGER.log_file_path
+    LOGGER.shutdown()
+    writer.data_store.add_log(log_file_path, cleanup=True)
     console.print("[green]Done!")
 
 
