@@ -587,6 +587,8 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
         data = defaultdict(list)
         for m in track(dstore):
             r = reader(m)
+            if r.observed.pvalue is None:
+                continue
             data["name"].append(m.name)
             data["chisq_pval"].append(r.observed.pvalue)
             data["bootstrap_pval"].append(r.pvalue)
