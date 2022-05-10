@@ -1,7 +1,7 @@
 import json
 
 from copy import deepcopy
-from json import dumps, loads
+from json import dumps
 
 from blosc2 import compress, decompress
 from cogent3.app import evo
@@ -16,7 +16,7 @@ from cogent3.app.composable import (
 )
 from cogent3.app.result import bootstrap_result
 from cogent3.util import deserialise, union_dict
-from tqdm import tqdm
+from rich.progress import track
 
 from mdeq.model import GN_sm, GS_sm
 from mdeq.toe import ALT_TOE, NULL_TOE, test_of_existence
@@ -222,7 +222,7 @@ class bootstrap(ComposableHypothesis):
 
         series = range(self._num_reps)
         if self._verbose:
-            series = tqdm(series)
+            series = track(series)
 
         for i in series:
             sim_aln = self._null.simulate_alignment()
