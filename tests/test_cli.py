@@ -102,12 +102,16 @@ def test_get_obj_type():
 def test_toe_exercise(runner, tmp_dir):
     inpath = DATADIR / "300bp.sqlitedb"
     outpath = tmp_dir / "toe.sqlitedb"
-    r = runner.invoke(toe, [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"])
+    r = runner.invoke(
+        toe, [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"], catch_exceptions=False
+    )
     assert r.exit_code == 0, r.output
     # now with incorrect input
     invalidinput = DATADIR / "toe-300bp.sqlitedb"
     r = runner.invoke(
-        toe, ["-i", f"{invalidinput}", "-o", f"{outpath}", "-t", "-n4", "-O"]
+        toe,
+        ["-i", f"{invalidinput}", "-o", f"{outpath}", "-t", "-n4", "-O"],
+        catch_exceptions=False,
     )
     assert r.exit_code != 0
     # checking the error message
@@ -134,7 +138,7 @@ def test_convergence(runner, tmp_dir):
     outpath = tmp_dir / "delme.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-O"]
     # convergence(args)
-    r = runner.invoke(convergence, args)
+    r = runner.invoke(convergence, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
     # now load the saved records and check they're delta_nabla instances
     dstore = io.get_data_store(outpath)
@@ -145,7 +149,7 @@ def test_convergence(runner, tmp_dir):
     # now with incorrect input
     invalidinput = DATADIR / "300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
-    r = runner.invoke(convergence, args)
+    r = runner.invoke(convergence, args, catch_exceptions=False)
     assert r.exit_code != 0
     # checking the error message
     assert "not one of the expected types" in r.output
@@ -161,7 +165,9 @@ def adjacent_path(runner, tmp_dir):
     gene_order = DATADIR / "gene_order.tsv"
     outpath = tmp_dir / "adjacent.sqlitedb"
     r = runner.invoke(
-        make_adjacent, [f"-i{inpath}", f"-g{gene_order}", f"-o{outpath}", "-t", "-O"]
+        make_adjacent,
+        [f"-i{inpath}", f"-g{gene_order}", f"-o{outpath}", "-t", "-O"],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
@@ -179,13 +185,13 @@ def test_aeop_exercise(runner, tmp_dir, adjacent_path):
     inpath = adjacent_path
     outpath = tmp_dir / "aeop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-t", "-O"]
-    r = runner.invoke(aeop, args)
+    r = runner.invoke(aeop, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
     # now with incorrect input
     invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
-    r = runner.invoke(aeop, args)
+    r = runner.invoke(aeop, args, catch_exceptions=False)
     assert r.exit_code != 0
     # checking the error message
     assert "not one of the expected types" in r.output
@@ -196,7 +202,9 @@ def test_aeop_exercise_shared_mprobs(runner, tmp_dir, adjacent_path):
     inpath = adjacent_path
     outpath = tmp_dir / "aeop.sqlitedb"
     r = runner.invoke(
-        aeop, [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"]
+        aeop,
+        [f"-i{inpath}", f"-o{outpath}", "-t", "-O", "--share_mprobs"],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
 
@@ -209,7 +217,7 @@ def test_teop_exercise(runner, tmp_dir):
     outpath = tmp_dir / "teop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-e", "Human,Chimp", "-t", "-O"]
     # teop(args)
-    r = runner.invoke(teop, args)
+    r = runner.invoke(teop, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
     dstore = io.get_data_store(outpath)
@@ -221,7 +229,7 @@ def test_teop_exercise(runner, tmp_dir):
     invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     # teop(args)
-    r = runner.invoke(teop, args)
+    r = runner.invoke(teop, args, catch_exceptions=False)
     assert r.exit_code != 0
     assert "not one of the expected types" in r.output
 
@@ -251,7 +259,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
             ]
             args = args if seed else args[:-1]
             # make_controls(args)  # useful for debugging
-            r = runner.invoke(make_controls, args)
+            r = runner.invoke(make_controls, args, catch_exceptions=False)
             assert r.exit_code == 0, r.output
 
             dstore = io.get_data_store(outpath)
@@ -264,7 +272,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
     # now with incorrect input
     invalidinput = DATADIR / "300bp.sqlitedb"
     args[1] = f"{invalidinput}"
-    r = runner.invoke(make_controls, args)
+    r = runner.invoke(make_controls, args, catch_exceptions=False)
     assert r.exit_code != 0
     # checking the error message
     assert "does not match expected" in r.output
@@ -293,18 +301,18 @@ def test_make_controls_toe_exercise(runner, tmp_dir):
 
 def test_sqlitedb_summary(runner):
     inpath = DATADIR / "toe-300bp.sqlitedb"
-    r = runner.invoke(db_summary, ["-i", inpath])
+    r = runner.invoke(db_summary, ["-i", inpath], catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
 
 def test_extract_pvalues(runner, tmp_dir):
     args = ["-id", str(DATADIR), "-g", "toe*", "-od", str(tmp_dir)]
-    r = runner.invoke(extract_pvalues, args)
+    r = runner.invoke(extract_pvalues, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
     # should not fail if I just give it the DATADIR due to data type mismatch since it will ignore dstores with wrong data type
     args = ["-id", str(DATADIR), "-od", str(tmp_dir)]
-    r = runner.invoke(extract_pvalues, args)
+    r = runner.invoke(extract_pvalues, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
 
@@ -319,7 +327,7 @@ def test_slide(runner, tmp_dir):
     step = 500
     min_length = 200
     args = f"-i {inpath} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
-    r = runner.invoke(slide, args)
+    r = runner.invoke(slide, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
     dstore = io.get_data_store(outpath)
     assert len(dstore) == 25, dstore
@@ -329,11 +337,11 @@ def test_slide(runner, tmp_dir):
 
     # fails when invalid input data type
     args = f"-i {DATADIR / 'teop-apes.sqlitedb'} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
-    r = runner.invoke(slide, args)
+    r = runner.invoke(slide, args, catch_exceptions=False)
     assert r.exit_code == 1, r.output
 
     # setting minlength greater than window size causes exit
     min_length = window_size + 1
     args = f"-i {inpath} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
-    r = runner.invoke(slide, args)
+    r = runner.invoke(slide, args, catch_exceptions=False)
     assert r.exit_code == 1, r.output
