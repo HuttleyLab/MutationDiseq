@@ -496,6 +496,7 @@ def db_summary(inpath):
 
     _type_map = {"None": "null", "True": "true", "False": "false"}
     for i, p in enumerate(params):
+        p = re.sub("[<]module[^>]+[>]", "'module'", p)
         for match in _types.findall(p):
             pattern = f"\\b{match}\\b"
             p = re.sub(pattern, _type_map[match], p)
@@ -504,6 +505,8 @@ def db_summary(inpath):
             params[i] = json.loads(p)
         except json.JSONDecodeError:
             params[i] = {"...": "json error decoding parameters"}
+        else:
+            params[i] = {k: v for k, v in params[i].items() if v != "module"}
 
     columns = ["num", "command", "args"]
     cmnds = make_table(
