@@ -47,11 +47,12 @@ from mdeq.utils import (
 
 try:
     from wakepy import set_keepawake, unset_keepawake
-except NotImplementedError:
+except (ImportError, NotImplementedError):
     # may not be installed, or on linux where this library doesn't work
-    make_none = type(None)
+    def _do_nothing_func(*args, **kwargs):
+        ...
 
-    set_keepawake, unset_keepawake = make_none, make_none
+    set_keepawake, unset_keepawake = _do_nothing_func, _do_nothing_func
 
 
 __author__ = "Gavin Huttley"
