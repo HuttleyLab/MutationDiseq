@@ -36,3 +36,4 @@ working/*
 hg_old*
 *-shm
 *-wal
+.nox/*
