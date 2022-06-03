@@ -91,7 +91,7 @@ def main():
     pass
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._gene_order
 @_cli_opt._outpath
@@ -130,7 +130,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     click.secho(f"{func_name!r} is done!", fg="green")
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._treepath
 @_cli_opt._outpath
@@ -222,7 +222,7 @@ def toe(
     click.secho(f"{func_name!r} is done!", fg="green")
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._outpath
 @_cli_opt._treepath
@@ -272,7 +272,7 @@ def teop(
     click.secho(f"{func_name!r} is done!", fg="green")
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._outpath
 @_cli_opt._treepath
@@ -322,7 +322,7 @@ def aeop(
     click.secho(f"{func_name!r} is done!", fg="green")
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._outpath
 @_cli_opt._wrt_nstat
@@ -359,7 +359,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     unset_keepawake()
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._outdir
 @_cli_opt._analysis
@@ -447,7 +447,7 @@ def make_controls(
 
 
 # todo postprocess functions, generate figures, tabulate data
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 def db_summary(inpath):
     """displays summary information about a db"""
@@ -542,7 +542,7 @@ def db_summary(inpath):
         rich_display(t)
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._indir
 @_cli_opt._pattern
 @_cli_opt._recursive
@@ -602,7 +602,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
     console.print("[green]Done!")
 
 
-@main.command()
+@main.command(no_args_is_help=True)
 @_cli_opt._inpath
 @_cli_opt._outpath
 @_cli_opt._window

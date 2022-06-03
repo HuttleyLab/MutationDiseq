@@ -37,6 +37,7 @@ def test(session):
         "mdeq",
     )
 
+
 @nox.session(python=[f"3.{v}" for v in _py_versions])
 def htmlcov(session):
     session.install(*dependencies)
