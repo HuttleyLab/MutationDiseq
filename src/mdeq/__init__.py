@@ -737,6 +737,9 @@ def slide(
 
                 sub.info.source = f"{n}-{start}"
                 sub.info.index = start
+                if "fg_edge" in aln.info:
+                    sub.info.fg_edge = aln.info["fg_edge"]
+
                 # write it
                 writer(sub)
             progress.remove_task(windows)

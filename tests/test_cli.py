@@ -428,6 +428,12 @@ def test_slide(runner, tmp_dir):
     assert len(dstore) == 25, dstore
     assert len(dstore.incomplete) == 0, dstore.incomplete
     assert len(dstore.logs) == 1, dstore.logs
+    # the info attribute should have the correct fg_edge setting
+    expect = "73021"
+    for m in dstore:
+        aln = loader(m)
+        assert aln.info["fg_edge"] == expect
+
     dstore.close()
 
 
