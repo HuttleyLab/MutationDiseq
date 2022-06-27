@@ -430,12 +430,19 @@ def test_slide(runner, tmp_dir):
     assert len(dstore.logs) == 1, dstore.logs
     dstore.close()
 
+
+def test_slide_exit(runner, tmp_dir):
     # fails when invalid input data type
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
+    window_size = 600
+    step = 500
+    min_length = 200
     args = f"-i {DATADIR / 'teop-apes.sqlitedb'} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
     r = runner.invoke(slide, args, catch_exceptions=False)
     assert r.exit_code == 1, r.output
 
-    # setting minlength greater than window size causes exit
+    # fail if minlength > window size
     min_length = window_size + 1
     args = f"-i {inpath} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
     r = runner.invoke(slide, args, catch_exceptions=False)
