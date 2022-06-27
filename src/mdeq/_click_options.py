@@ -37,6 +37,9 @@ def _gene_order_table(*args):
 
 
 def _valid_path(path, must_exist):
+    if not path:
+        return
+
     path = Path(path)
     if must_exist and not path.exists():
         raise ValueError(f"{path!r} does not exist")
