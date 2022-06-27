@@ -13,6 +13,7 @@ from mdeq import (
     get_obj_type,
     make_adjacent,
     make_controls,
+    prep,
     slide,
     sql_loader,
     teop,
@@ -97,6 +98,100 @@ def test_get_obj_type():
         dstore = io.get_data_store(DATADIR / path)
         ty = get_obj_type(dstore)
         assert ty == expect
+
+
+@pytest.fixture
+def fasta(tmp_dir):
+    """write a few fasta formatted flat files"""
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = pathlib.Path(tmp_dir / "fasta")
+    outpath.mkdir(exist_ok=True)
+    dstore = io.get_data_store(inpath, limit=5)
+    # make different lengths
+    lengths = [250, 300, 600, 700, 1000]
+    for length, m in zip(lengths, dstore):
+        aln = loader(m)[:length]
+        fp = outpath / f"{m.name.replace('json', 'fasta')}"
+        aln.write(fp)
+    return outpath
+
+
+def test_prep_invalid_input(runner, tmp_dir, fasta):
+    """fail if a directory and a db are provided or directory and no suffix"""
+    from cogent3.app import io
+
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
+    args = f"-id {fasta} -i {inpath} -o {outpath}".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code != 0, r.output
+
+    args = f"-id {fasta} -o {outpath}".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code != 0, r.output
+
+
+def test_prep_defaults(runner, tmp_dir, fasta):
+    """remove unamgious characters, exclude alignments < 300"""
+    from cogent3.app import io
+
+    outpath = tmp_dir / "output.sqlitedb"
+    args = f"-id {fasta} -su fasta -o {outpath}".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+
+    dstore = io.get_data_store(outpath)
+    assert len(dstore) == 4
+    assert len(dstore.incomplete) == 1
+    assert all(len(loader(m)) >= 300 for m in dstore)
+
+
+def test_prep_min_length(runner, tmp_dir, fasta):
+    """min_length arg works"""
+    from cogent3.app import io
+
+    outpath = tmp_dir / "output.sqlitedb"
+    args = f"-id {fasta} -su fasta -o {outpath} --min_length 600".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code == 0, r.output
+
+    dstore = io.get_data_store(outpath)
+    assert len(dstore) == 3
+    assert len(dstore.incomplete) == 2
+
+
+def test_prep_codon_pos(runner, tmp_dir, fasta):
+    """codon_pos arg works"""
+    from cogent3.app import io
+
+    outpath = tmp_dir / "output.sqlitedb"
+    args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3}".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code == 0, r.output
+
+    dstore = io.get_data_store(outpath)
+    assert len(dstore) == 3  # since alignment length is reduced by 1/3
+    assert len(dstore.incomplete) == 2
+
+
+def test_prep_fg_edge(runner, tmp_dir, fasta):
+    """fg_edge arg works"""
+    from cogent3.app import io
+
+    outpath = tmp_dir / "output.sqlitedb"
+    # fail when name missing
+    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge abcde".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code != 0, r.output
+
+    # succeed
+    fg_edge = "73021"
+    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge {fg_edge}".split()
+    r = runner.invoke(prep, args, catch_exceptions=False)
+    assert r.exit_code == 0, r.output
+    dstore = io.get_data_store(outpath)
+    for m in dstore:
+        aln = loader(m)
+        assert aln.info.fg_edge == fg_edge
 
 
 def test_toe_exercise(runner, tmp_dir):

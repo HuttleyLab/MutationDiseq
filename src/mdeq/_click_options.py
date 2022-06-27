@@ -213,3 +213,12 @@ _min_length = click.option(
     help="minimum length after filtering",
     show_default=True,
 )
+
+_suffix = click.option("-su", "--suffix", help="suffix of files to be loaded")
+_codon_pos = click.option(
+    "-c",
+    "--codon_pos",
+    type=click.Choice(["1", "2", "3"]),
+    default=None,
+    help="select this codon position, default is all.",
+)

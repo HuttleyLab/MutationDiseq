@@ -2,17 +2,20 @@
 
 # following line to stop automatic threading by numpy
 from mdeq import _block_threading  # isort: skip
+
 import inspect
 import sys
 
 from collections import defaultdict
+from functools import reduce
+from operator import add
 from pathlib import Path
 from warnings import filterwarnings
 
 import click
 
 from cogent3 import make_table
-from cogent3.app import io
+from cogent3.app import io, sample
 from rich.console import Console
 from rich.progress import Progress, track
 from scitrack import CachingLogger
@@ -89,6 +92,78 @@ def get_opt_settings(testrun):
 def main():
     """mdeq: mutation disequilibrium analysis tools."""
     pass
+
+
+@main.command(no_args_is_help=True)
+@_cli_opt._indir
+@_cli_opt._suffix
+@_cli_opt._inpath
+@_cli_opt._outpath
+@_cli_opt._min_length
+@_cli_opt._fg_edge
+@_cli_opt._codon_pos
+@_cli_opt._limit
+@_cli_opt._overwrite
+@_cli_opt._verbose
+def prep(
+    indir,
+    suffix,
+    inpath,
+    outpath,
+    min_length,
+    fg_edge,
+    codon_pos,
+    limit,
+    overwrite,
+    verbose,
+):
+    """pre-process alignment data.
+
+    Gaps and degenerate nucleotide characters will always be removed and
+    alignments < `--min_length` will be excluded.
+    """
+    LOGGER = CachingLogger(create_dir=True)
+    LOGGER.log_args()
+    console = Console()
+    if indir and inpath:
+        console.print(
+            r"[red]EXIT: ambiguous input, set either --indir [b]AND[/b] --suffix [b]OR[/b] --inpath"
+        )
+        exit(1)
+
+    if indir and suffix is None:
+        console.print(r"[red]EXIT: must define suffix")
+        exit(1)
+
+    dstore = io.get_data_store(inpath or indir, suffix=suffix, limit=limit)
+    loader = sql_loader() if inpath else io.load_aligned(format=suffix, moltype="dna")
+    if fg_edge:
+        aln = loader(dstore[0])
+        if fg_edge not in aln.names:
+            console.print(fr"[red]EXIT: {fg_edge=} not in {aln.names}")
+            exit(1)
+
+    LOGGER.log_file_path = f"{outpath.stem}-prep.log"
+
+    app_series = [loader]
+    if codon_pos:
+        app_series.append(sample.take_codon_positions(int(codon_pos)))
+
+    app_series.extend(
+        [sample.omit_degenerates(moltype="dna"), sample.min_length(min_length)]
+    )
+    if fg_edge:
+        app_series.append(set_fg_edge(fg_edge=fg_edge))
+
+    app_series.append(
+        sql_writer(
+            outpath, create=True, if_exists="overwrite" if overwrite else "raise"
+        )
+    )
+
+    app = reduce(add, app_series)
+    app.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 0)
+    console.print("[green]Done!")
 
 
 @main.command(no_args_is_help=True)
