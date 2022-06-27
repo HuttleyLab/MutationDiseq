@@ -204,7 +204,7 @@ _step = click.option(
 )
 _min_length = click.option(
     "-ml",
-    "min_length",
+    "--min_length",
     type=int,
     default=300,
     help="minimum length after filtering",
