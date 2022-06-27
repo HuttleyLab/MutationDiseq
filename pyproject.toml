@@ -51,6 +51,10 @@ dev = [
     "nox",
 ]
 
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "-ra"]
+testpaths = "tests"
+
 [tool.black]
 line-length = 88
 target-version = ['py38', 'py39']
