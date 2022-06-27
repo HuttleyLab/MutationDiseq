@@ -100,7 +100,7 @@ def test_get_obj_type():
         assert ty == expect
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def fasta(tmp_dir):
     """write a few fasta formatted flat files"""
     inpath = DATADIR / "3000bp.sqlitedb"
@@ -136,7 +136,7 @@ def test_prep_defaults(runner, tmp_dir, fasta):
     from cogent3.app import io
 
     outpath = tmp_dir / "output.sqlitedb"
-    args = f"-id {fasta} -su fasta -o {outpath}".split()
+    args = f"-id {fasta} -su fasta -o {outpath} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
 
     dstore = io.get_data_store(outpath)
@@ -150,7 +150,7 @@ def test_prep_min_length(runner, tmp_dir, fasta):
     from cogent3.app import io
 
     outpath = tmp_dir / "output.sqlitedb"
-    args = f"-id {fasta} -su fasta -o {outpath} --min_length 600".split()
+    args = f"-id {fasta} -su fasta -o {outpath} --min_length 600 -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
@@ -164,7 +164,7 @@ def test_prep_codon_pos(runner, tmp_dir, fasta):
     from cogent3.app import io
 
     outpath = tmp_dir / "output.sqlitedb"
-    args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3}".split()
+    args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
@@ -179,13 +179,13 @@ def test_prep_fg_edge(runner, tmp_dir, fasta):
 
     outpath = tmp_dir / "output.sqlitedb"
     # fail when name missing
-    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge abcde".split()
+    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge abcde -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code != 0, r.output
 
     # succeed
     fg_edge = "73021"
-    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge {fg_edge}".split()
+    args = f"-id {fasta} -su fasta -o {outpath} --fg_edge {fg_edge} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
     dstore = io.get_data_store(outpath)
