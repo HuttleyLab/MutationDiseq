@@ -2,8 +2,9 @@ from typing import Union
 
 from cogent3 import get_moltype
 from cogent3.app import evo
-from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
+from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import model_result
+from cogent3.app.typing import SerialisableType
 from cogent3.evolve.models import register_model
 from cogent3.evolve.ns_substitution_model import GeneralStationary
 from numpy import finfo
@@ -58,10 +59,10 @@ def GN_sm(tree=None, discrete_edges=None, opt_args=None):
 _eps = finfo(float).eps
 
 
-@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
+@define_app
 def mles_within_bounds(
     result: model_result, lower=1e-5, upper=RATE_PARAM_UPPER
-) -> Union[model_result, NotCompleted]:
+) -> Union[model_result, SerialisableType]:
     """validate fitted model rate parameter estimates are not close to the bounds
 
     Returns

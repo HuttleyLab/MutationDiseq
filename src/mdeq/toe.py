@@ -1,8 +1,9 @@
 from functools import lru_cache
 
 from cogent3.app import evo
-from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
+from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import generic_result
+from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util.misc import extend_docstring_from
 
 from mdeq.model import RATE_PARAM_UPPER
@@ -24,16 +25,6 @@ def get_param_rules_upper_limit(model_name, upper):
 
     sm = get_model(model_name)
     return [{"par_name": par_name, "upper": upper} for par_name in sm.get_param_list()]
-
-
-@appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
-def get_lrt(mc):
-    if isinstance(mc, NotCompleted):
-        return mc
-
-    hyp = mc["mcr"].get_hypothesis_result("GSN", "GN")
-    hyp.source = hyp.source["source"]
-    return hyp
 
 
 def test_of_existence(
@@ -139,8 +130,10 @@ def get_init_model_coll(aln, just_continuous, opt_args=None):
     )(aln)
 
 
-@appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
-def get_no_init_hypothesis(aln, just_continuous, opt_args=None):
+@define_app
+def get_no_init_hypothesis(
+    aln: AlignedSeqsType, just_continuous, opt_args=None
+) -> SerialisableType:
     if isinstance(aln, NotCompleted):
         return aln
 
@@ -157,8 +150,10 @@ def get_no_init_hypothesis(aln, just_continuous, opt_args=None):
 
 
 @extend_docstring_from(test_of_existence)
-@appify(input_types=SERIALISABLE_TYPE, output_types=SERIALISABLE_TYPE)
-def get_init_hypothesis(aln, just_continuous, opt_args=None):
+@define_app
+def get_init_hypothesis(
+    aln: AlignedSeqsType, just_continuous, opt_args=None
+) -> SerialisableType:
     if isinstance(aln, NotCompleted):
         return aln
 

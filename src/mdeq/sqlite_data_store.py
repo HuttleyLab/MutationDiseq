@@ -29,17 +29,14 @@ from typing import Callable, Optional, Union
 
 from blosc2 import compress
 from cogent3.app import io
-from cogent3.app.composable import (
-    IDENTIFIER_TYPE,
-    SERIALISABLE_TYPE,
-    NotCompleted,
-)
+from cogent3.app.composable import WRITER, NotCompleted, define_app
 from cogent3.app.data_store import (
     RAISE,
     DataStoreMember,
     ReadOnlyDataStoreBase,
     get_data_source,
 )
+from cogent3.app.typing import IdentifierType, SerialisableType
 from cogent3.util.deserialise import deserialise_not_completed
 from cogent3.util.table import Table
 from scitrack import get_text_hexdigest
@@ -641,7 +638,7 @@ def _decompressed(data: dict) -> dict:
             data[k] = v.deserialised
     return data
 
-
+# this is inheriting from an already defined loader app
 class sql_loader(io.load_db):
     def __init__(self, fully_deserialise=True, deserialiser: Callable = None):
         """
@@ -660,7 +657,7 @@ class sql_loader(io.load_db):
         self._deserialise = fully_deserialise
         self._deserialiser = deserialiser or deserialise_object
 
-    def read(self, identifier):
+    def main(self, identifier: IdentifierType) -> SerialisableType:
         """returns partly deserialised from a Sqlite db"""
         if not self._deserialise:
             return identifier.read()
@@ -673,24 +670,17 @@ class sql_loader(io.load_db):
         return self._deserialiser(data)
 
 
+@define_app(app_type=WRITER)
 class sql_writer(io._checkpointable):
-    _type = "output"
-
-    _input_types = (SERIALISABLE_TYPE,)
-    _output_types = (IDENTIFIER_TYPE, SERIALISABLE_TYPE)
-
     def __init__(self, *args, suffix="json", **kwargs):
         super().__init__(
             *args,
-            input_types=self._input_types,
-            output_types=self._output_types,
             suffix=suffix,
             writer_class=WriteableSqliteDataStore,
             **kwargs,
         )
-        self.func = self.write
 
-    def write(self, data, identifier=None):
+    def main(self, data: SerialisableType, identifier=None) -> IdentifierType:
         """
 
         Parameters
@@ -712,8 +702,6 @@ class sql_writer(io._checkpointable):
         if hasattr(data, "info"):
             data.info["stored"] = stored
         else:
-            try:
+            with contextlib.suppress(AttributeError):
                 data.stored = stored
-            except AttributeError:
-                pass
         return stored

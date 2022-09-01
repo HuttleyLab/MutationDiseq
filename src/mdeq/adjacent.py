@@ -2,11 +2,12 @@
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TypeVar
+from typing import TypeVar, Union
 
 from cogent3 import _Table as Table
-from cogent3.app.composable import SERIALISABLE_TYPE, appify
+from cogent3.app.composable import define_app
 from cogent3.app.io import get_data_store, load_db
+from cogent3.app.typing import IdentifierType, SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 
@@ -136,36 +137,36 @@ def make_identifier(data) -> str:
 _loader = sql_loader()
 
 
-@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
-def load_data_group(data_store_path, data_identifiers: grouped = None) -> grouped:
-    """
+@define_app
+class load_data_group:
+    def __init__(self, data_store_path: str):
+        """
+        Parameters
+        ----------
+        data_store_path : str
+            path to a tinydb
+        """
+        self.data_store_path = data_store_path
+        self.data_store = get_data_store(self.data_store_path)
 
-    Parameters
-    ----------
-    data_store_path : str
-        path to a tinydb
-    data_identifiers
-        grouped instance
+    def main(self, data_identifiers: "grouped") -> Union[grouped, SerialisableType]:
+        """
+        Notes
+        -----
+        Each data object has its identifier assigned to info.name attribute
+        """
+        data_objs = []
+        for identifier in data_identifiers:
+            identifier = (
+                identifier if identifier.endswith(".json") else f"{identifier}.json"
+            )
+            m = self.data_store.filtered(identifier)
+            assert len(m) == 1
+            obj = _loader(m[0])
+            if not obj:  # probably not completed error
+                return obj
+            obj.info.name = identifier.replace(".json", "")
+            data_objs.append(obj)
 
-    Notes
-    -----
-    Each data object has its identifier assigned to info.name attribute
-    """
-    dstore = get_data_store(data_store_path)
-    data_objs = []
-    for identifier in data_identifiers:
-        identifier = (
-            identifier if identifier.endswith(".json") else f"{identifier}.json"
-        )
-        m = dstore.filtered(identifier)
-        assert len(m) == 1
-        obj = _loader(m[0])
-        if not obj:  # probably not completed error
-            return obj
-        obj.info.name = identifier.replace(".json", "")
-        data_objs.append(obj)
-
-    dstore.close()
-
-    data_identifiers.elements = data_objs
-    return data_identifiers
+        data_identifiers.elements = data_objs
+        return data_identifiers

@@ -10,7 +10,6 @@ from mdeq.sqlite_data_store import sql_loader, sql_writer
 from mdeq.toe import (
     get_init_hypothesis,
     get_init_model_coll,
-    get_lrt,
     get_no_init_hypothesis,
     get_no_init_model_coll,
 )

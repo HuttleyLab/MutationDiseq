@@ -1,10 +1,13 @@
+from typing import Union
+
 from cogent3 import get_model, make_tree
 from cogent3.app import evo
 from cogent3.app import result as c3_result
-from cogent3.app.composable import (
-    SERIALISABLE_TYPE,
-    ComposableAligned,
-    NotCompleted,
+from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.typing import (
+    AlignedSeqsType,
+    HypothesisResultType,
+    SerialisableType,
 )
 
 from mdeq.model import RATE_PARAM_UPPER
@@ -21,13 +24,9 @@ NULL_TEOP = "GN-teop-null"
 ALT_TEOP = "GN-teop-alt"
 
 
-class adjacent_eop(ComposableAligned):
+@define_app
+class adjacent_eop:
     def __init__(self, tree=None, opt_args=None, share_mprobs=True, time_het=None):
-        super(adjacent_eop, self).__init__(
-            data_types="grouped",
-            input_types=SERIALISABLE_TYPE,
-            output_types=SERIALISABLE_TYPE,
-        )
         opt_args = opt_args or {}
         self._opt_args = {
             "max_restarts": 5,
@@ -37,7 +36,6 @@ class adjacent_eop(ComposableAligned):
         }
         self._tree = tree
         self._share_mprobs = share_mprobs
-        self.func = self.fit
         time_het = time_het or {}
         self._time_het = {"upper": RATE_PARAM_UPPER, **time_het}
 
@@ -57,7 +55,9 @@ class adjacent_eop(ComposableAligned):
 
         return list({fg_edge} ^ set(data.elements[0].names))
 
-    def fit(self, data, *args, **kwargs):
+    def main(
+        self, data: "grouped", *args, **kwargs
+    ) -> Union[HypothesisResultType, SerialisableType]:
         """fits multiple adjacent loci in."""
         # todo is it possible to get the param rules from each locus in null
         # if so, they could then be applied to the corresponding alternate
@@ -116,7 +116,8 @@ class adjacent_eop(ComposableAligned):
         return combined
 
 
-class temporal_eop(ComposableAligned):
+@define_app
+class temporal_eop:
     def __init__(self, edge_names, tree=None, opt_args=None):
         """performs the temporal Equivalence of Process LRT
 
@@ -131,10 +132,6 @@ class temporal_eop(ComposableAligned):
         opt_args : dict
             arguments for the numerical optimisations step
         """
-        super(temporal_eop, self).__init__(
-            input_types=SERIALISABLE_TYPE,
-            output_types=SERIALISABLE_TYPE,
-        )
         opt_args = opt_args or {}
         self._opt_args = {
             "max_restarts": 5,
@@ -148,8 +145,6 @@ class temporal_eop(ComposableAligned):
         self._edge_names = edge_names
         self._tree = tree
         self._hyp = None
-
-        self.func = self.fit
 
     def _get_app(self, aln):
         if self._tree is None:
@@ -188,6 +183,8 @@ class temporal_eop(ComposableAligned):
             self._hyp = evo.hypothesis(null, alt)
         return self._hyp
 
-    def fit(self, data, *args, **kwargs):
+    def main(
+        self, data: AlignedSeqsType, *args, **kwargs
+    ) -> Union[HypothesisResultType, SerialisableType]:
         app = self._get_app(data)
         return app(data)

@@ -4,14 +4,11 @@ import pickle
 
 from dataclasses import asdict
 from pathlib import Path
+from typing import Union
 
 from blosc2 import decompress
-from cogent3.app.composable import (
-    ALIGNED_TYPE,
-    SERIALISABLE_TYPE,
-    NotCompleted,
-    appify,
-)
+from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
 
@@ -96,8 +93,10 @@ def configure_parallel(parallel: bool, mpi: int) -> dict:
     return {"parallel": parallel, "par_kw": par_kw}
 
 
-@appify((ALIGNED_TYPE, SERIALISABLE_TYPE), (ALIGNED_TYPE, SERIALISABLE_TYPE))
-def set_fg_edge(aln, fg_edge=None):
+@define_app
+def set_fg_edge(
+    aln: AlignedSeqsType, fg_edge=None
+) -> Union[SerialisableType, AlignedSeqsType]:
     """sets aln.info_fg_edge to fg_edge"""
     if fg_edge is None:
         raise ValueError("fg_edge not set")

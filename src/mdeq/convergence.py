@@ -3,10 +3,12 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
+from typing import Union
 
 from accupy import fdot as dot
 from accupy import fsum as sum
-from cogent3.app.composable import SERIALISABLE_TYPE, NotCompleted, appify
+from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.typing import SerialisableType
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.recalculation.scope import InvalidScopeError
 from cogent3.util import deserialise
@@ -231,8 +233,10 @@ def get_delta_nabla(
     return delta_nabla(obs_nabla, tuple(sim_nabla), fg_edge, source=obs_result.source)
 
 
-@appify(SERIALISABLE_TYPE, SERIALISABLE_TYPE)
-def bootstrap_to_nabla(result, fg_edge=None, wrt_nstat=False):
+@define_app
+def bootstrap_to_nabla(
+    result: "compact_bootstrap_result", fg_edge=None, wrt_nstat=False
+) -> Union[delta_nabla, SerialisableType]:
     """returns delta nabla stats from bootstrap result."""
     from mdeq.bootstrap import deserialise_single_hyp
 

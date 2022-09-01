@@ -4,13 +4,9 @@ from random import Random
 from typing import Union
 
 from cogent3 import ArrayAlignment
-from cogent3.app.composable import (
-    ALIGNED_TYPE,
-    RESULT_TYPE,
-    SERIALISABLE_TYPE,
-    Composable,
-)
+from cogent3.app.composable import define_app
 from cogent3.app.result import bootstrap_result, model_result
+from cogent3.app.typing import AlignedSeqsType, ResultType, SerialisableType
 from cogent3.util.deserialise import deserialise_object
 
 from mdeq.adjacent import grouped
@@ -45,19 +41,12 @@ class select_model_result:
         return result[self._name]
 
 
-class control_generator(Composable):
+@define_app
+class control_generator:
     def __init__(self, model_selector, seed=None):
-        super(control_generator, self).__init__(
-            input_types=(
-                SERIALISABLE_TYPE,
-                RESULT_TYPE,
-            ),
-            output_types=(SERIALISABLE_TYPE, ALIGNED_TYPE),
-        )
         self._select_model = model_selector
         self.rng = Random()
         self.rng.seed(a=seed)
-        self.func = self.gen
 
     def _from_single_model_single_locus(self, result) -> ArrayAlignment:
         source = pathlib.Path(result.source).stem
@@ -110,19 +99,21 @@ class control_generator(Composable):
         result.elements = sims
         return result
 
-    def gen(self, result) -> Union[ArrayAlignment, grouped]:
+    T = Union[ArrayAlignment, grouped, SerialisableType]
+
+    def main(self, result: "compact_boostrap_result") -> T:
         # this function will only be called on the first result object,
         # it establishes the appropriate method to set for the data
-        # and assigns that to self.func, which the Composable architecture
+        # and assigns that to self.main, which the Composable architecture
         # invokes
         model = self._select_model(result)
         if len(model) > 1:
-            self.func = self._from_multi_model_multi_locus
-            return self.func(result)
+            self.main = self._from_multi_model_multi_locus
+            return self.main(result)
 
         if len(model.lf.locus_names) > 1:
-            self.func = self._from_single_model_multi_locus
-            return self.func(result)
+            self.main = self._from_single_model_multi_locus
+            return self.main(result)
 
-        self.func = self._from_single_model_single_locus
-        return self.func(result)
+        self.main = self._from_single_model_single_locus
+        return self.main(result)

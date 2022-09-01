@@ -2,19 +2,13 @@ import json
 
 from copy import deepcopy
 from json import dumps
+from typing import Union
 
 from blosc2 import compress, decompress
 from cogent3.app import evo
-from cogent3.app.composable import (
-    ALIGNED_TYPE,
-    BOOTSTRAP_RESULT_TYPE,
-    RESULT_TYPE,
-    SERIALISABLE_TYPE,
-    ComposableHypothesis,
-    NotCompleted,
-    appify,
-)
+from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import bootstrap_result
+from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise, union_dict
 from rich.progress import track
 
@@ -183,30 +177,22 @@ class compact_bootstrap_result(bootstrap_result):
             self._store[k] = deserialise_object(v)
 
 
-class bootstrap(ComposableHypothesis):
+@define_app
+class bootstrap:
     """Parametric bootstrap for a provided hypothesis.
 
     Only returns the LR for the boostrapped models (to avoid overloading
     memory for use on nci) Returns a generic_result
     """
 
-    _input_types = (ALIGNED_TYPE, SERIALISABLE_TYPE)
-    _output_types = (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE)
-    _data_types = ("ArrayAlignment", "Alignment")
-
     def __init__(self, hyp, num_reps, verbose=False):
-        super(bootstrap, self).__init__(
-            input_types=self._input_types,
-            output_types=self._output_types,
-            data_types=self._data_types,
-        )
-        self._formatted_params()
         self._hyp = hyp
         self._num_reps = num_reps
         self._verbose = verbose
-        self.func = self.run
 
-    def run(self, aln):
+    def main(
+        self, aln: AlignedSeqsType
+    ) -> Union[SerialisableType, compact_bootstrap_result]:
         result = compact_bootstrap_result(aln.info.source)
         try:
             obs = self._hyp(aln)
@@ -258,19 +244,16 @@ def create_bootstrap_app(
     return bootstrap(hyp, num_reps, verbose=verbose)
 
 
-@appify(
-    (SERIALISABLE_TYPE, ALIGNED_TYPE),
-    (RESULT_TYPE, BOOTSTRAP_RESULT_TYPE, SERIALISABLE_TYPE),
-)
+@define_app
 def bootstrap_toe(
-    aln,
+    aln: AlignedSeqsType,
     tree=None,
     just_continuous=False,
     num_reps=100,
     sequential=False,
     opt_args=None,
     verbose=False,
-):
+) -> Union[SerialisableType, compact_bootstrap_result]:
     """dynamically constructs a bootstrap app and performs the toe."""
     if isinstance(aln, NotCompleted):
         return aln
