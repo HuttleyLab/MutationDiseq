@@ -245,7 +245,10 @@ def toe(
     dstore = io.get_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
     if get_obj_type(dstore) not in expected_types:
-        click.secho(f"records not one of the expected types {expected_types}", fg="red")
+        click.secho(
+            f"{get_obj_type(dstore)!r} records not one of the expected types {expected_types}",
+            fg="red",
+        )
         exit(1)
 
     loader = sql_loader()
