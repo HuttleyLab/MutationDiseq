@@ -7,6 +7,7 @@ from cogent3 import make_aligned_seqs
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
+    est_pi0,
     foreground_from_jsd,
     get_foreground,
     paths_to_sqlitedbs_matching,
@@ -150,3 +151,15 @@ def test_compressed_value_deserialises():
     cv = CompressedValue(compress(p_ser))
     assert isinstance(cv.deserialised, dict)
     assert cv.deserialised == data
+
+
+def test_est_pi0():
+    """compare results to expected from R package"""
+    # data file derived from R qvalue package
+    data = [
+        float(v) for v in (DATADIR / "hedenfalk_pvals.txt").read_text().splitlines()
+    ]
+    got = est_pi0(data)
+    assert round(got, 3) == 0.669
+    got = est_pi0(data, use_log=True)
+    assert round(got, 3) == 0.669

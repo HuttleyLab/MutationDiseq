@@ -6,6 +6,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Union
 
+import numpy
+
 from blosc2 import decompress
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
@@ -200,3 +202,47 @@ def paths_to_sqlitedbs_matching(
 def omit_suffixes_from_path(path: Path) -> str:
     """removes all components of stem after '.'"""
     return path.stem.split(".", maxsplit=1)[0]
+
+
+def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
+    """estimate proportion of for which null hypothesis is true
+
+    Parameters
+    ----------
+    pvalues
+        series of p-values
+    use_log
+        fit spline using natural log transform
+
+    Returns
+    -------
+    Estimate of the proportion of p-values for which null is True
+
+    Notes
+    -----
+    Based on description in
+
+    JD Storey & R Tibshirani. Statistical significance for genomewide studies.
+    Proc National Acad Sci 100, 9440–9445 (2003).
+
+    and compared with results from the R q-value package at
+    https://github.com/StoreyLab/qvalue
+    """
+    from scipy.interpolate import UnivariateSpline
+
+    pvalues = numpy.array(pvalues)
+    lambdas = numpy.arange(0.05, 0.96, 0.05)
+    intervals = numpy.digitize(pvalues, lambdas)
+    cumsums = numpy.cumsum(numpy.bincount(intervals)[1:][::-1])
+    num = pvalues.shape[0]
+
+    denom = num * lambdas
+    pi0 = cumsums / denom
+    pi0 = pi0[::-1]
+    if use_log:
+        pi0 = numpy.log(pi0)
+    spline = UnivariateSpline(lambdas, pi0, k=3)
+    result = spline(lambdas)[-1]
+    if use_log:
+        result = numpy.exp(result)
+    return result

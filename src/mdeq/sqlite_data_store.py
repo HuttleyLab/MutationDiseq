@@ -638,6 +638,7 @@ def _decompressed(data: dict) -> dict:
             data[k] = v.deserialised
     return data
 
+
 # this is inheriting from an already defined loader app
 class sql_loader(io.load_db):
     def __init__(self, fully_deserialise=True, deserialiser: Callable = None):
