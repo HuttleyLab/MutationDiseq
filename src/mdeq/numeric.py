@@ -41,10 +41,8 @@ def valid_probability_vector(vector):
 def valid_rate_matrix(matrix):
     """returns True if off-diagonal elements are positive and row sums are
     0."""
-
     if isinstance(matrix, DictArray):
         matrix = matrix.to_array()
-
     row_sum_zero = numpy.allclose(
         [sum(row) for row in matrix], numpy.zeros(len(matrix)), rtol=1e-10, atol=1e-14
     )
@@ -53,8 +51,7 @@ def valid_rate_matrix(matrix):
         elem for i, row in enumerate(matrix) for j, elem in enumerate(row) if i != j
     ]
 
-    off_diagonal_elem_positive = all([x > 0 for x in off_diagonal_elem])
-
+    off_diagonal_elem_positive = all(x > 0 for x in off_diagonal_elem)
     return row_sum_zero and off_diagonal_elem_positive
 
 
@@ -63,7 +60,4 @@ def fix_rounding_error(x, round_error=1e-14):
 
     Specifically, if x is between -round_error and 0, returns 0.
     """
-    if -round_error < x < 0:
-        return 0
-    else:
-        return x
+    return 0 if -round_error < x < 0 else x
