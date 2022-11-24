@@ -153,13 +153,27 @@ def test_compressed_value_deserialises():
     assert cv.deserialised == data
 
 
-def test_est_pi0():
-    """compare results to expected from R package"""
-    # data file derived from R qvalue package
-    data = [
+@pytest.fixture(scope="session")
+def hedenfalk():
+    return [
         float(v) for v in (DATADIR / "hedenfalk_pvals.txt").read_text().splitlines()
     ]
-    got = est_pi0(data)
+
+
+def test_est_pi0(hedenfalk):
+    """compare results to expected from R package"""
+    # data file derived from R qvalue package
+    got = est_pi0(hedenfalk)
     assert round(got, 3) == 0.669
-    got = est_pi0(data, use_log=True)
+    got = est_pi0(hedenfalk, use_log=True)
     assert round(got, 3) == 0.669
+
+
+def test_est_pi0_gt1(hedenfalk):
+    # shift distribution so estimate would be > 1
+    data = hedenfalk[:]
+    data = list(sorted(data))
+    for i in range(len(data) - 20):
+        data[i] = 1.0
+    e = est_pi0(data)
+    assert e == 1.0

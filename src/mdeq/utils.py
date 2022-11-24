@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import pickle
+import warnings
 
 from dataclasses import asdict
 from pathlib import Path
@@ -13,6 +14,7 @@ from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
+from scipy.interpolate import UnivariateSpline
 
 
 __author__ = "Katherine Caley"
@@ -228,8 +230,6 @@ def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
     and compared with results from the R q-value package at
     https://github.com/StoreyLab/qvalue
     """
-    from scipy.interpolate import UnivariateSpline
-
     pvalues = numpy.array(pvalues)
     lambdas = numpy.arange(0.05, 0.96, 0.05)
     intervals = numpy.digitize(pvalues, lambdas)
@@ -245,4 +245,8 @@ def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
     result = spline(lambdas)[-1]
     if use_log:
         result = numpy.exp(result)
+    result = min(result, 1.0)
+    if result < 0.0:
+        warnings.warn("estimate of pi_0 <= 0, setting to 1.0")
+        result = 1.0
     return result
