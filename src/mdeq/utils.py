@@ -206,7 +206,14 @@ def omit_suffixes_from_path(path: Path) -> str:
     return path.stem.split(".", maxsplit=1)[0]
 
 
-def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
+def estimate_freq_null(
+    pvalues: numpy.ndarray,
+    use_log: bool = False,
+    start: float = 0.05,
+    stop: float = 0.96,
+    step: float = 0.05,
+    use_mse: bool = True,
+) -> float:
     """estimate proportion of for which null hypothesis is true
 
     Parameters
@@ -215,6 +222,10 @@ def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
         series of p-values
     use_log
         fit spline using natural log transform
+    start, stop, step
+        used to produce the lambda series
+    use_mse
+        identifies the best lambda using the mean square error
 
     Returns
     -------
@@ -229,24 +240,52 @@ def est_pi0(pvalues: numpy.ndarray, use_log: bool = False) -> float:
 
     and compared with results from the R q-value package at
     https://github.com/StoreyLab/qvalue
+
+    MSE approach from '6. Automatically choosing λ'
+    from Storey, Taylor, and Siegmund, 2004 and the R q-value package
     """
-    pvalues = numpy.array(pvalues)
-    lambdas = numpy.arange(0.05, 0.96, 0.05)
+    pvalues = numpy.array(sorted(pvalues))
+    if min(start, stop, step) <= 0 or max(start, stop) >= 1 or start > stop:
+        raise ValueError(f"start, stop, step must all be positive with start < stop")
+
+    if pvalues.max() <= stop:
+        stop = 0.95 * pvalues.max()
+
+    lambdas = numpy.arange(start, stop, step)
     intervals = numpy.digitize(pvalues, lambdas)
     cumsums = numpy.cumsum(numpy.bincount(intervals)[1:][::-1])
-    num = pvalues.shape[0]
+    denom = pvalues.shape[0] * (1 - lambdas[::-1])
 
-    denom = num * lambdas
-    pi0 = cumsums / denom
-    pi0 = pi0[::-1]
+    freq_null = cumsums / denom
+    freq_null = freq_null[::-1]
+
+    if use_mse:
+        result = _minimise_mse(pvalues, lambdas, freq_null)
+    else:
+        result = _spline_fit(lambdas, freq_null, use_log)
+
+    result = min(result, 1.0)
+    if result < 0.0:
+        warnings.warn("estimate of freq_null <= 0, setting to 1.0")
+        result = 1.0
+
+    return result
+
+
+def _spline_fit(lambdas, freq_null, use_log):
     if use_log:
-        pi0 = numpy.log(pi0)
-    spline = UnivariateSpline(lambdas, pi0, k=3)
+        freq_null = numpy.log(freq_null)
+    spline = UnivariateSpline(lambdas, freq_null, k=3)
     result = spline(lambdas)[-1]
     if use_log:
         result = numpy.exp(result)
-    result = min(result, 1.0)
-    if result < 0.0:
-        warnings.warn("estimate of pi_0 <= 0, setting to 1.0")
-        result = 1.0
     return result
+
+
+def _minimise_mse(pvalues, lambdas, freq_null):
+    # returns the frequency that minimises the mean square error
+    num = len(pvalues)
+    fdr_val = numpy.quantile(freq_null, q=0.1)
+    W = numpy.array([(pvalues > l).sum() for l in lambdas])
+    a = W / (num ** 2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
+    return freq_null[a == a.min()][0]

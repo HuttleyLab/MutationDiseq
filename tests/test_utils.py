@@ -3,11 +3,12 @@ import pathlib
 import pytest
 
 from cogent3 import make_aligned_seqs
+from numpy.testing import assert_allclose
 
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
-    est_pi0,
+    estimate_freq_null,
     foreground_from_jsd,
     get_foreground,
     paths_to_sqlitedbs_matching,
@@ -160,20 +161,58 @@ def hedenfalk():
     ]
 
 
-def test_est_pi0(hedenfalk):
+@pytest.fixture(scope="session")
+def ten_pvals():
+    return (0.0, 0.0, 0.0, 0.043, 0.202, 0.333, 0.385, 0.515, 0.598, 0.617)
+
+
+def test_est_freq_null(hedenfalk):
     """compare results to expected from R package"""
     # data file derived from R qvalue package
-    got = est_pi0(hedenfalk)
+    got = estimate_freq_null(hedenfalk, use_mse=False)
     assert round(got, 3) == 0.669
-    got = est_pi0(hedenfalk, use_log=True)
+    got = estimate_freq_null(hedenfalk, use_log=True, use_mse=False)
     assert round(got, 3) == 0.669
+    got = estimate_freq_null(hedenfalk, use_mse=True)
+    assert 0.0 < got < 1.0
 
 
-def test_est_pi0_gt1(hedenfalk):
+def test_est_freq_null_2(ten_pvals):
+    """compare results to expected from R package"""
+    # data file derived from R qvalue package
+    got = estimate_freq_null(ten_pvals, use_mse=False)
+    assert round(got, 2) == 0.49
+    got = estimate_freq_null(ten_pvals, use_log=True, use_mse=False)
+    assert round(got, 2) == 0.48
+
+
+def test_est_freq_null_boostrap(ten_pvals):
+    """compare results to expected from R package"""
+    # data file derived from R qvalue package
+    got = estimate_freq_null(ten_pvals, use_mse=True)
+    assert_allclose(got, 0.6315789)
+
+
+def test_est_freq_null_gt1(hedenfalk):
     # shift distribution so estimate would be > 1
     data = hedenfalk[:]
     data = list(sorted(data))
     for i in range(len(data) - 20):
         data[i] = 1.0
-    e = est_pi0(data)
+    e = estimate_freq_null(data)
     assert e == 1.0
+
+
+@pytest.mark.parametrize(
+    "start,stop,step",
+    (
+        (-0.1, 0.8, 0.05),
+        (0.1, -0.8, 0.05),
+        (0.1, 0.8, -0.05),
+        (0.1, 1.1, 0.05),
+        (0.8, 0.1, 0.05),
+    ),
+)
+def test_est_freq_null_invalid_range(ten_pvals, start, stop, step):
+    with pytest.raises(ValueError):
+        estimate_freq_null(ten_pvals, start=start, stop=stop, step=step)
