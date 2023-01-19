@@ -19,7 +19,7 @@ from scipy.linalg import expm
 from scipy.optimize import minimize_scalar
 
 from mdeq.toe import ALT_TOE
-from mdeq.utils import CompressedValue, SerialisableMixin
+from mdeq.utils import SerialisableMixin
 
 
 __author__ = "Katherine Caley"

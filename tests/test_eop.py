@@ -4,7 +4,6 @@ import numpy
 import pytest
 
 from cogent3 import make_aligned_seqs, open_data_store
-from cogent3.app import io_new
 from cogent3.app.result import hypothesis_result
 
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop

@@ -4,7 +4,6 @@ import pathlib
 import pytest
 
 from cogent3 import load_aligned_seqs, make_tree, open_data_store
-from cogent3.app import io_new
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.util.deserialise import deserialise_object
 from numpy import array, diag_indices, mean, std

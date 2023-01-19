@@ -3,7 +3,6 @@ import pathlib
 import pytest
 
 from cogent3 import make_aligned_seqs, open_data_store
-from cogent3.app import io_new
 from cogent3.app.evo import model_collection_result
 
 from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb

@@ -3,12 +3,11 @@ import pathlib
 import pytest
 
 from cogent3 import open_data_store
-from cogent3.app import io_new
 from cogent3.core.alignment import ArrayAlignment
 
 from mdeq import control
 from mdeq.adjacent import grouped
-from mdeq.sqlite_data_store import load_from_sql, sql_loader
+from mdeq.sqlite_data_store import load_from_sql
 
 
 __author__ = "Gavin Huttley"

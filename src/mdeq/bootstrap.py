@@ -1,11 +1,8 @@
 import json
-import pickle
 
 from copy import deepcopy
-from json import dumps
 from typing import Union
 
-from blosc2 import compress, decompress
 from cogent3.app import evo, get_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import bootstrap_result
