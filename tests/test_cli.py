@@ -358,6 +358,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
             for r in results:
                 assert isinstance(r, result_type)
 
+            assert len(dstore.completed) > 0
             dstore.close()
 
     # now with incorrect input

@@ -83,6 +83,7 @@ class SerialisableMixin:
 
 
 def matches_type(dstore, types):
+    types = (types,) if isinstance(types, str) else types
     rt = dstore.record_type
     if not rt:
         return True

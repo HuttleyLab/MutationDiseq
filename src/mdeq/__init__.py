@@ -145,7 +145,7 @@ def prep(
         else get_app("load_aligned", format=suffix, moltype="dna")
     )
     if fg_edge:
-        aln = loader(dstore[0])
+        aln = loader(dstore.completed[0])
         if fg_edge not in aln.names:
             console.print(fr"[red]EXIT: {fg_edge=} not in {aln.names}")
             exit(1)
@@ -169,7 +169,9 @@ def prep(
     app_series.append(write_to_sqldb(out_dstore))
 
     app = reduce(add, app_series)
-    app.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 0)
+    app.apply_to(
+        dstore.completed, logger=LOGGER, cleanup=True, show_progress=verbose > 0
+    )
     console.print("[green]Done!")
 
 
@@ -193,7 +195,7 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
 
-    sample_ids = {m.unique_id.replace(".json", "") for m in dstore}
+    sample_ids = {m.unique_id.replace(".json", "") for m in dstore.completed}
     paired = physically_adjacent(gene_order, sample_ids)
     # make the grouped data app
     group_loader = load_data_group(inpath)
@@ -263,7 +265,7 @@ def toe(
     loader = load_from_sqldb()
 
     # check consistency of just_continuous / fg_edge / aln.info
-    _aln = loader(dstore[0])
+    _aln = loader(dstore.completed[0])
     if just_continuous and fg_edge is not None:
         click.secho(
             f"WARN: setting just_continuous overrides {fg_edge!r} setting", fg="yellow"
@@ -302,7 +304,11 @@ def toe(
     if mpi:
         kwargs["par_kw"]["chunksize"] = 1
     app.apply_to(
-        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
+        dstore.completed,
+        logger=LOGGER,
+        cleanup=True,
+        show_progress=verbose > 2,
+        **kwargs,
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
@@ -351,7 +357,11 @@ def teop(
     process = loader + teop + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     process.apply_to(
-        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2, **kwargs
+        dstore.completed,
+        logger=LOGGER,
+        cleanup=True,
+        show_progress=verbose > 2,
+        **kwargs,
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
@@ -403,7 +413,11 @@ def aeop(
     process = loader + test_adjacent + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     _ = process.apply_to(
-        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1, **kwargs
+        dstore.completed,
+        logger=LOGGER,
+        cleanup=True,
+        show_progress=verbose > 1,
+        **kwargs,
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
@@ -441,7 +455,11 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     process = loader + to_delta_nabla + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     r = process.apply_to(
-        dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 1, **kwargs
+        dstore.completed,
+        logger=LOGGER,
+        cleanup=True,
+        show_progress=verbose > 1,
+        **kwargs,
     )
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
@@ -520,7 +538,8 @@ def make_controls(
     if sample_size is not None:
         # sample without replacement
         dstore = [
-            dstore[i] for i in generator.rng.sample(range(len(dstore)), sample_size)
+            dstore.completed[i]
+            for i in generator.rng.sample(range(len(dstore.completed)), sample_size)
         ]
         if verbose > 3:
             print(f"{dstore!r}")
@@ -670,18 +689,20 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
         dstore = open_data_store(path, limit=limit)
         if not matches_type(dstore, data_type):
-            console.print(
-                "[yellow]SKIPPED: "
-                f"record type {dstore.record_type!r} in '{path}' does not match "
-                f"expected {data_type!r}",
-            )
+            if verbose:
+                console.print(
+                    "[yellow]SKIPPED: "
+                    f"record type {dstore.record_type!r} in '{path}' does not match "
+                    f"expected {data_type!r}",
+                )
             continue
 
         data = defaultdict(list)
-        for m in track(dstore):
+        for m in track(dstore.completed):
             r = reader(m)
             if r.observed.pvalue is None:
                 continue
+
             data["name"].append(m.unique_id)
             data["chisq_pval"].append(r.observed.pvalue)
             data["bootstrap_pval"].append(r.pvalue)
@@ -737,8 +758,10 @@ def slide(
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
     with Progress() as progress:
-        alignments = progress.add_task("[green]Alignment...", total=len(dstore))
-        for i, member in enumerate(dstore):
+        alignments = progress.add_task(
+            "[green]Alignment...", total=len(dstore.completed)
+        )
+        for i, member in enumerate(dstore.completed):
             progress.update(alignments, completed=i + 1)
             n = omit_suffixes_from_path(Path(member.unique_id))
             aln = loader(member)
