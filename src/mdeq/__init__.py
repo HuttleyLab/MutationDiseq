@@ -674,41 +674,51 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
         )
         exit(1)
 
-    for path in paths:
-        if outdir:
-            outpath = outdir / f"{path.stem}.tsv"
-        else:
-            outpath = path.parent / f"{path.stem}.tsv"
+    with Progress(transient=True) as progress:
+        all_paths = progress.add_task("[green]Dbs...", total=len(paths))
+        for i, path in enumerate(paths):
+            progress.update(all_paths, completed=i + 1)
+            if outdir:
+                outpath = outdir / f"{path.stem}.tsv"
+            else:
+                outpath = path.parent / f"{path.stem}.tsv"
 
-        if outpath.exists() and overwrite:
-            outpath.unlink()
-        elif outpath.exists() and not overwrite:
-            if verbose:
-                console.print(f"[green]{outpath} exists, skipping")
-            continue
-
-        dstore = open_data_store(path, limit=limit)
-        if not matches_type(dstore, data_type):
-            if verbose:
-                console.print(
-                    "[yellow]SKIPPED: "
-                    f"record type {dstore.record_type!r} in '{path}' does not match "
-                    f"expected {data_type!r}",
-                )
-            continue
-
-        data = defaultdict(list)
-        for m in track(dstore.completed):
-            r = reader(m)
-            if r.observed.pvalue is None:
+            if outpath.exists() and overwrite:
+                outpath.unlink()
+            elif outpath.exists() and not overwrite:
+                if verbose:
+                    console.print(f"[green]{outpath} exists, skipping")
                 continue
 
-            data["name"].append(m.unique_id)
-            data["chisq_pval"].append(r.observed.pvalue)
-            data["bootstrap_pval"].append(r.pvalue)
+            dstore = open_data_store(path, limit=limit)
+            if not matches_type(dstore, data_type):
+                if verbose:
+                    console.print(
+                        "[yellow]SKIPPED: "
+                        f"record type {dstore.record_type!r} in '{path}' does not match "
+                        f"expected {data_type!r}",
+                    )
+                continue
 
-        table = make_table(data=data)
-        table.write(outpath)
+            records = progress.add_task(
+                "[blue]records...", total=len(dstore.completed), transient=True
+            )
+
+            data = defaultdict(list)
+            for j, m in enumerate(dstore.completed):
+                progress.update(records, completed=j + 1)
+                r = reader(m)
+                if r.observed.pvalue is None:
+                    continue
+
+                data["name"].append(m.unique_id)
+                data["chisq_pval"].append(r.observed.pvalue)
+                data["bootstrap_pval"].append(r.pvalue)
+
+            progress.remove_task(records)
+
+            table = make_table(data=data)
+            table.write(outpath)
     console.print("[green]Done!")
 
 
