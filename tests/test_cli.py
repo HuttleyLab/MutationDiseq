@@ -9,8 +9,9 @@ from mdeq import (
     aeop,
     convergence,
     db_summary,
+    db_upgrade,
     extract_pvalues,
-    load_from_sql,
+    load_from_sqldb,
     make_adjacent,
     make_controls,
     prep,
@@ -46,7 +47,7 @@ def workingdir(tmp_dir, monkeypatch):
 
 
 def test_validation_input_path():
-    valid = DATADIR / "300bp-new.sqlitedb"
+    valid = DATADIR / "300bp.sqlitedb"
     assert _valid_sqlitedb_input(*[valid])
     invalid_suffix = DATADIR / "brca1.fasta"
     with pytest.raises(ValueError):
@@ -58,7 +59,7 @@ def test_validation_input_path():
 
 
 def test_validation_output_path():
-    valid = "300bp-new.sqlitedb"
+    valid = "300bp.sqlitedb"
     assert _valid_sqlitedb_output(*[valid])
     invalid_suffix = DATADIR / "brca1.fasta"
     with pytest.raises(ValueError):
@@ -90,8 +91,8 @@ def runner():
 
 def test_get_obj_type():
     types = {
-        "300bp-new.sqlitedb": "ArrayAlignment",
-        "toe-300bp-new.sqlitedb": "compact_bootstrap_result",
+        "300bp.sqlitedb": "ArrayAlignment",
+        "toe-300bp.sqlitedb": "compact_bootstrap_result",
     }
     for path, expect in types.items():
         dstore = open_data_store(DATADIR / path)
@@ -101,7 +102,7 @@ def test_get_obj_type():
 @pytest.fixture(scope="session")
 def fasta(tmp_dir):
     """write a few fasta formatted flat files"""
-    inpath = DATADIR / "3000bp-new.sqlitedb"
+    inpath = DATADIR / "3000bp.sqlitedb"
     outpath = pathlib.Path(tmp_dir / "fasta")
     outpath.mkdir(exist_ok=True)
     dstore = open_data_store(inpath, limit=5)
@@ -118,8 +119,8 @@ def test_prep_invalid_input(runner, tmp_dir, fasta):
     """fail if a directory and a db are provided or directory and no suffix"""
     from cogent3.app import io_new
 
-    inpath = DATADIR / "3000bp-new.sqlitedb"
-    outpath = tmp_dir / "output-new.sqlitedb"
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     args = f"-id {fasta} -i {inpath} -o {outpath}".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code != 0, r.output
@@ -133,7 +134,7 @@ def test_prep_defaults(runner, tmp_dir, fasta):
     """remove unamgious characters, exclude alignments < 300"""
     from cogent3.app import io_new
 
-    outpath = tmp_dir / "output-new.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     args = f"-id {fasta} -su fasta -o {outpath} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
 
@@ -147,7 +148,7 @@ def test_prep_min_length(runner, tmp_dir, fasta):
     """min_length arg works"""
     from cogent3.app import io_new
 
-    outpath = tmp_dir / "output-new.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     args = f"-id {fasta} -su fasta -o {outpath} --min_length 600 -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
@@ -162,7 +163,7 @@ def test_prep_codon_pos(runner, tmp_dir, fasta):
     """codon_pos arg works"""
     from cogent3.app import io_new
 
-    outpath = tmp_dir / "output-new.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
@@ -175,7 +176,7 @@ def test_prep_codon_pos(runner, tmp_dir, fasta):
 
 def test_prep_fg_edge(runner, tmp_dir, fasta):
     """fg_edge arg works"""
-    outpath = tmp_dir / "output-new.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     # fail when name missing
     args = f"-id {fasta} -su fasta -o {outpath} --fg_edge abcde -O".split()
@@ -194,14 +195,14 @@ def test_prep_fg_edge(runner, tmp_dir, fasta):
 
 
 def test_toe_exercise(runner, tmp_dir):
-    inpath = DATADIR / "300bp-new.sqlitedb"
-    outpath = tmp_dir / "toe-new.sqlitedb"
+    inpath = DATADIR / "300bp.sqlitedb"
+    outpath = tmp_dir / "toe.sqlitedb"
     r = runner.invoke(
         toe, [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"], catch_exceptions=False
     )
     assert r.exit_code == 0, r.output
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp-new.sqlitedb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     r = runner.invoke(
         toe,
         ["-i", f"{invalidinput}", "-o", f"{outpath}", "-t", "-n4", "-O"],
@@ -217,7 +218,7 @@ def test_toe_exercise(runner, tmp_dir):
     assert isinstance(CompressedValue(result.observed["data"]).as_primitive, dict)
 
 
-loader = load_from_sql()
+loader = load_from_sqldb()
 
 
 def test_convergence(runner, tmp_dir):
@@ -225,8 +226,8 @@ def test_convergence(runner, tmp_dir):
 
     from mdeq.convergence import delta_nabla
 
-    inpath = DATADIR / "toe-300bp-new.sqlitedb"
-    outpath = tmp_dir / "delme-new.sqlitedb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    outpath = tmp_dir / "delme.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-O"]
     # convergence(args)
     r = runner.invoke(convergence, args, catch_exceptions=False)
@@ -239,7 +240,7 @@ def test_convergence(runner, tmp_dir):
     assert len(dstore) == len(results)
 
     # now with incorrect input
-    invalidinput = DATADIR / "300bp-new.sqlitedb"
+    invalidinput = DATADIR / "300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     r = runner.invoke(convergence, args, catch_exceptions=False)
     assert r.exit_code != 0
@@ -251,9 +252,9 @@ def test_convergence(runner, tmp_dir):
 def adjacent_path(runner, tmp_dir):
     from mdeq.adjacent import grouped
 
-    inpath = DATADIR / "apes-align-new.sqlitedb"
+    inpath = DATADIR / "apes-align.sqlitedb"
     gene_order = DATADIR / "gene_order.tsv"
-    outpath = tmp_dir / "adjacent-new.sqlitedb"
+    outpath = tmp_dir / "adjacent.sqlitedb"
     r = runner.invoke(
         make_adjacent,
         [f"-i{inpath}", f"-g{gene_order}", f"-o{outpath}", "-t", "-O"],
@@ -273,13 +274,13 @@ def adjacent_path(runner, tmp_dir):
 def test_aeop_exercise(runner, tmp_dir, adjacent_path):
     # We're using the result created in adjacent_path as input here
     inpath = adjacent_path
-    outpath = tmp_dir / "aeop-new.sqlitedb"
+    outpath = tmp_dir / "aeop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-t", "-O"]
     r = runner.invoke(aeop, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp-new.sqlitedb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     r = runner.invoke(aeop, args, catch_exceptions=False)
     assert r.exit_code != 0
@@ -290,7 +291,7 @@ def test_aeop_exercise(runner, tmp_dir, adjacent_path):
 def test_aeop_exercise_shared_mprobs(runner, tmp_dir, adjacent_path):
     # We're using the result created in adjacent_path as input here
     inpath = adjacent_path
-    outpath = tmp_dir / "aeop-new.sqlitedb"
+    outpath = tmp_dir / "aeop.sqlitedb"
     outpath.unlink(missing_ok=True)
     r = runner.invoke(
         aeop,
@@ -304,8 +305,8 @@ def test_teop_exercise(runner, tmp_dir):
     from cogent3.app import result
 
     # We're using the result created in adjacent_path as input here
-    inpath = DATADIR / "apes-align-new.sqlitedb"
-    outpath = tmp_dir / "teop-new.sqlitedb"
+    inpath = DATADIR / "apes-align.sqlitedb"
+    outpath = tmp_dir / "teop.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-e", "Human,Chimp", "-t", "-O"]
     # teop(args)
     r = runner.invoke(teop, args, catch_exceptions=False)
@@ -317,7 +318,7 @@ def test_teop_exercise(runner, tmp_dir):
         assert isinstance(r, result.hypothesis_result)
 
     # now with incorrect input
-    invalidinput = DATADIR / "toe-300bp-new.sqlitedb"
+    invalidinput = DATADIR / "toe-300bp.sqlitedb"
     args[0] = f"-i{invalidinput}"
     # teop(args)
     r = runner.invoke(teop, args, catch_exceptions=False)
@@ -360,7 +361,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
             dstore.close()
 
     # now with incorrect input
-    invalidinput = DATADIR / "300bp-new.sqlitedb"
+    invalidinput = DATADIR / "300bp.sqlitedb"
     args[1] = f"{invalidinput}"
     r = runner.invoke(make_controls, args, catch_exceptions=False)
     assert r.exit_code != 0
@@ -371,36 +372,32 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
 def test_make_controls_aeop_exercise(runner, tmp_dir):
     from mdeq.adjacent import grouped
 
-    inpath = DATADIR / "aeop-apes-new.sqlitedb"
+    inpath = DATADIR / "aeop-apes.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "aeop", grouped)
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
     from cogent3 import ArrayAlignment
 
-    inpath = DATADIR / "teop-apes-new.sqlitedb"
+    inpath = DATADIR / "teop-apes.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "teop", ArrayAlignment)
 
 
 def test_make_controls_toe_exercise(runner, tmp_dir):
     from cogent3 import ArrayAlignment
 
-    inpath = DATADIR / "toe-300bp-new.sqlitedb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
 
 
 def test_sqlitedb_summary(runner):
-    inpath = DATADIR / "toe-300bp-new.sqlitedb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
     r = runner.invoke(db_summary, ["-i", inpath], catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.xfail
-@pytest.mark.parametrize("glob", (None, "toe*new.sqlitedb"))
-def test_extract_pvalues(runner, tmp_dir, glob):
-    args = ["-id", str(DATADIR), "-od", str(tmp_dir)]
-    if glob:
-        args.extend(["-g", glob])
+def test_extract_pvalues(runner, tmp_dir):
+    args = ["-id", str(DATADIR), "-od", str(tmp_dir), "-g", "toe*.sqlitedb"]
     r = runner.invoke(extract_pvalues, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
@@ -410,8 +407,8 @@ def test_slide(runner, tmp_dir):
     # produces expected number of sliced alignments with given input
     # aligns are 3k long, window 700, setting step to 500 give 5 sub-alignments, times 5
     # alignments gives 25
-    inpath = DATADIR / "3000bp-new.sqlitedb"
-    outpath = tmp_dir / "output-new.sqlitedb"
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     window_size = 600
     step = 500
@@ -434,12 +431,12 @@ def test_slide(runner, tmp_dir):
 
 def test_slide_exit(runner, tmp_dir):
     # fails when invalid input data type
-    inpath = DATADIR / "3000bp-new.sqlitedb"
-    outpath = tmp_dir / "output-new.sqlitedb"
+    inpath = DATADIR / "3000bp.sqlitedb"
+    outpath = tmp_dir / "output.sqlitedb"
     window_size = 600
     step = 500
     min_length = 200
-    args = f"-i {DATADIR / 'teop-apes-new.sqlitedb'} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
+    args = f"-i {DATADIR / 'teop-apes.sqlitedb'} -o {outpath} -wz {window_size} -st {step} -ml {min_length} -O".split()
     r = runner.invoke(slide, args, catch_exceptions=False)
     assert r.exit_code == 1, r.output
 

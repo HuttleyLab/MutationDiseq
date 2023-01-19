@@ -19,7 +19,7 @@ from mdeq.convergence import (
     unit_stationary_Q,
 )
 from mdeq.model import GN_sm
-from mdeq.sqlite_data_store import load_from_sql
+from mdeq.utils import load_from_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -27,7 +27,7 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
-loader = load_from_sql()
+loader = load_from_sqldb()
 
 
 @pytest.fixture(scope="session")
@@ -244,7 +244,7 @@ def test_get_nabla_mixes(alignment_tree, opt_args):
 def toe_bstrap():
     """tinydb with bootstrap results."""
 
-    inpath = DATADIR / "toe-300bp-new.sqlitedb"
+    inpath = DATADIR / "toe-300bp.sqlitedb"
     dstore = open_data_store(inpath)
     result = [loader(m) for m in dstore]
     for e in result:

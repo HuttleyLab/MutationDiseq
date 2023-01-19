@@ -4,7 +4,7 @@ import pickle
 import warnings
 
 from dataclasses import asdict
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
 from typing import Optional, Union
 
 import numpy
@@ -12,6 +12,11 @@ import numpy
 from blosc2 import decompress
 from cogent3 import get_app
 from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.sqlite_data_store import (
+    _LOG_TABLE,
+    OVERWRITE,
+    DataStoreSqlite,
+)
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.dict_array import DictArray
@@ -345,20 +350,14 @@ def convert_db_to_new_sqlitedb(
     source: Path, dest: Optional[Path] = None, overwrite: bool = False
 ):
     """convert mdeq custom sqlitedb to cogent3 sqlitedb"""
+    import os
+    import sys
 
     from cogent3.app.composable import _make_logfile_name
     from cogent3.app.io_new import compress, pickle_it, to_primitive, write_db
-    from cogent3.app.sqlite_data_store import (
-        _LOG_TABLE,
-        OVERWRITE,
-        DataStoreSqlite,
-    )
     from scitrack import CachingLogger
 
     from mdeq.sqlite_data_store import ReadonlySqliteDataStore, sql_loader
-
-    old_dstore = ReadonlySqliteDataStore(source=source)
-    old_loader = sql_loader()
 
     dest = dest or Path(source.parent) / f"{source.stem}-new.sqlitedb"
 
@@ -366,21 +365,32 @@ def convert_db_to_new_sqlitedb(
         raise IOError(f"cannot overwrite existing {str(dest)}")
 
     dest.unlink(missing_ok=True)
+    dest.parent.mkdir(parents=True, exist_ok=True)
 
     new_dstore = DataStoreSqlite(source=dest, mode=OVERWRITE)
     serialiser = to_primitive() + pickle_it() + compress()
     new_writer = write_db(data_store=new_dstore, serialiser=serialiser)
 
-    for m in old_dstore.members:
-        obj = old_loader(m)
-        if new_dstore.record_type is None:
-            new_dstore.record_type = obj
-        obj = _reserialised(obj)
-        new_writer.main(data=obj, identifier=m.name)
+    old_dstore = ReadonlySqliteDataStore(source=source)
 
-    for m in old_dstore.incomplete:
-        obj = old_loader(m)
-        new_writer.main(identifier=m.name, data=obj)
+    # this is the only way I've managed to suppress bloody deprecation warnings!
+    with open(os.devnull, mode="w") as out:
+        sys.stderr = out
+
+        old_loader = sql_loader()
+
+        for m in old_dstore.members:
+            obj = old_loader(m)
+            if new_dstore.record_type is None:
+                new_dstore.record_type = obj
+            obj = _reserialised(obj)
+            new_writer.main(data=obj, identifier=m.name)
+
+        for m in old_dstore.incomplete:
+            obj = old_loader(m)
+            new_writer.main(identifier=m.name, data=obj)
+
+    sys.stderr = sys.__stderr__
 
     # copy the logfile state
     assert len(old_dstore.logs) == 1
@@ -425,3 +435,25 @@ def convert_db_to_new_sqlitedb(
         new_dstore.unlock()
 
     return new_dstore
+
+
+@define_app
+def upgrade_db(
+    path: Union[Path, PosixPath, WindowsPath],
+    rootdir,
+    outdir,
+    fn_sig,
+    overwrite: bool = False,
+) -> DataStoreSqlite:
+    dest = outdir / path.parent.relative_to(rootdir) / f"{path.stem}{fn_sig}.sqlitedb"
+    return convert_db_to_new_sqlitedb(source=path, dest=dest, overwrite=overwrite)
+
+
+def load_from_sqldb():
+    deser = get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
+    return get_app("load_db", deserialiser=deser)
+
+
+def write_to_sqldb(data_store):
+    ser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+    return get_app("write_db", data_store=data_store, serialiser=ser)

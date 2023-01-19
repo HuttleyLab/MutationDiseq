@@ -28,7 +28,6 @@ from collections import defaultdict
 from typing import Callable, Optional, Union
 
 from blosc2 import compress
-from cogent3 import get_app
 from cogent3.app import io
 from cogent3.app.composable import WRITER, NotCompleted, define_app
 from cogent3.app.data_store import (
@@ -42,7 +41,7 @@ from cogent3.util.deserialise import deserialise_not_completed
 from cogent3.util.table import Table
 from scitrack import get_text_hexdigest
 
-from mdeq.utils import CompressedValue, CompressedValueOld
+from mdeq.utils import CompressedValueOld
 
 
 _INCOMPLETE_TABLE = "incomplete"
@@ -638,16 +637,6 @@ def _decompressed(data: dict) -> dict:
         if isinstance(v, CompressedValueOld):
             data[k] = v.deserialised
     return data
-
-
-def load_from_sql():
-    deser = get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
-    return get_app("load_db", deserialiser=deser)
-
-
-def write_to_sqldb(data_store):
-    ser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
-    return get_app("write_db", data_store=data_store, serialiser=ser)
 
 
 # this is inheriting from an already defined loader app

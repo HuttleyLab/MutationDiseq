@@ -5,13 +5,13 @@ import pytest
 from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.evo import model_collection_result
 
-from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
 from mdeq.toe import (
     get_init_hypothesis,
     get_init_model_coll,
     get_no_init_hypothesis,
     get_no_init_model_coll,
 )
+from mdeq.utils import load_from_sqldb, write_to_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -27,7 +27,7 @@ def opt_args():
 
 @pytest.fixture()
 def dstore_instance():
-    return open_data_store(DATADIR / "3000bp-new.sqlitedb")
+    return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
@@ -75,7 +75,7 @@ def test_no_fg(get_aln_no_fg, opt_args):
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
 
 
-reader = load_from_sql()
+reader = load_from_sqldb()
 
 
 @pytest.mark.parametrize(
@@ -84,7 +84,7 @@ reader = load_from_sql()
 def test_get_no_init_hypothesis_app_run(
     tmp_path, dstore_instance, opt_args, init_hyp_app
 ):
-    out_dstore = open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")
+    out_dstore = open_data_store(tmp_path / "tempdir.sqlitedb", mode="w")
     writer = write_to_sqldb(out_dstore)
     reader.disconnect()
     process = reader + init_hyp_app(just_continuous=False, opt_args=opt_args) + writer

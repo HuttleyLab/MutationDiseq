@@ -5,9 +5,8 @@ import pytest
 from cogent3 import open_data_store
 from cogent3.core.alignment import ArrayAlignment
 
-from mdeq import control
+from mdeq import control, load_from_sqldb
 from mdeq.adjacent import grouped
-from mdeq.sqlite_data_store import load_from_sql
 
 
 __author__ = "Gavin Huttley"
@@ -23,13 +22,13 @@ def opt_args():
 
 @pytest.fixture()
 def apes_dstore():
-    return open_data_store(DATADIR / "apes-align-new.sqlitedb")
+    return open_data_store(DATADIR / "apes-align.sqlitedb")
 
 
 @pytest.fixture(scope="session")
 def toe_result():
-    inpath = DATADIR / "toe-300bp-new.sqlitedb"
-    loader = load_from_sql()
+    inpath = DATADIR / "toe-300bp.sqlitedb"
+    loader = load_from_sqldb()
 
     dstore = open_data_store(inpath)
     result = loader(dstore[0])
@@ -67,7 +66,7 @@ def test_select_aeop(apes_dstore, opt_args):
         selector = control.select_model_result(name)
         return selector(result)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     alns = [loader(apes_dstore[i]) for i in (2, 4)]
     for n, a in zip(("a", "b"), alns):
         a.info.name = n
@@ -97,7 +96,7 @@ def test_select_teop(apes_dstore, opt_args):
         selector = control.select_model_result(name)
         return selector(result)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     aln = loader(apes_dstore[0])
 
     opt_args["max_evaluations"] = 10
@@ -132,19 +131,19 @@ def test_gen_toe_alt(toe_result):
 
 @pytest.fixture(scope="session")
 def aeop_result():
-    inpath = DATADIR / "aeop-apes-new.sqlitedb"
+    inpath = DATADIR / "aeop-apes.sqlitedb"
 
     dstore = open_data_store(inpath)
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     return [loader(m) for m in dstore]
 
 
 @pytest.fixture(scope="session")
 def teop_result():
-    inpath = DATADIR / "teop-apes-new.sqlitedb"
+    inpath = DATADIR / "teop-apes.sqlitedb"
 
     dstore = open_data_store(inpath)
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     return [loader(m) for m in dstore]
 
 

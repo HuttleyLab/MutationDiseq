@@ -9,12 +9,12 @@ from numpy import eye
 from numpy.testing import assert_allclose
 
 from mdeq.jsd import get_jsd
-from mdeq.sqlite_data_store import load_from_sql
 from mdeq.stationary_pi import (
     OscillatingPiException,
     get_stat_pi_via_brute,
     get_stat_pi_via_eigen,
 )
+from mdeq.utils import load_from_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -116,8 +116,8 @@ def identity():
 
 @pytest.fixture()
 def non_converging():
-    dstore = open_data_store(DATADIR / "non_converging-new.sqlitedb")
-    loader = load_from_sql()
+    dstore = open_data_store(DATADIR / "non_converging.sqlitedb")
+    loader = load_from_sqldb()
     return loader(dstore[0])
 
 

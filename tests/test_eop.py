@@ -7,7 +7,7 @@ from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.result import hypothesis_result
 
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
-from mdeq.sqlite_data_store import load_from_sql
+from mdeq.utils import load_from_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -28,7 +28,7 @@ def opt_args():
 
 @pytest.fixture(scope="session")
 def dstore_instance():
-    return open_data_store(DATADIR / "3000bp-new.sqlitedb")
+    return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
@@ -76,7 +76,7 @@ def diff_length_alns():
     return [aln1, aln2]
 
 
-loader = load_from_sql()
+loader = load_from_sqldb()
 
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
@@ -129,7 +129,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
 
 
 def test_temporal_eop(opt_args):
-    inpath = DATADIR / "apes-align-new.sqlitedb"
+    inpath = DATADIR / "apes-align.sqlitedb"
     dstore = open_data_store(inpath)
     aln = loader(dstore[4])
     opt_args["max_evaluations"] = 100

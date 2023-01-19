@@ -36,14 +36,16 @@ from mdeq.eop import (
     adjacent_eop,
     temporal_eop,
 )
-from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
 from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import (
     configure_parallel,
+    load_from_sqldb,
     matches_type,
     omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
     set_fg_edge,
+    upgrade_db,
+    write_to_sqldb,
 )
 
 
@@ -138,7 +140,7 @@ def prep(
 
     dstore = open_data_store(inpath or indir, suffix=suffix, limit=limit)
     loader = (
-        load_from_sql()
+        load_from_sqldb()
         if inpath
         else get_app("load_aligned", format=suffix, moltype="dna")
     )
@@ -258,7 +260,7 @@ def toe(
         )
         exit(1)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
 
     # check consistency of just_continuous / fg_edge / aln.info
     _aln = loader(dstore[0])
@@ -341,7 +343,7 @@ def teop(
         exit(1)
 
     # construct hypothesis app, null constrains edge_names to same process
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     opt_args = get_opt_settings(testrun)
     teop = temporal_eop(edge_names, tree=treepath, opt_args=opt_args)
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
@@ -392,7 +394,7 @@ def aeop(
         )
         exit(1)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
     test_adjacent = adjacent_eop(
@@ -432,7 +434,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
         )
         exit(1)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
@@ -508,7 +510,7 @@ def make_controls(
     model_name = control_name[analysis][controls]
     model_selector = select_model_result(model_name)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     generator = control_generator(model_selector, seed=seed)
 
     # now use that rng to randomly select sample_size from dstore
@@ -645,7 +647,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
     data_type = "compact_bootstrap_result"
 
-    reader = load_from_sql()
+    reader = load_from_sqldb()
     paths = paths_to_sqlitedbs_matching(indir, pattern, recursive)
     if not paths:
         console.print(
@@ -729,7 +731,7 @@ def slide(
         )
         exit(1)
 
-    loader = load_from_sql()
+    loader = load_from_sqldb()
     if outpath.exists() and overwrite:
         outpath.unlink(missing_ok=True)
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
@@ -787,12 +789,12 @@ def db_upgrade(pattern: Path, outdir: Path, overwrite: bool):
     fn_sig = "-new" if rootdir == outdir else ""
 
     paths = [p for p in pattern.parent.glob("**/*.sqlitedb") if "-new" not in p.name]
-    for path in track(paths):
-        dest = (
-            outdir / path.parent.relative_to(rootdir) / f"{path.stem}{fn_sig}.sqlitedb"
-        )
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        convert_db_to_new_sqlitedb(source=path, dest=dest)
+
+    set_keepawake(keep_screen_awake=False)
+    app = upgrade_db(rootdir, outdir, fn_sig, overwrite=overwrite)
+    _ = list(app.as_completed(paths, parallel=True, show_progress=True))
+
+    unset_keepawake()
 
 
 if __name__ == "__main__":

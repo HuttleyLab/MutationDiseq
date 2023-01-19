@@ -11,8 +11,8 @@ from cogent3.app.typing import SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 
-from mdeq.sqlite_data_store import load_from_sql, sql_loader
-from mdeq.utils import SerialisableMixin
+from mdeq.sqlite_data_store import sql_loader
+from mdeq.utils import SerialisableMixin, load_from_sqldb
 
 
 __author__ = "Gavin Huttley"
@@ -134,7 +134,7 @@ def make_identifier(data) -> str:
     return "--".join(composite)
 
 
-_new_loader = load_from_sql()
+_new_loader = load_from_sqldb()
 
 
 @define_app

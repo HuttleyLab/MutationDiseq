@@ -10,7 +10,7 @@ from mdeq.bootstrap import (
     compact_bootstrap_result,
     create_bootstrap_app,
 )
-from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
+from mdeq.utils import load_from_sqldb, write_to_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -48,12 +48,12 @@ def aln():
 
 @pytest.fixture()
 def aligns_dstore():
-    return open_data_store(DATADIR / "3000bp-new.sqlitedb")
+    return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
 @pytest.fixture()
 def bstrap_result_dstore():
-    return open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep-new.sqlitedb")
+    return open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
 
 
 def test_create_bootstrap_app(aln, opt_args):
@@ -75,11 +75,11 @@ def test_deserialise_compact_boostrap_result(aln, opt_args):
     assert isinstance(got, compact_bootstrap_result)
 
 
-reader = load_from_sql()
+reader = load_from_sqldb()
 
 
 def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
-    out_dstore = open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")
+    out_dstore = open_data_store(tmp_path / "tempdir.sqlitedb", mode="w")
     writer = write_to_sqldb(out_dstore)
     bstrap = create_bootstrap_app(num_reps=2, opt_args=opt_args)
     process = reader + bstrap + writer
@@ -108,7 +108,7 @@ def test_estimate_pval(bstrap_result_dstore):
 
 @pytest.fixture(scope="session")
 def dstore4_tree():
-    inpath = DATADIR / "4otu-aligns-new.sqlitedb"
+    inpath = DATADIR / "4otu-aligns.sqlitedb"
     tree = "(Human,Platypus,(Mouse,Rat))"
     dstore = open_data_store(inpath)
     return dstore, tree

@@ -2,8 +2,7 @@ import pathlib
 
 from cogent3 import get_model, open_data_store
 
-from mdeq import model
-from mdeq.sqlite_data_store import load_from_sql
+from mdeq import load_from_sqldb, model
 
 
 __author__ = "Katherine Caley"
@@ -11,7 +10,7 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
-loader = load_from_sql()
+loader = load_from_sqldb()
 
 
 def test_get_gsn():
@@ -37,7 +36,7 @@ def test_make_gsn_app():
 def test_mles_at_bounds():
     from cogent3.app import composable
 
-    path = DATADIR / "toe-300bp-new.sqlitedb"
+    path = DATADIR / "toe-300bp.sqlitedb"
     dstore = open_data_store(path, limit=1)
     r = loader(dstore[0])
     r.deserialised_values()

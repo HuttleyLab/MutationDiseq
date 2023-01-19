@@ -201,7 +201,9 @@ def tmp_dir(tmpdir_factory):
     "path",
     [
         p
-        for p in paths_to_sqlitedbs_matching(DATADIR, "*.sqlitedb", False)
+        for p in paths_to_sqlitedbs_matching(
+            DATADIR / "old-sqlitedbs", "*.sqlitedb", False
+        )
         if "-new" not in p.name
     ],
 )

@@ -127,7 +127,7 @@ def test_load_data_group():
             o = got.elements[i]
             assert o.info.source == n.replace(".json", "")
 
-    path = DATADIR / "300bp-new.sqlitedb"
+    path = DATADIR / "300bp.sqlitedb"
     dstore = open_data_store(path)
     names = [m.unique_id for m in dstore]
     shuffle(names)
@@ -144,7 +144,7 @@ def test_load_data_group():
 def test_new_adjacent_eop():
     from random import choice, shuffle
 
-    path = DATADIR / "300bp-new.sqlitedb"
+    path = DATADIR / "300bp.sqlitedb"
     dstore = open_data_store(path)
     names = [m.unique_id for m in dstore]
     shuffle(names)
