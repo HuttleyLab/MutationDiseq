@@ -197,7 +197,15 @@ def tmp_dir(tmpdir_factory):
     return pathlib.Path(tmpdir_factory.mktemp("convert"))
 
 
-def test_db_conversion(tmp_dir):
+@pytest.mark.parametrize(
+    "path",
+    [
+        p
+        for p in paths_to_sqlitedbs_matching(DATADIR, "*.sqlitedb", False)
+        if "-new" not in p.name
+    ],
+)
+def test_db_conversion(tmp_dir, path):
     from cogent3.app.io_new import (
         decompress,
         from_primitive,
@@ -205,13 +213,10 @@ def test_db_conversion(tmp_dir):
         unpickle_it,
     )
 
-    source = DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb"
-    source = DATADIR / "4otu-aligns.sqlitedb"
-    source = DATADIR / "toe-300bp.sqlitedb"
-
+    source = DATADIR / path
     dest = tmp_dir / source.name
     got = convert_db_to_new_sqlitedb(source, dest)
     deserialiser = decompress() + unpickle_it() + from_primitive()
     loader = load_db(deserialiser=deserialiser)
     obj = loader(got.completed[0])
-    got.summary_not_completed
+    print(got.summary_not_completed)

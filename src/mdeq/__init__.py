@@ -4,6 +4,7 @@
 from mdeq import _block_threading  # isort: skip
 
 import inspect
+import shutil
 import sys
 
 from collections import defaultdict
@@ -23,7 +24,6 @@ import mdeq._click_options as _cli_opt
 
 # required to ensure registration of define substitution models
 from mdeq import model as _model
-from mdeq import sqlite_data_store as _sqldstore
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import control_generator, select_model_result
@@ -68,6 +68,7 @@ filterwarnings("ignore", "using slow exponentiator")
 filterwarnings("ignore", ".*creased to keep within bounds")
 filterwarnings("ignore", "Used mean of.*", module="cogent3")
 filterwarnings("ignore", "use.*")
+filterwarnings("ignore", category=DeprecationWarning)
 
 _min_version = (3, 10)
 if sys.version_info < _min_version:
@@ -770,17 +771,27 @@ def slide(
 
 @main.command(no_args_is_help=True)
 @click.argument("pattern", type=Path)
+@_cli_opt._outdir
 @click.option("-O", "--overwrite", is_flag=True, help="delete dest if exists")
-def db_upgrade(pattern: Path, overwrite: bool):
+def db_upgrade(pattern: Path, outdir: Path, overwrite: bool):
     from .utils import convert_db_to_new_sqlitedb
 
+    pattern = pattern.expanduser().absolute()
+    rootdir = pattern.parent
+
     assert pattern.name.endswith("*")
+
+    outdir = outdir or rootdir
+    outdir = outdir.expanduser().absolute()
+    outdir.mkdir(exist_ok=True)
+    fn_sig = "-new" if rootdir == outdir else ""
+
     paths = [p for p in pattern.parent.glob("**/*.sqlitedb") if "-new" not in p.name]
     for path in track(paths):
-        dest = path.parent / f"{path.stem}-new.sqlitedb"
-        if overwrite:
-            dest.unlink(missing_ok=True)
-
+        dest = (
+            outdir / path.parent.relative_to(rootdir) / f"{path.stem}{fn_sig}.sqlitedb"
+        )
+        dest.parent.mkdir(parents=True, exist_ok=True)
         convert_db_to_new_sqlitedb(source=path, dest=dest)
 
 

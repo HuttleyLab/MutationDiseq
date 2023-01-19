@@ -341,8 +341,11 @@ def _reserialised(data: dict) -> dict:
     return data
 
 
-def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
+def convert_db_to_new_sqlitedb(
+    source: Path, dest: Optional[Path] = None, overwrite: bool = False
+):
     """convert mdeq custom sqlitedb to cogent3 sqlitedb"""
+
     from cogent3.app.composable import _make_logfile_name
     from cogent3.app.io_new import compress, pickle_it, to_primitive, write_db
     from cogent3.app.sqlite_data_store import (
@@ -359,8 +362,10 @@ def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
 
     dest = dest or Path(source.parent) / f"{source.stem}-new.sqlitedb"
 
-    if dest.exists():
-        dest.unlink(missing_ok=True)
+    if dest.exists() and not overwrite:
+        raise IOError(f"cannot overwrite existing {str(dest)}")
+
+    dest.unlink(missing_ok=True)
 
     new_dstore = DataStoreSqlite(source=dest, mode=OVERWRITE)
     serialiser = to_primitive() + pickle_it() + compress()

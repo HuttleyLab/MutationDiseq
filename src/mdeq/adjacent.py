@@ -134,7 +134,6 @@ def make_identifier(data) -> str:
     return "--".join(composite)
 
 
-_loader = sql_loader()
 _new_loader = load_from_sql()
 
 
