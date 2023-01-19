@@ -37,3 +37,4 @@ hg_old*
 *-shm
 *-wal
 .nox/*
+lcov*.info
