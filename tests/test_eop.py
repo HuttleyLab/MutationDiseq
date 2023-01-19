@@ -3,12 +3,12 @@ import pathlib
 import numpy
 import pytest
 
-from cogent3 import make_aligned_seqs
-from cogent3.app import io
+from cogent3 import make_aligned_seqs, open_data_store
+from cogent3.app import io_new
 from cogent3.app.result import hypothesis_result
 
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
-from mdeq.sqlite_data_store import sql_loader
+from mdeq.sqlite_data_store import load_from_sql
 
 
 __author__ = "Katherine Caley"
@@ -29,7 +29,7 @@ def opt_args():
 
 @pytest.fixture(scope="session")
 def dstore_instance():
-    return io.get_data_store(DATADIR / "3000bp.sqlitedb")
+    return open_data_store(DATADIR / "3000bp-new.sqlitedb")
 
 
 @pytest.fixture()
@@ -77,7 +77,7 @@ def diff_length_alns():
     return [aln1, aln2]
 
 
-loader = sql_loader()
+loader = load_from_sql()
 
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
@@ -130,10 +130,8 @@ def test_adjacent_eop(multiple_alns, opt_args):
 
 
 def test_temporal_eop(opt_args):
-    from cogent3.app import evo
-
-    inpath = DATADIR / "apes-align.sqlitedb"
-    dstore = io.get_data_store(inpath)
+    inpath = DATADIR / "apes-align-new.sqlitedb"
+    dstore = open_data_store(inpath)
     aln = loader(dstore[4])
     opt_args["max_evaluations"] = 100
     edge_names = ["Human", "Chimp"]

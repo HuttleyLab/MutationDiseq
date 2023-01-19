@@ -2,8 +2,7 @@ import pathlib
 
 import pytest
 
-from cogent3 import load_aligned_seqs
-from cogent3.app import io
+from cogent3 import load_aligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
 
 from mdeq.bootstrap import (
@@ -11,7 +10,7 @@ from mdeq.bootstrap import (
     compact_bootstrap_result,
     create_bootstrap_app,
 )
-from mdeq.sqlite_data_store import sql_loader, sql_writer
+from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
 
 
 __author__ = "Katherine Caley"
@@ -49,12 +48,12 @@ def aln():
 
 @pytest.fixture()
 def aligns_dstore():
-    return io.get_data_store(DATADIR / "3000bp.sqlitedb")
+    return open_data_store(DATADIR / "3000bp-new.sqlitedb")
 
 
 @pytest.fixture()
 def bstrap_result_dstore():
-    return io.get_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
+    return open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep-new.sqlitedb")
 
 
 def test_create_bootstrap_app(aln, opt_args):
@@ -75,28 +74,25 @@ def test_deserialise_compact_boostrap_result(aln, opt_args):
     assert len(result) == 2
     assert isinstance(got, compact_bootstrap_result)
 
+reader = load_from_sql()
 
 def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
-    reader = sql_loader()
-    outpath = tmp_path / "tempdir.sqlitedb"
-    writer = sql_writer(outpath)
+    out_dstore = open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")
+    writer = write_to_sqldb(out_dstore)
     bstrap = create_bootstrap_app(num_reps=2, opt_args=opt_args)
     process = reader + bstrap + writer
 
     process.apply_to(aligns_dstore[:1], show_progress=False)
-    dstore = io.get_data_store(outpath)
-    assert len(dstore.summary_incomplete) == 0
+    assert len(out_dstore.summary_not_completed) == 0
 
-    loader = sql_loader()
-    result = loader(dstore[0])
+    result = reader(out_dstore[0])
     assert isinstance(result, compact_bootstrap_result)
     pvalue = result.pvalue
     assert isinstance(pvalue, float)
 
 
 def test_estimate_pval(bstrap_result_dstore):
-    loader = sql_loader()
-    result = loader(bstrap_result_dstore[0])
+    result = reader(bstrap_result_dstore[0])
     assert isinstance(result.pvalue, float)
 
     num_reps = sum(v.LR >= 0 for v in result.values()) - 1
@@ -110,9 +106,9 @@ def test_estimate_pval(bstrap_result_dstore):
 
 @pytest.fixture(scope="session")
 def dstore4_tree():
-    inpath = DATADIR / "4otu-aligns.sqlitedb"
+    inpath = DATADIR / "4otu-aligns-new.sqlitedb"
     tree = "(Human,Platypus,(Mouse,Rat))"
-    dstore = io.get_data_store(inpath)
+    dstore = open_data_store(inpath)
     return dstore, tree
 
 
@@ -137,8 +133,7 @@ def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
         tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
     )
 
-    loader = sql_loader()
-    aln = loader(dstore[0])
+    aln = reader(dstore[0])
     result = bstrap(aln)
     result.deserialised_values()
     assert isinstance(result, compact_bootstrap_result)
@@ -154,8 +149,7 @@ def test_4otu_bootstrap_toe(dstore4_tree, opt_args):
         tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
     )
 
-    loader = sql_loader()
-    aln = loader(dstore[0])
+    aln = reader(dstore[0])
     result = bstrap(aln)
     result.deserialised_values()
     assert isinstance(result, compact_bootstrap_result)

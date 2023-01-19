@@ -35,12 +35,16 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  aeop           between loci equivalence of mutation process test
-  convergence    estimates convergence towards mutation equilibrium.
-  make-adjacent  makes tinydb of adjacent alignment records.
-  make-controls  simulate negative and positive controls
-  teop           between branch equivalence of mutation process test
-  toe            test of existence of mutation equilibrium.
+  aeop             between loci equivalence of mutation process test
+  convergence      estimates convergence towards mutation equilibrium.
+  db-summary       displays summary information about a db
+  extract-pvalues  extracts p-values from TOE sqlitedb results
+  make-adjacent    makes sqlitedb of adjacent alignment records.
+  make-controls    simulate negative and positive controls
+  prep             pre-process alignment data.
+  slide            generate window sized sub-alignments.
+  teop             between branch equivalence of mutation process test
+  toe              test of existence of mutation equilibrium.
 
 ```
 <!-- [[[end]]] -->

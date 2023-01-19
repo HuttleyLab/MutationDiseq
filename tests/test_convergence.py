@@ -3,8 +3,9 @@ import pathlib
 
 import pytest
 
+from cogent3 import open_data_store
 from cogent3 import load_aligned_seqs, make_tree
-from cogent3.app import io
+from cogent3.app import io_new
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.util.deserialise import deserialise_object
 from numpy import array, diag_indices, mean, std
@@ -20,7 +21,7 @@ from mdeq.convergence import (
     unit_stationary_Q,
 )
 from mdeq.model import GN_sm
-from mdeq.sqlite_data_store import sql_loader
+from mdeq.sqlite_data_store import load_from_sql
 
 
 __author__ = "Katherine Caley"
@@ -28,7 +29,7 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
-loader = sql_loader()
+loader = load_from_sql()
 
 
 @pytest.fixture(scope="session")
@@ -244,11 +245,9 @@ def test_get_nabla_mixes(alignment_tree, opt_args):
 @pytest.fixture(scope="session")
 def toe_bstrap():
     """tinydb with bootstrap results."""
-    from mdeq.sqlite_data_store import sql_loader
 
-    inpath = DATADIR / "toe-300bp.sqlitedb"
-    dstore = io.get_data_store(inpath)
-    loader = sql_loader()
+    inpath = DATADIR / "toe-300bp-new.sqlitedb"
+    dstore = open_data_store(inpath)
     result = [loader(m) for m in dstore]
     for e in result:
         e.deserialised_values()

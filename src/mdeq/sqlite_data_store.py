@@ -28,6 +28,7 @@ from collections import defaultdict
 from typing import Callable, Optional, Union
 
 from blosc2 import compress
+from cogent3 import get_app
 from cogent3.app import io
 from cogent3.app.composable import WRITER, NotCompleted, define_app
 from cogent3.app.data_store import (
@@ -101,6 +102,8 @@ def open_sqlite_db_rw(path: Union[str, pathlib.Path]):
     -------
     Handle to a sqlite3 session
     """
+    raise RuntimeError
+
     db = sqlite3.connect(
         path,
         isolation_level=None,
@@ -127,6 +130,7 @@ def open_sqlite_db_ro(path):
     -------
     Handle to a sqlite3 session
     """
+    raise RuntimeError
     db = sqlite3.connect(
         f"file:{path}?mode=ro",
         isolation_level=None,
@@ -137,8 +141,6 @@ def open_sqlite_db_ro(path):
     return db
 
 
-# make these available via cogent3.app.io.get_datastore()
-@io.register_datastore_reader("sqlitedb")
 class ReadonlySqliteDataStore(ReadOnlyDataStoreBase):
     # interface to a read only sqlite3 database
     # todo docstring for the class
@@ -638,6 +640,15 @@ def _decompressed(data: dict) -> dict:
             data[k] = v.deserialised
     return data
 
+
+def load_from_sql():
+    deser = get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
+    return get_app("load_db", deserialiser=deser)
+
+
+def write_to_sqldb(data_store):
+    ser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+    return get_app("write_db", data_store=data_store, serialiser=ser)
 
 # this is inheriting from an already defined loader app
 class sql_loader(io.load_db):

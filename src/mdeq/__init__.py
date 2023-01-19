@@ -14,8 +14,7 @@ from warnings import filterwarnings
 
 import click
 
-from cogent3 import make_table
-from cogent3.app import io, sample
+from cogent3 import make_table, open_data_store, get_app
 from rich.console import Console
 from rich.progress import Progress, track
 from scitrack import CachingLogger
@@ -37,14 +36,13 @@ from mdeq.eop import (
     adjacent_eop,
     temporal_eop,
 )
-from mdeq.sqlite_data_store import sql_loader, sql_writer
+from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
 from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import (
     configure_parallel,
-    get_obj_type,
     omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
-    set_fg_edge,
+    set_fg_edge, matches_type,
 )
 
 
@@ -68,6 +66,7 @@ filterwarnings("ignore", "Unexpected warning from scipy")
 filterwarnings("ignore", "using slow exponentiator")
 filterwarnings("ignore", ".*creased to keep within bounds")
 filterwarnings("ignore", "Used mean of.*", module="cogent3")
+filterwarnings("ignore", "use.*")
 
 _min_version = (3, 10)
 if sys.version_info < _min_version:
@@ -135,8 +134,8 @@ def prep(
         console.print(r"[red]EXIT: must define suffix")
         exit(1)
 
-    dstore = io.get_data_store(inpath or indir, suffix=suffix, limit=limit)
-    loader = sql_loader() if inpath else io.load_aligned(format=suffix, moltype="dna")
+    dstore = open_data_store(inpath or indir, suffix=suffix, limit=limit)
+    loader = load_from_sql() if inpath else get_app("load_aligned", format=suffix, moltype="dna")
     if fg_edge:
         aln = loader(dstore[0])
         if fg_edge not in aln.names:
@@ -147,18 +146,20 @@ def prep(
 
     app_series = [loader]
     if codon_pos:
-        app_series.append(sample.take_codon_positions(int(codon_pos)))
+        app_series.append(get_app("take_codon_positions", int(codon_pos)))
 
     app_series.extend(
-        [sample.omit_degenerates(moltype="dna"), sample.min_length(min_length)]
+        [get_app("omit_degenerates", moltype="dna"), get_app("min_length", min_length)]
     )
     if fg_edge:
         app_series.append(set_fg_edge(fg_edge=fg_edge))
 
+    if overwrite:
+        Path(outpath).unlink(missing_ok=True)
+
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     app_series.append(
-        sql_writer(
-            outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-        )
+        write_to_sqldb(out_dstore)
     )
 
     app = reduce(add, app_series)
@@ -182,12 +183,11 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     LOGGER.log_args()
 
     # we get member names from input dstore
-    dstore = io.get_data_store(inpath, limit=limit)
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    dstore = open_data_store(inpath, limit=limit)
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
 
-    sample_ids = {m.name.replace(".json", "") for m in dstore}
+    sample_ids = {m.unique_id.replace(".json", "") for m in dstore}
     paired = physically_adjacent(gene_order, sample_ids)
     # make the grouped data app
     group_loader = load_data_group(inpath)
@@ -195,9 +195,10 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
         record = group_loader(pair)
         writer(record)
 
-    log_file_path = LOGGER.log_file_path
+    log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
-    writer.data_store.add_file(log_file_path, cleanup=True, keep_suffix=True)
+    writer.data_store.write_log(unique_id=log_file_path.name, data=log_file_path.read_text())
+    log_file_path.unlink()
     writer.data_store.close()
 
     writer.data_store.close()
@@ -242,16 +243,13 @@ def toe(
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-toe.log"
     LOGGER.log_args()
 
-    dstore = io.get_data_store(inpath, limit=limit)
+    dstore = open_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
-    if get_obj_type(dstore) not in expected_types:
-        click.secho(
-            f"{get_obj_type(dstore)!r} records not one of the expected types {expected_types}",
-            fg="red",
-        )
+    if not matches_type(dstore, expected_types):
+        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = sql_loader()
+    loader = load_from_sql()
 
     # check consistency of just_continuous / fg_edge / aln.info
     _aln = loader(dstore[0])
@@ -282,9 +280,8 @@ def toe(
         sequential=sequential,
         just_continuous=just_continuous,
     )
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     if inject_fg:
         app = loader + inject_fg + bstrapper + writer
     else:
@@ -328,19 +325,18 @@ def teop(
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-teop.log"
     LOGGER.log_args()
 
-    dstore = io.get_data_store(inpath, limit=limit)
+    dstore = open_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
-    if get_obj_type(dstore) not in expected_types:
+    if not matches_type(dstore, expected_types):
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
         exit(1)
 
     # construct hypothesis app, null constrains edge_names to same process
-    loader = sql_loader()
+    loader = load_from_sql()
     opt_args = get_opt_settings(testrun)
     teop = temporal_eop(edge_names, tree=treepath, opt_args=opt_args)
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     process = loader + teop + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     process.apply_to(
@@ -378,16 +374,15 @@ def aeop(
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-aeop.log"
     LOGGER.log_args()
 
-    dstore = io.get_data_store(inpath, limit=limit)
+    dstore = open_data_store(inpath, limit=limit)
     expected_types = ("grouped",)
-    if get_obj_type(dstore) not in expected_types:
-        click.secho(f"records not one of the expected types {expected_types}", fg="red")
+    if not matches_type(dstore, expected_types):
+        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = sql_loader()
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    loader = load_from_sql()
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     test_adjacent = adjacent_eop(
         tree=treepath, opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
     )
@@ -416,17 +411,16 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
     LOGGER.log_args()
-    dstore = io.get_data_store(inpath, limit=limit)
+    dstore = open_data_store(inpath, limit=limit)
     expected_types = ("compact_bootstrap_result",)
-    if get_obj_type(dstore) not in expected_types:
-        click.secho(f"records not one of the expected types {expected_types}", fg="red")
+    if not matches_type(dstore, expected_types):
+        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = sql_loader(fully_deserialise=True)
+    loader = load_from_sql()
     to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     process = loader + to_delta_nabla + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
     r = process.apply_to(
@@ -475,7 +469,7 @@ def make_controls(
 
     # create loader, read a single result and validate the type matches the controls choice
     # validate the model choice too
-    dstore = io.get_data_store(inpath, limit=limit)
+    dstore = open_data_store(inpath, limit=limit)
     result_types = {
         "teop": "hypothesis_result",
         "aeop": "hypothesis_result",
@@ -488,8 +482,7 @@ def make_controls(
         "toe": {"-ve": NULL_TOE, "+ve": ALT_TOE},
         "single-model": {"-ve": "", "+ve": ""},
     }
-    record_type = get_obj_type(dstore)
-    if record_type != result_types[analysis]:
+    if not matches_type(dstore, (result_types[analysis],)):
         click.secho(
             f"object type in {inpath!r} does not match expected "
             f"{result_types[analysis]!r} for analysis {analysis!r}",
@@ -500,7 +493,7 @@ def make_controls(
     model_name = control_name[analysis][controls]
     model_selector = select_model_result(model_name)
 
-    loader = sql_loader()
+    loader = load_from_sql()
     generator = control_generator(model_selector, seed=seed)
 
     # now use that rng to randomly select sample_size from dstore
@@ -515,9 +508,8 @@ def make_controls(
         if verbose > 3:
             print(f"{dstore!r}")
 
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     proc = loader + generator + writer
     proc.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
     func_name = inspect.stack()[0].function
@@ -542,15 +534,15 @@ def db_summary(inpath):
     _path = re.compile(r"[A-Z]*[a-z]+Path\('[^']*'\)")
     _types = re.compile(r"\b(None|True|False)\b")
 
-    dstore = io.get_data_store(inpath)
-    record_type = get_obj_type(dstore)
+    dstore = open_data_store(inpath)
+    record_type = dstore.record_type
 
     cmnds = []
     args = []
     params = []
     timestamp = ""
     for log in dstore.logs:
-        log = log.deserialised.splitlines()
+        log = log.read().splitlines()
         if not log:
             continue
         timestamp = " ".join(log[0].split()[:2])
@@ -614,8 +606,8 @@ def db_summary(inpath):
     t = dstore.describe
     t.title = "Content summary"
     rich_display(t)
-    if len(dstore.incomplete) > 0:
-        t = dstore.summary_incomplete
+    if len(dstore.not_completed) > 0:
+        t = dstore.summary_not_completed
         t.title = "Summary of incomplete records"
         rich_display(t)
 
@@ -638,7 +630,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
     data_type = "compact_bootstrap_result"
 
-    reader = sql_loader()
+    reader = load_from_sql()
     paths = paths_to_sqlitedbs_matching(indir, pattern, recursive)
     if not paths:
         console.print(
@@ -651,17 +643,20 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
             outpath = outdir / f"{path.stem}.tsv"
         else:
             outpath = path.parent / f"{path.stem}.tsv"
-        if outpath.exists() and not overwrite:
+
+        if outpath.exists() and overwrite:
+           outpath.unlink()
+        elif outpath.exists() and not overwrite:
             if verbose:
                 console.print(f"[green]{outpath} exists, skipping")
             continue
 
-        dstore = io.get_data_store(path, limit=limit)
-        record_type = get_obj_type(dstore)
-        if record_type != data_type:
+
+        dstore = open_data_store(path, limit=limit)
+        if not matches_type(dstore, data_type):
             console.print(
                 "[yellow]SKIPPED: "
-                f"record type {record_type!r} in '{path}' does not match "
+                f"record type {dstore.record_type!r} in '{path}' does not match "
                 f"expected {data_type!r}",
             )
             continue
@@ -671,7 +666,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
             r = reader(m)
             if r.observed.pvalue is None:
                 continue
-            data["name"].append(m.name)
+            data["name"].append(m.unique_id)
             data["chisq_pval"].append(r.observed.pvalue)
             data["bootstrap_pval"].append(r.pvalue)
 
@@ -711,21 +706,23 @@ def slide(
         )
         exit(1)
 
-    dstore = io.get_data_store(inpath)
+    dstore = open_data_store(inpath)
     expected_types = ("ArrayAlignment", "Alignment")
-    if get_obj_type(dstore) not in expected_types:
-        console.print(f"[red]records not one of the expected types {expected_types}")
+    if not matches_type(dstore, expected_types):
+        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
         exit(1)
 
-    loader = sql_loader()
-    writer = sql_writer(
-        outpath, create=True, if_exists="overwrite" if overwrite else "raise"
-    )
+
+    loader = load_from_sql()
+    if outpath.exists() and overwrite:
+        outpath.unlink(missing_ok=True)
+    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+    writer = write_to_sqldb(out_dstore)
     with Progress() as progress:
         alignments = progress.add_task("[green]Alignment...", total=len(dstore))
         for i, member in enumerate(dstore):
             progress.update(alignments, completed=i + 1)
-            n = omit_suffixes_from_path(Path(member.name))
+            n = omit_suffixes_from_path(Path(member.unique_id))
             aln = loader(member)
             num_windows = len(aln) - window_size + 1
             windows = progress.add_task(
@@ -747,10 +744,27 @@ def slide(
                 writer(sub)
             progress.remove_task(windows)
 
-    log_file_path = LOGGER.log_file_path
+    log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
-    writer.data_store.add_log(log_file_path, cleanup=True)
+    writer.data_store.write_log(unique_id=log_file_path.name, data=log_file_path.read_text())
+    log_file_path.unlink()
     console.print("[green]Done!")
+
+@main.command(no_args_is_help=True)
+@click.argument("pattern", type=Path)
+@click.option("-O", "--overwrite", is_flag=True, help="delete dest if exists")
+def db_upgrade(pattern: Path, overwrite: bool):
+    from .utils import convert_db_to_new_sqlitedb
+
+    assert pattern.name.endswith("*")
+    paths = list(pattern.parent.glob("**/*.sqlitedb"))
+    for path in track(paths):
+        dest = path.parent / f"{path.stem}-new.sqlitedb"
+        if overwrite:
+            dest.unlink(missing_ok=True)
+
+        convert_db_to_new_sqlitedb(source=path, dest=dest)
+
 
 
 if __name__ == "__main__":

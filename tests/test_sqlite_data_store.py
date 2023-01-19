@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from cogent3 import open_data_store
 from cogent3.app.composable import NotCompleted
-from cogent3.app.io import get_data_store
 
 from mdeq.sqlite_data_store import (
     ReadonlySqliteDataStore,
@@ -24,7 +24,7 @@ def tmp_dir(tmpdir_factory):
 @pytest.fixture(scope="session")
 def ro_dir_dstore():
     DATADIR = Path("~/repos/Cogent3/tests/data").expanduser()
-    return get_data_store(DATADIR, suffix="fasta")
+    return open_data_store(DATADIR, suffix="fasta")
 
 
 @pytest.fixture(scope="session")
@@ -33,13 +33,13 @@ def sql_dstore_path(ro_dir_dstore, tmp_dir):
     path = tmp_dir / "data.sqlitedb"
     wr = WriteableSqliteDataStore(path, if_exists="overwrite")
     for m in ro_dir_dstore:
-        wr.write(data={"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
+        wr.write(data={"data": m.read()}, identifier=f"{Path(m.unique_id).stem}.json")
     return path
 
 
 @pytest.fixture(scope="session")
 def ro_sql_dstore(sql_dstore_path):
-    dstore = get_data_store(sql_dstore_path)
+    dstore = open_data_store(sql_dstore_path)
     return dstore
 
 
@@ -68,8 +68,8 @@ def test_sql_get_member(ro_sql_dstore):
 
 def test_sql_iter(ro_sql_dstore, ro_dir_dstore):
     """sql dstore iter works"""
-    expect = [f"{Path(m.name).stem}.json" for m in ro_dir_dstore]
-    got = [m.name for m in ro_sql_dstore]
+    expect = [f"{Path(m.unique_id).stem}.json" for m in ro_dir_dstore]
+    got = [m.unique_id for m in ro_sql_dstore]
     assert set(got) == set(expect)
 
 
@@ -88,10 +88,10 @@ def test_sql_pickleable_roundtrip(ro_sql_dstore):
     """pickling of data stores should be reversible"""
     from pickle import dumps, loads
 
-    expect = [m.name for m in ro_sql_dstore]
+    expect = [m.unique_id for m in ro_sql_dstore]
 
     round_tripped = loads(dumps(ro_sql_dstore))
-    got = [m.name for m in round_tripped]
+    got = [m.unique_id for m in round_tripped]
     assert got == expect
 
 
@@ -101,7 +101,7 @@ def rw_sql_dstore_mem(ro_dir_dstore):
     """in memory dstore"""
     db = WriteableSqliteDataStore(":memory:")
     for m in ro_dir_dstore:
-        db.write(data={"data": m.read()}, identifier=f"{Path(m.name).stem}.json")
+        db.write(data={"data": m.read()}, identifier=f"{Path(m.unique_id).stem}.json")
     return db
 
 
@@ -186,7 +186,7 @@ def test_sql_summary_incomplete(rw_sql_dstore_mem):
 
     ncomp = NotCompleted("FAIL", "somefunc", "checking", source="testing.json")
     rw_sql_dstore_mem.write(data=ncomp)
-    summary = rw_sql_dstore_mem.summary_incomplete
+    summary = rw_sql_dstore_mem.summary_not_completed
     assert isinstance(summary, Table)
     assert summary[0, "num"] == 1
 

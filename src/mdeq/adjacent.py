@@ -5,13 +5,13 @@ from pathlib import Path
 from typing import TypeVar, Union
 
 from cogent3 import _Table as Table
+from cogent3 import open_data_store
 from cogent3.app.composable import define_app
-from cogent3.app.io import get_data_store, load_db
-from cogent3.app.typing import IdentifierType, SerialisableType
+from cogent3.app.typing import SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 
-from mdeq.sqlite_data_store import sql_loader
+from mdeq.sqlite_data_store import sql_loader, load_from_sql
 from mdeq.utils import SerialisableMixin
 
 
@@ -135,7 +135,7 @@ def make_identifier(data) -> str:
 
 
 _loader = sql_loader()
-
+_new_loader = load_from_sql()
 
 @define_app
 class load_data_group:
@@ -147,7 +147,7 @@ class load_data_group:
             path to a tinydb
         """
         self.data_store_path = data_store_path
-        self.data_store = get_data_store(self.data_store_path)
+        self.data_store = open_data_store(self.data_store_path)
 
     def main(self, data_identifiers: "grouped") -> Union[grouped, SerialisableType]:
         """
@@ -160,9 +160,9 @@ class load_data_group:
             identifier = (
                 identifier if identifier.endswith(".json") else f"{identifier}.json"
             )
-            m = self.data_store.filtered(identifier)
+            m = [m for m in self.data_store if m.unique_id == identifier]
             assert len(m) == 1
-            obj = _loader(m[0])
+            obj = _new_loader(m[0])
             if not obj:  # probably not completed error
                 return obj
             obj.info.name = identifier.replace(".json", "")

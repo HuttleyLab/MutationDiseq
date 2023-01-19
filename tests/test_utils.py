@@ -8,6 +8,7 @@ from numpy.testing import assert_allclose
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
+    convert_db_to_new_sqlitedb,
     estimate_freq_null,
     foreground_from_jsd,
     get_foreground,
@@ -216,3 +217,25 @@ def test_est_freq_null_gt1(hedenfalk):
 def test_est_freq_null_invalid_range(ten_pvals, start, stop, step):
     with pytest.raises(ValueError):
         estimate_freq_null(ten_pvals, start=start, stop=stop, step=step)
+
+
+@pytest.fixture(scope="function")
+def tmp_dir(tmpdir_factory):
+    return pathlib.Path(tmpdir_factory.mktemp("convert"))
+
+
+def test_db_conversion(tmp_dir):
+    from cogent3.app.io_new import (
+        decompress,
+        from_primitive,
+        load_db,
+        unpickle_it,
+    )
+
+    source = DATADIR / "300bp.sqlitedb"
+    dest = tmp_dir / source.name
+    got = convert_db_to_new_sqlitedb(source, dest)
+    deserialiser = decompress() + unpickle_it() + from_primitive()
+    loader = load_db(deserialiser=deserialiser)
+    obj = loader(got.completed[0])
+    ...

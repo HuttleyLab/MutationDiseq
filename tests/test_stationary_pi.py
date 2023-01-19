@@ -3,13 +3,13 @@ import pathlib
 import numpy
 import pytest
 
-from cogent3 import get_model, load_aligned_seqs, make_tree
-from cogent3.app import evo, io
+from cogent3 import get_model, load_aligned_seqs, make_tree, open_data_store
+from cogent3.app import evo
 from numpy import eye
 from numpy.testing import assert_allclose
 
 from mdeq.jsd import get_jsd
-from mdeq.sqlite_data_store import sql_loader
+from mdeq.sqlite_data_store import load_from_sql
 from mdeq.stationary_pi import (
     OscillatingPiException,
     get_stat_pi_via_brute,
@@ -116,8 +116,8 @@ def identity():
 
 @pytest.fixture()
 def non_converging():
-    dstore = io.get_data_store(DATADIR / "non_converging.sqlitedb")
-    loader = sql_loader()
+    dstore = open_data_store(DATADIR / "non_converging-new.sqlitedb")
+    loader = load_from_sql()
     return loader(dstore[0])
 
 

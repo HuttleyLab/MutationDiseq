@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cogent3 import make_unaligned_seqs
+from cogent3 import make_unaligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
 
 from mdeq.adjacent import (
@@ -118,8 +118,6 @@ def test_grouped_data():
 def test_load_data_group():
     from random import choice, shuffle
 
-    from cogent3.app import io
-
     def eval_input(pair):
         got = group_loader(grouped(identifiers=pair))
         assert len(got.elements) == 2
@@ -127,11 +125,11 @@ def test_load_data_group():
         assert got.source == source
         for i, n in enumerate(pair):
             o = got.elements[i]
-            assert o.info.name == n.replace(".json", "")
+            assert o.info.source == n.replace(".json", "")
 
-    path = DATADIR / "300bp.sqlitedb"
-    dstore = io.get_data_store(path)
-    names = [m.name for m in dstore]
+    path = DATADIR / "300bp-new.sqlitedb"
+    dstore = open_data_store(path)
+    names = [m.unique_id for m in dstore]
     shuffle(names)
 
     paired = sequential_groups(names, 2)
@@ -146,11 +144,9 @@ def test_load_data_group():
 def test_new_adjacent_eop():
     from random import choice, shuffle
 
-    from cogent3.app import io
-
-    path = DATADIR / "300bp.sqlitedb"
-    dstore = io.get_data_store(path)
-    names = [m.name for m in dstore]
+    path = DATADIR / "300bp-new.sqlitedb"
+    dstore = open_data_store(path)
+    names = [m.unique_id for m in dstore]
     shuffle(names)
 
     paired = sequential_groups(names, 2)

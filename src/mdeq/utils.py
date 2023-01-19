@@ -5,7 +5,7 @@ import warnings
 
 from dataclasses import asdict
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import numpy
 
@@ -74,19 +74,11 @@ class SerialisableMixin:
         data.pop("type", None)
         return cls(**data)
 
-
-def get_obj_type(dstore):
-    """returns the record type in dstore"""
-    if len(dstore) == 0:
-        return None
-    data = dstore[0].read()
-    if isinstance(data, str):
-        data = json.loads(data)
-        return data["type"].split(".")[-1]
-
-    # already a dict with compressed values
-    return data["type"].deserialised.split(".")[-1]
-
+def matches_type(dstore, types):
+    rt = dstore.record_type
+    if not rt:
+        return True
+    return any(rt.endswith(t) for t in types)
 
 def configure_parallel(parallel: bool, mpi: int) -> dict:
     """returns parallel configuration settings for use as composable.apply_to(**config)"""
@@ -289,3 +281,60 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     W = numpy.array([(pvalues > l).sum() for l in lambdas])
     a = W / (num ** 2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
+
+
+def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
+    """convert mdeq custom sqlitedb to cogent3 sqlitedb"""
+    from cogent3.app.io_new import compress, pickle_it, to_primitive, write_db
+    from cogent3.app.sqlite_data_store import (
+        _LOG_TABLE,
+        OVERWRITE,
+        DataStoreSqlite,
+    )
+
+    from mdeq.sqlite_data_store import ReadonlySqliteDataStore, sql_loader
+
+    old_dstore = ReadonlySqliteDataStore(source=source)
+    old_loader = sql_loader()
+
+    dest = dest or Path(source.parent) / f"{source.stem}-new.sqlitedb"
+
+    if dest.exists():
+        dest.unlink(missing_ok=True)
+
+    new_dstore = DataStoreSqlite(source=dest, mode=OVERWRITE)
+    serialiser = to_primitive() + pickle_it() + compress()
+    new_writer = write_db(data_store=new_dstore, serialiser=serialiser)
+
+    for m in old_dstore.members:
+        obj = old_loader(m)
+        nm = new_writer.main(data=obj, identifier=m.name)
+
+    for m in old_dstore.incomplete:
+        obj = old_loader(m)
+        new_writer.main(identifier=m.name, data=obj)
+
+    # copy the logfile state
+    assert len(old_dstore.logs) == 1
+    log_record = old_dstore.db.execute("SELECT * from logs").fetchone()
+    log_id = log_record["log_id"]
+    date = log_record["date"]
+    log_data = old_dstore.logs[0].decompressed.decode("utf8")
+    if log_data:
+        new_writer.data_store.write_log(unique_id="logfile", data=log_data)
+
+    cmnd = f"UPDATE {_LOG_TABLE} SET date=? WHERE log_id == ?"
+    new_writer.data_store.db.execute(cmnd, (date, log_id))
+
+    # copy lock status
+    if old_dstore._lock_pid:
+        cmnd = f"UPDATE state SET lock_pid =? WHERE state_id == 1"
+        new_dstore.db.execute(cmnd, (old_dstore._lock_id,))
+    else:
+        new_dstore.unlock()
+
+    assert len(old_dstore.incomplete) == len(new_dstore.not_completed)
+    assert len(old_dstore) == len(new_dstore.completed)
+    if log_data:
+        assert len(old_dstore.logs) == len(new_dstore.logs)
+    return new_dstore

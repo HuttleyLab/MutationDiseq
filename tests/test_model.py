@@ -1,7 +1,7 @@
 import pathlib
 
-from cogent3 import get_model
-
+from cogent3 import get_model, open_data_store
+from mdeq.sqlite_data_store import load_from_sql
 from mdeq import model
 
 
@@ -10,6 +10,7 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 DATADIR = pathlib.Path(__file__).parent / "data"
 
+loader = load_from_sql()
 
 def test_get_gsn():
     """model registry process works and we can get a GSN instance."""
@@ -32,13 +33,10 @@ def test_make_gsn_app():
 
 
 def test_mles_at_bounds():
-    from cogent3.app import composable, io
+    from cogent3.app import composable
 
-    from mdeq.sqlite_data_store import sql_loader
-
-    loader = sql_loader()
-    path = DATADIR / "toe-300bp.sqlitedb"
-    dstore = io.get_data_store(path, limit=1)
+    path = DATADIR / "toe-300bp-new.sqlitedb"
+    dstore = open_data_store(path, limit=1)
     r = loader(dstore[0])
     r.deserialised_values()
     models = []
