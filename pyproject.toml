@@ -11,8 +11,8 @@ authors = [
 keywords = ["biology", "genomics", "statistics", "phylogeny", "evolution", "bioinformatics"]
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
 dependencies = ["accupy", "blosc2", "git+ssh://git@github.com:cogent3/cogent3.git@develop#egg=cogent3", "click", "numpy", "scipy", "scitrack", "rich"]
+requires-python = "3.10"
 classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
