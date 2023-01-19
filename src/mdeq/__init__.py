@@ -136,7 +136,11 @@ def prep(
         exit(1)
 
     dstore = open_data_store(inpath or indir, suffix=suffix, limit=limit)
-    loader = load_from_sql() if inpath else get_app("load_aligned", format=suffix, moltype="dna")
+    loader = (
+        load_from_sql()
+        if inpath
+        else get_app("load_aligned", format=suffix, moltype="dna")
+    )
     if fg_edge:
         aln = loader(dstore[0])
         if fg_edge not in aln.names:
@@ -159,9 +163,7 @@ def prep(
         Path(outpath).unlink(missing_ok=True)
 
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
-    app_series.append(
-        write_to_sqldb(out_dstore)
-    )
+    app_series.append(write_to_sqldb(out_dstore))
 
     app = reduce(add, app_series)
     app.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 0)
@@ -198,7 +200,9 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
 
     log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
-    writer.data_store.write_log(unique_id=log_file_path.name, data=log_file_path.read_text())
+    writer.data_store.write_log(
+        unique_id=log_file_path.name, data=log_file_path.read_text()
+    )
     log_file_path.unlink()
     writer.data_store.close()
 
@@ -247,7 +251,10 @@ def toe(
     dstore = open_data_store(inpath, limit=limit)
     expected_types = ("ArrayAlignment", "Alignment")
     if not matches_type(dstore, expected_types):
-        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
+        click.secho(
+            f"records {dstore.record_type} not one of the expected types {expected_types}",
+            fg="red",
+        )
         exit(1)
 
     loader = load_from_sql()
@@ -378,7 +385,10 @@ def aeop(
     dstore = open_data_store(inpath, limit=limit)
     expected_types = ("grouped",)
     if not matches_type(dstore, expected_types):
-        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
+        click.secho(
+            f"records {dstore.record_type} not one of the expected types {expected_types}",
+            fg="red",
+        )
         exit(1)
 
     loader = load_from_sql()
@@ -415,7 +425,10 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     dstore = open_data_store(inpath, limit=limit)
     expected_types = ("compact_bootstrap_result",)
     if not matches_type(dstore, expected_types):
-        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
+        click.secho(
+            f"records {dstore.record_type} not one of the expected types {expected_types}",
+            fg="red",
+        )
         exit(1)
 
     loader = load_from_sql()
@@ -646,12 +659,11 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
             outpath = path.parent / f"{path.stem}.tsv"
 
         if outpath.exists() and overwrite:
-           outpath.unlink()
+            outpath.unlink()
         elif outpath.exists() and not overwrite:
             if verbose:
                 console.print(f"[green]{outpath} exists, skipping")
             continue
-
 
         dstore = open_data_store(path, limit=limit)
         if not matches_type(dstore, data_type):
@@ -710,9 +722,11 @@ def slide(
     dstore = open_data_store(inpath)
     expected_types = ("ArrayAlignment", "Alignment")
     if not matches_type(dstore, expected_types):
-        click.secho(f"records {dstore.record_type} not one of the expected types {expected_types}", fg="red")
+        click.secho(
+            f"records {dstore.record_type} not one of the expected types {expected_types}",
+            fg="red",
+        )
         exit(1)
-
 
     loader = load_from_sql()
     if outpath.exists() and overwrite:
@@ -747,9 +761,12 @@ def slide(
 
     log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
-    writer.data_store.write_log(unique_id=log_file_path.name, data=log_file_path.read_text())
+    writer.data_store.write_log(
+        unique_id=log_file_path.name, data=log_file_path.read_text()
+    )
     log_file_path.unlink()
     console.print("[green]Done!")
+
 
 @main.command(no_args_is_help=True)
 @click.argument("pattern", type=Path)
@@ -765,7 +782,6 @@ def db_upgrade(pattern: Path, overwrite: bool):
             dest.unlink(missing_ok=True)
 
         convert_db_to_new_sqlitedb(source=path, dest=dest)
-
 
 
 if __name__ == "__main__":

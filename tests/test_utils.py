@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-from cogent3 import make_aligned_seqs
+from cogent3 import get_app, make_aligned_seqs
 from numpy.testing import assert_allclose
 
 from mdeq.utils import (
@@ -102,57 +102,30 @@ def test_paths_to_sqlitedbs_matching():
 
 
 def test_compressed_value_decompressed():
-    from blosc2 import compress
-
-    # returns empty string if no data
+    serialiser = get_app("pickle_it") + get_app("compress")
     cv = CompressedValue(None)
     assert isinstance(cv.decompressed, bytes) and not cv.decompressed
-
-    # returns bytes if data not compressed
     data = "abcdefghijhkly" * 10
-    cv = CompressedValue(data)
-    assert cv.data == data
+    cv = CompressedValue(serialiser(data))
     assert isinstance(cv.decompressed, bytes)
-    assert cv.decompressed == data.encode("utf8")
-    # and if data was bytes
-    cv = CompressedValue(data.encode("utf8"))
-    assert cv.data == data.encode("utf8")
-    assert isinstance(cv.decompressed, bytes)
-    assert cv.decompressed == data.encode("utf8")
-
-    # and if data is compressed
-    cv = CompressedValue(compress(data.encode("utf8")))
-    assert cv.data != data
-    assert isinstance(cv.decompressed, bytes)
-    assert cv.decompressed.decode("utf8") == data
+    assert cv.as_primitive == data
 
 
 def test_compressed_value_deserialises():
-    import json
-    import pickle
+    from cogent3 import get_app
 
-    from blosc2 import compress
+    to_prim = get_app("to_primitive")
+    pickler = get_app("pickle_it")
+    compressor = get_app("compress")
+
+    serialiser = to_prim + pickler + compressor
 
     # deserialises if data just json
     data = dict(a=24, b=[0, 1], c="ACGTT")
-    j_ser = json.dumps(data).encode("utf8")
-    cv = CompressedValue(j_ser)
-    assert isinstance(cv.deserialised, dict)
-    assert cv.deserialised == data
-    # and if compressed json
-    cv = CompressedValue(compress(j_ser))
-    assert isinstance(cv.deserialised, dict)
-    assert cv.deserialised == data
-
-    # deserialises if data just pickled
-    p_ser = pickle.dumps(data)
-    cv = CompressedValue(compress(p_ser))
-    assert isinstance(cv.deserialised, dict)
-    assert cv.deserialised == data
-    # and if compressed pickled
-    cv = CompressedValue(compress(p_ser))
-    assert isinstance(cv.deserialised, dict)
-    assert cv.deserialised == data
+    ser = serialiser(data)
+    cv = CompressedValue(ser)
+    assert isinstance(cv.as_primitive, dict)
+    assert cv.as_primitive == data
 
 
 @pytest.fixture(scope="session")

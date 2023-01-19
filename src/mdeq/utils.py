@@ -13,6 +13,7 @@ from blosc2 import decompress
 from cogent3 import get_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
+from cogent3.util import deserialise
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
 from scipy.interpolate import UnivariateSpline
@@ -75,11 +76,13 @@ class SerialisableMixin:
         data.pop("type", None)
         return cls(**data)
 
+
 def matches_type(dstore, types):
     rt = dstore.record_type
     if not rt:
         return True
     return any(rt.endswith(t) for t in types)
+
 
 def configure_parallel(parallel: bool, mpi: int) -> dict:
     """returns parallel configuration settings for use as composable.apply_to(**config)"""
@@ -141,7 +144,7 @@ def rich_display(c3t, title_justify="left"):
 
 
 @dataclasses.dataclass
-class CompressedValue:
+class CompressedValueOld:
     """container class to support delayed decompression of serialised data"""
 
     data: bytes
@@ -173,25 +176,32 @@ class CompressedValue:
 
 
 @dataclasses.dataclass
-class CompressedValueNew:
+class CompressedValue:
     """container class to support delayed decompression of serialised data"""
 
     data: bytes
-    from_primitive = get_app("from_primitive")
+    unpickler = get_app("unpickle_it")
     decompress = get_app("decompress")
 
     @property
     def decompressed(self) -> bytes:
         if not self.data:
             return b""
-        return self.decompress(self.data)
+        r = self.decompress(self.data)
+        return r
 
     @property
     def as_primitive(self):
         """decompresses and then returns as primitive python types"""
         if not self.data:
             return ""
-        return self.from_primitive(self.decompressed)
+        r = self.unpickler(self.decompressed)
+        return r
+
+    @property
+    def deserialised(self):
+        r = deserialise.deserialise_object(self.as_primitive)
+        return r
 
 
 def paths_to_sqlitedbs_matching(
@@ -305,6 +315,7 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     a = W / (num ** 2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
 
+
 def _get_composed_func_str_from_log(text: str) -> str:
     term = "composable function :"
     if term not in text:
@@ -312,6 +323,7 @@ def _get_composed_func_str_from_log(text: str) -> str:
     line_prefix = text.split(maxsplit=1)[0]
     text = text.split(term, maxsplit=1)[1].split(line_prefix, maxsplit=1)[0]
     return " ".join(text.split())
+
 
 def _reserialised(data: dict) -> dict:
     if not hasattr(data, "items"):
@@ -322,7 +334,7 @@ def _reserialised(data: dict) -> dict:
         if isinstance(v, dict):
             v = _reserialised(v)
         elif isinstance(v, bytes):
-            v = CompressedValue(v).deserialised
+            v = CompressedValueOld(v).deserialised
             v = serialiser(v)
 
         data[k] = v

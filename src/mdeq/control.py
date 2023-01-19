@@ -32,7 +32,7 @@ class select_model_result:
         if isinstance(result, bootstrap_result):
             if "data" in result.observed:
                 # only decompress the instance required
-                data = CompressedValue(result.observed["data"]).deserialised
+                data = CompressedValue(result.observed["data"]).as_primitive
                 data = _reconstitute_collection(data)
                 result = deserialise_object(data)
             else:

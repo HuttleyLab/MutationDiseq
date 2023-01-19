@@ -137,6 +137,7 @@ def make_identifier(data) -> str:
 _loader = sql_loader()
 _new_loader = load_from_sql()
 
+
 @define_app
 class load_data_group:
     def __init__(self, data_store_path: str):

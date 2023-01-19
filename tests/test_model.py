@@ -13,6 +13,7 @@ DATADIR = pathlib.Path(__file__).parent / "data"
 
 loader = load_from_sql()
 
+
 def test_get_gsn():
     """model registry process works and we can get a GSN instance."""
     from cogent3.evolve.ns_substitution_model import GeneralStationary

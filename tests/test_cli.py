@@ -214,9 +214,7 @@ def test_toe_exercise(runner, tmp_dir):
     dstore = open_data_store(outpath)
     result = loader(dstore[0])
     assert isinstance(result.observed["data"], bytes)
-    assert isinstance(
-        CompressedValue(result.observed["data"]).decompressed.decode("utf8"), str
-    )
+    assert isinstance(CompressedValue(result.observed["data"]).as_primitive, dict)
 
 
 loader = load_from_sql()
@@ -235,6 +233,7 @@ def test_convergence(runner, tmp_dir):
     assert r.exit_code == 0, r.output
     # now load the saved records and check they're delta_nabla instances
     dstore = open_data_store(outpath)
+
     results = [loader(m) for m in dstore]
     assert {type(r) for r in results} == {delta_nabla}
     assert len(dstore) == len(results)
@@ -404,6 +403,7 @@ def test_extract_pvalues(runner, tmp_dir, glob):
         args.extend(["-g", glob])
     r = runner.invoke(extract_pvalues, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
+
 
 def test_slide(runner, tmp_dir):
     """exercise slide"""

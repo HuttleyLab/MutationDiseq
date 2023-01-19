@@ -79,16 +79,15 @@ def test_no_fg(get_aln_no_fg, opt_args):
 reader = load_from_sql()
 
 
-@pytest.mark.parametrize("init_hyp_app", (get_no_init_hypothesis, get_init_hypothesis)[:1])
-def test_get_no_init_hypothesis_app_run(tmp_path, dstore_instance, opt_args, init_hyp_app):
-    out_dstore =  open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")
+@pytest.mark.parametrize(
+    "init_hyp_app", (get_no_init_hypothesis, get_init_hypothesis)[:1]
+)
+def test_get_no_init_hypothesis_app_run(
+    tmp_path, dstore_instance, opt_args, init_hyp_app
+):
+    out_dstore = open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")
     writer = write_to_sqldb(out_dstore)
     reader.disconnect()
-    process = (
-        reader
-        + init_hyp_app(just_continuous=False, opt_args=opt_args)
-        + writer
-    )
+    process = reader + init_hyp_app(just_continuous=False, opt_args=opt_args) + writer
     process.apply_to(dstore_instance[:1])
     assert len(out_dstore.summary_not_completed) == 0
-

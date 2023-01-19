@@ -74,7 +74,9 @@ def test_deserialise_compact_boostrap_result(aln, opt_args):
     assert len(result) == 2
     assert isinstance(got, compact_bootstrap_result)
 
+
 reader = load_from_sql()
+
 
 def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
     out_dstore = open_data_store(tmp_path / "tempdir-new.sqlitedb", mode="w")

@@ -1,12 +1,12 @@
 import json
 import pickle
+
 from copy import deepcopy
 from json import dumps
-
 from typing import Union
 
 from blosc2 import compress, decompress
-from cogent3.app import evo
+from cogent3.app import evo, get_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import bootstrap_result
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
@@ -64,7 +64,7 @@ def deserialise_single_hyp(data: dict):
 
     from mdeq.utils import CompressedValue
 
-    data = CompressedValue(data["data"]).deserialised
+    data = CompressedValue(data["data"]).as_primitive
     _reconstitute_collection(data)
     return deserialise_object(data)
 
@@ -96,6 +96,9 @@ def _eliminated_redundant_aln_in_place(hyp_result):
 class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
+    compress = get_app("pickle_it") + get_app("compress")
+    decompress = get_app("decompress") + get_app("unpickle_it")
+
     def __setitem__(self, key, data):
         # ignore validation checks, put compressed json straight
         # into self._store
@@ -117,7 +120,7 @@ class compact_bootstrap_result(bootstrap_result):
             LR=hyp.LR,
             df=hyp.df,
             pvalue=hyp.pvalue,
-            data=compress(dumps(rd).encode("utf8")),
+            data=self.compress(rd),
         )
 
         self._store[key] = data
@@ -136,7 +139,7 @@ class compact_bootstrap_result(bootstrap_result):
         # result type
         for item in rd["items"]:
             if "data" in item[1]:
-                item[1]["data"] = decompress(item[1]["data"]).decode("utf8")
+                item[1]["data"] = self.decompress(item[1]["data"])
 
         return rd
 
@@ -173,7 +176,7 @@ class compact_bootstrap_result(bootstrap_result):
 
         for k, v in self._store.items():
             if "data" in v:
-                v = CompressedValue(v["data"]).deserialised
+                v = CompressedValue(v["data"]).as_primitive
                 v = _reconstitute_collection(v)
             self._store[k] = deserialise_object(v)
 

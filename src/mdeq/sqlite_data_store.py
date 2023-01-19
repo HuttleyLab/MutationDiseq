@@ -42,7 +42,7 @@ from cogent3.util.deserialise import deserialise_not_completed
 from cogent3.util.table import Table
 from scitrack import get_text_hexdigest
 
-from mdeq.utils import CompressedValue
+from mdeq.utils import CompressedValue, CompressedValueOld
 
 
 _INCOMPLETE_TABLE = "incomplete"
@@ -68,7 +68,7 @@ def _serialised_compressed(data: dict) -> bytes:
         return pickle.dumps({k: compress(pickle.dumps(v)) for k, v in data.items()})
 
 
-def _deserialised_compressed(data: bytes) -> dict:
+def _deserialised_compressed_old(data: bytes) -> dict:
     """unpickle top-level dict, leaving dict values compressed
 
     Parameters
@@ -82,7 +82,7 @@ def _deserialised_compressed(data: bytes) -> dict:
     """
     data = pickle.loads(data)
     for k, v in data.items():
-        data[k] = CompressedValue(v)
+        data[k] = CompressedValueOld(v)
     return data
 
 
@@ -227,7 +227,7 @@ class ReadonlySqliteDataStore(ReadOnlyDataStoreBase):
         if self._md5:
             self._checksums[member] = get_text_hexdigest(result["data"])
 
-        return _deserialised_compressed(result["data"])
+        return _deserialised_compressed_old(result["data"])
 
     @property
     def members(self):
@@ -273,7 +273,7 @@ class ReadonlySqliteDataStore(ReadOnlyDataStoreBase):
     def logs(self):
         """returns all log records"""
         return [
-            CompressedValue(r["data"])
+            CompressedValueOld(r["data"])
             for r in self.db.execute(f"SELECT data FROM {_LOG_TABLE}").fetchall()
         ]
 
@@ -635,7 +635,7 @@ class WriteableSqliteDataStore(ReadonlySqliteDataStore):
 
 def _decompressed(data: dict) -> dict:
     for k, v in data.items():
-        if isinstance(v, CompressedValue):
+        if isinstance(v, CompressedValueOld):
             data[k] = v.deserialised
     return data
 
@@ -648,6 +648,7 @@ def load_from_sql():
 def write_to_sqldb(data_store):
     ser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
     return get_app("write_db", data_store=data_store, serialiser=ser)
+
 
 # this is inheriting from an already defined loader app
 class sql_loader(io.load_db):
