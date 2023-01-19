@@ -10,11 +10,11 @@ from mdeq import (
     convergence,
     db_summary,
     extract_pvalues,
+    load_from_sql,
     make_adjacent,
     make_controls,
     prep,
     slide,
-    load_from_sql,
     teop,
     toe,
 )
@@ -24,6 +24,7 @@ from mdeq._click_options import (
     _valid_sqlitedb_output,
 )
 from mdeq.utils import CompressedValue, matches_type
+
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]

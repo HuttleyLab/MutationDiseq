@@ -130,7 +130,6 @@ def open_sqlite_db_ro(path):
     -------
     Handle to a sqlite3 session
     """
-    raise RuntimeError
     db = sqlite3.connect(
         f"file:{path}?mode=ro",
         isolation_level=None,

@@ -1,8 +1,9 @@
 import pathlib
 
 from cogent3 import get_model, open_data_store
-from mdeq.sqlite_data_store import load_from_sql
+
 from mdeq import model
+from mdeq.sqlite_data_store import load_from_sql
 
 
 __author__ = "Katherine Caley"

@@ -10,6 +10,7 @@ from typing import Optional, Union
 import numpy
 
 from blosc2 import decompress
+from cogent3 import get_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util.dict_array import DictArray
@@ -171,6 +172,28 @@ class CompressedValue:
                 return self.decompressed.decode("utf8")
 
 
+@dataclasses.dataclass
+class CompressedValueNew:
+    """container class to support delayed decompression of serialised data"""
+
+    data: bytes
+    from_primitive = get_app("from_primitive")
+    decompress = get_app("decompress")
+
+    @property
+    def decompressed(self) -> bytes:
+        if not self.data:
+            return b""
+        return self.decompress(self.data)
+
+    @property
+    def as_primitive(self):
+        """decompresses and then returns as primitive python types"""
+        if not self.data:
+            return ""
+        return self.from_primitive(self.decompressed)
+
+
 def paths_to_sqlitedbs_matching(
     indir: Path, pattern: str, recursive: bool
 ) -> list[Path]:
@@ -282,15 +305,40 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     a = W / (num ** 2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
 
+def _get_composed_func_str_from_log(text: str) -> str:
+    term = "composable function :"
+    if term not in text:
+        return "unnamed"
+    line_prefix = text.split(maxsplit=1)[0]
+    text = text.split(term, maxsplit=1)[1].split(line_prefix, maxsplit=1)[0]
+    return " ".join(text.split())
+
+def _reserialised(data: dict) -> dict:
+    if not hasattr(data, "items"):
+        return data.to_rich_dict()
+
+    serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+    for k, v in data.items():
+        if isinstance(v, dict):
+            v = _reserialised(v)
+        elif isinstance(v, bytes):
+            v = CompressedValue(v).deserialised
+            v = serialiser(v)
+
+        data[k] = v
+    return data
+
 
 def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
     """convert mdeq custom sqlitedb to cogent3 sqlitedb"""
+    from cogent3.app.composable import _make_logfile_name
     from cogent3.app.io_new import compress, pickle_it, to_primitive, write_db
     from cogent3.app.sqlite_data_store import (
         _LOG_TABLE,
         OVERWRITE,
         DataStoreSqlite,
     )
+    from scitrack import CachingLogger
 
     from mdeq.sqlite_data_store import ReadonlySqliteDataStore, sql_loader
 
@@ -308,7 +356,10 @@ def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
 
     for m in old_dstore.members:
         obj = old_loader(m)
-        nm = new_writer.main(data=obj, identifier=m.name)
+        if new_dstore.record_type is None:
+            new_dstore.record_type = obj
+        obj = _reserialised(obj)
+        new_writer.main(data=obj, identifier=m.name)
 
     for m in old_dstore.incomplete:
         obj = old_loader(m)
@@ -317,24 +368,43 @@ def convert_db_to_new_sqlitedb(source: Path, dest: Optional[Path] = None):
     # copy the logfile state
     assert len(old_dstore.logs) == 1
     log_record = old_dstore.db.execute("SELECT * from logs").fetchone()
-    log_id = log_record["log_id"]
-    date = log_record["date"]
-    log_data = old_dstore.logs[0].decompressed.decode("utf8")
-    if log_data:
-        new_writer.data_store.write_log(unique_id="logfile", data=log_data)
 
-    cmnd = f"UPDATE {_LOG_TABLE} SET date=? WHERE log_id == ?"
-    new_writer.data_store.db.execute(cmnd, (date, log_id))
+    cmnd = f"UPDATE {_LOG_TABLE} SET date =?"
+    values = (log_record["date"],)
+    if log_data := old_dstore.logs[0].decompressed.decode("utf8"):
+        # need to create a filename
+        log_name = _get_composed_func_str_from_log(log_data)
+        log_name = _make_logfile_name(log_name)
+        cmnd = f"{cmnd}, log_name =?, data =?"
+        values += (log_name, log_data)
 
-    # copy lock status
-    if old_dstore._lock_pid:
-        cmnd = f"UPDATE state SET lock_pid =? WHERE state_id == 1"
-        new_dstore.db.execute(cmnd, (old_dstore._lock_id,))
-    else:
-        new_dstore.unlock()
+    cmnd = f"{cmnd} WHERE log_id=?"
+    values += (log_record["log_id"],)
+
+    new_writer.data_store.db.execute(cmnd, values)
 
     assert len(old_dstore.incomplete) == len(new_dstore.not_completed)
     assert len(old_dstore) == len(new_dstore.completed)
     if log_data:
         assert len(old_dstore.logs) == len(new_dstore.logs)
+
+    lock_id = old_dstore._lock_pid
+    new_dstore.close()
+
+    LOGGER = CachingLogger(create_dir=True)
+    log_file_path = source.parent / _make_logfile_name("convert_db_to_new_sqlitedb")
+    LOGGER.log_file_path = log_file_path
+    LOGGER.shutdown()
+
+    new_dstore = DataStoreSqlite(source=dest, mode="a")
+    new_dstore.write_log(unique_id=log_file_path.name, data=log_file_path.read_text())
+    log_file_path.unlink()
+
+    # copy lock status
+    if lock_id:
+        cmnd = f"UPDATE state SET lock_pid =? WHERE state_id == 1"
+        new_dstore.db.execute(cmnd, (lock_id,))
+    else:
+        new_dstore.unlock()
+
     return new_dstore

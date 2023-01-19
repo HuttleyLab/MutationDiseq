@@ -14,7 +14,7 @@ from warnings import filterwarnings
 
 import click
 
-from cogent3 import make_table, open_data_store, get_app
+from cogent3 import get_app, make_table, open_data_store
 from rich.console import Console
 from rich.progress import Progress, track
 from scitrack import CachingLogger
@@ -40,9 +40,10 @@ from mdeq.sqlite_data_store import load_from_sql, write_to_sqldb
 from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import (
     configure_parallel,
+    matches_type,
     omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
-    set_fg_edge, matches_type,
+    set_fg_edge,
 )
 
 
@@ -757,7 +758,7 @@ def db_upgrade(pattern: Path, overwrite: bool):
     from .utils import convert_db_to_new_sqlitedb
 
     assert pattern.name.endswith("*")
-    paths = list(pattern.parent.glob("**/*.sqlitedb"))
+    paths = [p for p in pattern.parent.glob("**/*.sqlitedb") if "-new" not in p.name]
     for path in track(paths):
         dest = path.parent / f"{path.stem}-new.sqlitedb"
         if overwrite:

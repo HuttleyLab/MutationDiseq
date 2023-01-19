@@ -232,10 +232,13 @@ def test_db_conversion(tmp_dir):
         unpickle_it,
     )
 
-    source = DATADIR / "300bp.sqlitedb"
+    source = DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb"
+    source = DATADIR / "4otu-aligns.sqlitedb"
+    source = DATADIR / "toe-300bp.sqlitedb"
+
     dest = tmp_dir / source.name
     got = convert_db_to_new_sqlitedb(source, dest)
     deserialiser = decompress() + unpickle_it() + from_primitive()
     loader = load_db(deserialiser=deserialiser)
     obj = loader(got.completed[0])
-    ...
+    got.summary_not_completed

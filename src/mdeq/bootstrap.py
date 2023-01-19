@@ -1,7 +1,8 @@
 import json
-
+import pickle
 from copy import deepcopy
 from json import dumps
+
 from typing import Union
 
 from blosc2 import compress, decompress
@@ -101,13 +102,13 @@ class compact_bootstrap_result(bootstrap_result):
         # NOTE: json requires less memory and is faster than using pickle
         # I create an intermediate dict that contains top level statistics (LR, df, pvalue)
         # so we can delay decompression
-        if hasattr(data, "get_hypothesis_result"):
-            hyp = data.get_hypothesis_result(NULL_TOE, ALT_TOE)
-
         if isinstance(data, dict):
             data = union_dict.UnionDict(**data)
             self._store[key] = data
             return
+
+        if hasattr(data, "get_hypothesis_result"):
+            hyp = data.get_hypothesis_result(NULL_TOE, ALT_TOE)
 
         rd = data.to_rich_dict()
         _eliminated_redundant_aln_in_place(rd)

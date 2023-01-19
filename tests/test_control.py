@@ -8,7 +8,7 @@ from cogent3.core.alignment import ArrayAlignment
 
 from mdeq import control
 from mdeq.adjacent import grouped
-from mdeq.sqlite_data_store import sql_loader, load_from_sql
+from mdeq.sqlite_data_store import load_from_sql, sql_loader
 
 
 __author__ = "Gavin Huttley"
