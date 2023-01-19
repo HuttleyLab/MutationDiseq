@@ -12,10 +12,8 @@ def test(session):
     session.run(
         "pytest",
         "-x",
-        "--junitxml",
-        f"junit-{py_version}.xml",
         "--cov-report",
-        "xml",
+        f"lcov:lcov-{session.python}.info",
         "--cov",
         "mdeq",
     )
