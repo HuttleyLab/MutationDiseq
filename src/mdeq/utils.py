@@ -450,11 +450,28 @@ def upgrade_db(
     return convert_db_to_new_sqlitedb(source=path, dest=dest, overwrite=overwrite)
 
 
+deserialiser = (
+    get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
+)
+
+
 def load_from_sqldb():
-    deser = get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
-    return get_app("load_db", deserialiser=deser)
+    return get_app("load_db", deserialiser=deserialiser)
 
 
-def write_to_sqldb(data_store):
-    ser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
-    return get_app("write_db", data_store=data_store, serialiser=ser)
+serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+
+
+def write_to_sqldb(data_store, id_from_source=None):
+    from cogent3.app.io_new import get_unique_id
+
+    id_from_source = id_from_source or get_unique_id
+
+    return get_app(
+        "write_db",
+        data_store=data_store,
+        serialiser=serialiser,
+        id_from_source=id_from_source,
+    )
+
+
