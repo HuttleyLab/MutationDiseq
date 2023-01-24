@@ -475,3 +475,7 @@ def write_to_sqldb(data_store, id_from_source=None):
     )
 
 
+def summary_not_completed(dstore):
+    from cogent3.app.data_store_new import summary_not_completeds
+
+    return summary_not_completeds(dstore.not_completed, deserialise=deserialiser)

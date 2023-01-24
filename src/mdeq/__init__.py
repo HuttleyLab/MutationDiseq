@@ -563,7 +563,7 @@ def db_summary(inpath):
 
     from cogent3 import make_table
 
-    from mdeq.utils import rich_display
+    from mdeq.utils import rich_display, summary_not_completed
 
     _cmnd = re.compile(r"command_string\s+:")
     _params = re.compile(r"params\s+:")
@@ -643,7 +643,7 @@ def db_summary(inpath):
     t.title = "Content summary"
     rich_display(t)
     if len(dstore.not_completed) > 0:
-        t = dstore.summary_not_completed
+        t = summary_not_completed(dstore)
         t.title = "Summary of incomplete records"
         rich_display(t)
 
