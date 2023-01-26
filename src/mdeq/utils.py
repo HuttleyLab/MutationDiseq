@@ -338,9 +338,12 @@ def _reserialised(data: dict) -> dict:
         return data.to_rich_dict()
 
     serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+
     for k, v in data.items():
         if isinstance(v, dict):
             v = _reserialised(v)
+        elif isinstance(v, list):
+            v = [(l, _reserialised(w)) for l, w in v]
         elif isinstance(v, bytes):
             v = CompressedValueOld(v).deserialised
             v = serialiser(v)
@@ -380,15 +383,26 @@ def convert_db_to_new_sqlitedb(
     with open(os.devnull, mode="w") as out:
         sys.stderr = out
 
-        old_loader = sql_loader()
-
+        # we don't try and fully deserialise objects, just get back to
+        # the python primitives
+        old_loader = sql_loader(deserialiser=lambda x: x)
         for m in old_dstore.members:
             obj = old_loader(m)
             if new_dstore.record_type is None:
-                new_dstore.record_type = obj
+                # set the type dict entry directly, since we're not
+                # deserialising into the original object
+                new_dstore.db.execute(
+                    "UPDATE state SET record_type=? WHERE state_id=1", (obj["type"],)
+                )
             obj = _reserialised(obj)
-            new_writer.main(data=obj, identifier=m.name)
+            if not obj:
+                raise AssertionError(f"{obj} not completed for {m}")
 
+            _ = new_writer.main(data=obj, identifier=m.name)
+
+        # but we do fully deserialise NotCompleted objects so they get
+        # written properly
+        old_loader = sql_loader()
         for m in old_dstore.incomplete:
             obj = old_loader(m)
             new_writer.main(identifier=m.name, data=obj)
@@ -413,7 +427,9 @@ def convert_db_to_new_sqlitedb(
 
     new_writer.data_store.db.execute(cmnd, values)
 
-    assert len(old_dstore.incomplete) == len(new_dstore.not_completed)
+    assert len(old_dstore.incomplete) == len(
+        new_dstore.not_completed
+    ), f"FAILED to convert {str(source)}"
     assert len(old_dstore) == len(new_dstore.completed)
     if log_data:
         assert len(old_dstore.logs) == len(new_dstore.logs)
