@@ -209,6 +209,7 @@ def tmp_dir(tmpdir_factory):
 )
 def test_db_conversion(tmp_dir, path):
     from cogent3.app.io_new import (
+        NotCompleted,
         decompress,
         from_primitive,
         load_db,
@@ -221,4 +222,5 @@ def test_db_conversion(tmp_dir, path):
     deserialiser = decompress() + unpickle_it() + from_primitive()
     loader = load_db(deserialiser=deserialiser)
     obj = loader(got.completed[0])
-    print(got.summary_not_completed)
+    # making sure we can correctly read a completed object
+    assert not isinstance(obj, NotCompleted)

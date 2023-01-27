@@ -334,8 +334,10 @@ def _get_composed_func_str_from_log(text: str) -> str:
 
 
 def _reserialised(data: dict) -> dict:
-    if not hasattr(data, "items"):
+    if hasattr(data, "to_rich_dict"):
         return data.to_rich_dict()
+    elif isinstance(data, str):
+        return data
 
     serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
 
@@ -343,7 +345,11 @@ def _reserialised(data: dict) -> dict:
         if isinstance(v, dict):
             v = _reserialised(v)
         elif isinstance(v, list):
-            v = [(l, _reserialised(w)) for l, w in v]
+            for i, e in enumerate(v):
+                if len(e) == 2:
+                    v[i][1] = _reserialised(v[i][1])
+                else:
+                    v[i] = _reserialised(v[i])
         elif isinstance(v, bytes):
             v = CompressedValueOld(v).deserialised
             v = serialiser(v)
