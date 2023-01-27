@@ -579,3 +579,12 @@ def db_status(inpath):
         t = summary_not_completed(dstore)
         t.title = "Summary of incomplete records"
         rich_display(t)
+
+    if len(dstore.completed) == 0:
+        one = deserialiser(dstore.not_completed[0].read())
+        print(
+            "",
+            "DataStore has only not completed members, displaying one.",
+            one,
+            sep="\n",
+        )
