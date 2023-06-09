@@ -11,7 +11,7 @@ authors = [
 keywords = ["biology", "genomics", "statistics", "phylogeny", "evolution", "bioinformatics"]
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = "3.10"
+requires-python = ">=3.10"
 dependencies = [
     "blosc2", # todo remove blosc dependency when dropping mdeq.sqlite*
     "cogent3 @ git+https://github.com/cogent3/cogent3.git@develop",
@@ -72,7 +72,7 @@ exclude = '''
   | \.git
   | \.hg
   | \.mypy_cache
-  | \.tox
+  | \.nox
   | \.venv
   | _build
   | build
