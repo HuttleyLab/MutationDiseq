@@ -55,7 +55,7 @@ class control_generator:
         if isinstance(model.lf, dict):
             model.deserialise_values()
 
-        sim = model.lf.simulate_alignment(seed=self.rng)
+        sim = model.lf.simulate_alignment(random_series=self.rng)
         sim.info.source = source
         return sim
 
@@ -71,7 +71,7 @@ class control_generator:
         for name in locus_names:
             n = name
             names.append(n)
-            sim = model.lf.simulate_alignment(locus=name)
+            sim = model.lf.simulate_alignment(random_series=self.rng, locus=name)
             sim.info.name = n
             alns.append(sim)
 
