@@ -163,9 +163,9 @@ def test_eigen_numerical_same_pi(likelihood_gn):
 
     for p in psubs:
         p = p.to_array()
-        numpy.testing.assert_almost_equal(
-            get_stat_pi_via_brute(p, pi), get_stat_pi_via_eigen(p), decimal=6
-        )
+        brute = get_stat_pi_via_brute(p, pi)
+        eigen = get_stat_pi_via_eigen(p)
+        numpy.testing.assert_almost_equal(brute, eigen, decimal=6)
 
 
 def test_throw_error():

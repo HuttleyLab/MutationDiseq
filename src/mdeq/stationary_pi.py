@@ -35,7 +35,7 @@ def get_stat_pi_via_eigen(P, check_precision=True):
 
     diff = eva - 1
     evect = eve[:, eva.round(10) == 1]
-    stat_pi = evect / sum(evect)
+    stat_pi = evect / sum(evect.real)
     return stat_pi.flatten().real
 
 
