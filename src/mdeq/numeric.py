@@ -2,7 +2,14 @@ import math
 
 import numpy
 
-from accupy import fsum as sum
+
+try:
+    from accupy import fdot as dot
+    from accupy import fsum as sum
+except ImportError:
+    sum = math.fsum
+    dot = numpy.dot
+
 from cogent3.util.dict_array import DictArray
 
 

@@ -5,8 +5,6 @@ from functools import lru_cache, singledispatch
 from types import NoneType
 from typing import Union
 
-from accupy import fdot as dot
-from accupy import fsum as sum
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import SerialisableType
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
@@ -18,6 +16,7 @@ from numpy.linalg import norm
 from scipy.linalg import expm
 from scipy.optimize import minimize_scalar
 
+from mdeq.numeric import dot, sum
 from mdeq.toe import ALT_TOE
 from mdeq.utils import SerialisableMixin
 

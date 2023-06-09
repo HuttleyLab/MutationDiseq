@@ -1,11 +1,14 @@
-from accupy import fdot as dot
-from accupy import fsum as sum
 from numpy import allclose
 from numpy.linalg import eig, inv, norm
 from numpy.ma import dot as ma_dot
 from numpy.ma.core import array, diag
 
-from mdeq.numeric import valid_probability_vector, valid_stochastic_matrix
+from mdeq.numeric import (
+    dot,
+    sum,
+    valid_probability_vector,
+    valid_stochastic_matrix,
+)
 
 
 __author__ = "Katherine Caley"

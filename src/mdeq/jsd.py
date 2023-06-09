@@ -1,8 +1,8 @@
-from accupy import fsum as sum
 from cogent3.core.profile import safe_p_log_p
 from cogent3.maths.measure import jsd as jsd_func
 from cogent3.util.dict_array import DictArray
 
+from mdeq.numeric import sum
 from mdeq.stationary_pi import get_stat_pi_via_brute
 
 

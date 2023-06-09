@@ -4,6 +4,10 @@
 
 Create a conda environment, install flit and the git version of cogent3. Then do a developer install of this tool, again using flit  
 
+### Installing `accupy`
+
+For the most numerically accurate results you will need to install `accupy`. This is just a `pip install`, but it requires you have the `Eigen` library installed.
+
 ## Running the tests
 
 ```
