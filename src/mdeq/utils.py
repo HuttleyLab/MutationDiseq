@@ -7,7 +7,7 @@ import warnings
 
 from dataclasses import asdict
 from pathlib import Path, PosixPath, WindowsPath
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 import numpy
 
@@ -320,7 +320,7 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     num = len(pvalues)
     fdr_val = numpy.quantile(freq_null, q=0.1)
     W = numpy.array([(pvalues > l).sum() for l in lambdas])
-    a = W / (num ** 2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
+    a = W / (num**2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
 
 
@@ -336,7 +336,7 @@ def _get_composed_func_str_from_log(text: str) -> str:
 def _reserialised(data: dict) -> dict:
     if hasattr(data, "to_rich_dict"):
         return data.to_rich_dict()
-    elif isinstance(data, str):
+    elif isinstance(data, (str, float, int)):
         return data
 
     serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
@@ -344,9 +344,9 @@ def _reserialised(data: dict) -> dict:
     for k, v in data.items():
         if isinstance(v, dict):
             v = _reserialised(v)
-        elif isinstance(v, list):
+        elif isinstance(v, list) and len(v):
             for i, e in enumerate(v):
-                if len(e) == 2:
+                if isinstance(e, Iterable) and len(e) == 2:
                     v[i][1] = _reserialised(v[i][1])
                 else:
                     v[i] = _reserialised(v[i])
@@ -371,7 +371,7 @@ serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress"
 
 
 def write_to_sqldb(data_store, id_from_source=None):
-    from cogent3.app.io_new import get_unique_id
+    from cogent3.app.io import get_unique_id
 
     id_from_source = id_from_source or get_unique_id
 
@@ -384,7 +384,7 @@ def write_to_sqldb(data_store, id_from_source=None):
 
 
 def summary_not_completed(dstore):
-    from cogent3.app.data_store_new import summary_not_completeds
+    from cogent3.app.data_store import summary_not_completeds
 
     return summary_not_completeds(dstore.not_completed, deserialise=deserialiser)
 
