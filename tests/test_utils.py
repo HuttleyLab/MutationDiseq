@@ -195,32 +195,3 @@ def test_est_freq_null_invalid_range(ten_pvals, start, stop, step):
 @pytest.fixture(scope="function")
 def tmp_dir(tmpdir_factory):
     return pathlib.Path(tmpdir_factory.mktemp("convert"))
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        p
-        for p in paths_to_sqlitedbs_matching(
-            DATADIR / "old-sqlitedbs", "*.sqlitedb", False
-        )
-        if "-new" not in p.name
-    ],
-)
-def test_db_conversion(tmp_dir, path):
-    from cogent3.app.io_new import (
-        NotCompleted,
-        decompress,
-        from_primitive,
-        load_db,
-        unpickle_it,
-    )
-
-    source = DATADIR / path
-    dest = tmp_dir / source.name
-    got = convert_db_to_new_sqlitedb(source, dest)
-    deserialiser = decompress() + unpickle_it() + from_primitive()
-    loader = load_db(deserialiser=deserialiser)
-    obj = loader(got.completed[0])
-    # making sure we can correctly read a completed object
-    assert not isinstance(obj, NotCompleted)

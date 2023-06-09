@@ -11,7 +11,6 @@ from cogent3.app.typing import SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 
-from mdeq.sqlite_data_store import sql_loader
 from mdeq.utils import SerialisableMixin, load_from_sqldb
 
 
