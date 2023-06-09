@@ -147,7 +147,7 @@ def prep(
     if fg_edge:
         aln = loader(dstore.completed[0])
         if fg_edge not in aln.names:
-            console.print(fr"[red]EXIT: {fg_edge=} not in {aln.names}")
+            console.print(rf"[red]EXIT: {fg_edge=} not in {aln.names}")
             exit(1)
 
     LOGGER.log_file_path = f"{outpath.stem}-prep.log"

@@ -13,7 +13,6 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 @pytest.fixture()
 def aln():
-
     _seqs = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",
         "Bandicoot": "GACTCATTAATGCTTGAAACCAGCAGTTTATTGTCCAACACT",
@@ -26,7 +25,6 @@ def aln():
 
 @pytest.fixture()
 def single_nt_aln():
-
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "Bandicoot": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -38,7 +36,6 @@ def single_nt_aln():
 
 @pytest.fixture()
 def diff_nt_aln():
-
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "Bandicoot": "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
@@ -50,7 +47,6 @@ def diff_nt_aln():
 
 @pytest.fixture()
 def diff_nt_aln_with_fg():
-
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "Bandicoot": "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
