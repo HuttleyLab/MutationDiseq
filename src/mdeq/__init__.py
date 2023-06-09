@@ -44,7 +44,6 @@ from mdeq.utils import (
     omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
     set_fg_edge,
-    upgrade_db,
     write_to_sqldb,
 )
 
@@ -714,32 +713,6 @@ def slide(
     )
     log_file_path.unlink()
     console.print("[green]Done!")
-
-
-@main.command(no_args_is_help=True)
-@click.argument("pattern", type=Path)
-@_cli_opt._outdir
-@click.option("-O", "--overwrite", is_flag=True, help="delete dest if exists")
-def db_upgrade(pattern: Path, outdir: Path, overwrite: bool):
-    from .utils import convert_db_to_new_sqlitedb
-
-    pattern = pattern.expanduser().absolute()
-    rootdir = pattern.parent
-
-    assert pattern.name.endswith("*")
-
-    outdir = outdir or rootdir
-    outdir = outdir.expanduser().absolute()
-    outdir.mkdir(exist_ok=True)
-    fn_sig = "-new" if rootdir == outdir else ""
-
-    paths = [p for p in pattern.parent.glob("**/*.sqlitedb") if "-new" not in p.name]
-
-    set_keepawake(keep_screen_awake=False)
-    app = upgrade_db(rootdir, outdir, fn_sig, overwrite=overwrite)
-    _ = list(app.as_completed(paths, parallel=True, show_progress=True))
-
-    unset_keepawake()
 
 
 if __name__ == "__main__":

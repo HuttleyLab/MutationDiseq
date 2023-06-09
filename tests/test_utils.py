@@ -8,7 +8,6 @@ from numpy.testing import assert_allclose
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
-    convert_db_to_new_sqlitedb,
     estimate_freq_null,
     foreground_from_jsd,
     get_foreground,

@@ -9,7 +9,6 @@ from mdeq import (
     aeop,
     convergence,
     db_summary,
-    db_upgrade,
     extract_pvalues,
     load_from_sqldb,
     make_adjacent,
