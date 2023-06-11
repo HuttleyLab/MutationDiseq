@@ -152,38 +152,6 @@ def rich_display(c3t, title_justify="left"):
 
 
 @dataclasses.dataclass
-class CompressedValueOld:
-    """container class to support delayed decompression of serialised data"""
-
-    data: bytes
-
-    @property
-    def decompressed(self) -> str:
-        if not self.data:
-            return b""
-        try:
-            return decompress(self.data)
-        except RuntimeError:
-            return self.data
-        except TypeError:
-            return self.data.encode("utf8")
-
-    @property
-    def deserialised(self):
-        """decompresses and then deserialises"""
-        if not self.data:
-            return ""
-        try:
-            return json.loads(self.decompressed.decode("utf8"))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            try:
-                return pickle.loads(self.decompressed)
-            except pickle.UnpicklingError:
-                # a compressed plain string
-                return self.decompressed.decode("utf8")
-
-
-@dataclasses.dataclass
 class CompressedValue:
     """container class to support delayed decompression of serialised data"""
 
@@ -322,40 +290,6 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     W = numpy.array([(pvalues > l).sum() for l in lambdas])
     a = W / (num**2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
-
-
-def _get_composed_func_str_from_log(text: str) -> str:
-    term = "composable function :"
-    if term not in text:
-        return "unnamed"
-    line_prefix = text.split(maxsplit=1)[0]
-    text = text.split(term, maxsplit=1)[1].split(line_prefix, maxsplit=1)[0]
-    return " ".join(text.split())
-
-
-def _reserialised(data: dict) -> dict:
-    if hasattr(data, "to_rich_dict"):
-        return data.to_rich_dict()
-    elif isinstance(data, (str, float, int)):
-        return data
-
-    serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
-
-    for k, v in data.items():
-        if isinstance(v, dict):
-            v = _reserialised(v)
-        elif isinstance(v, list) and len(v):
-            for i, e in enumerate(v):
-                if isinstance(e, Iterable) and len(e) == 2:
-                    v[i][1] = _reserialised(v[i][1])
-                else:
-                    v[i] = _reserialised(v[i])
-        elif isinstance(v, bytes):
-            v = CompressedValueOld(v).deserialised
-            v = serialiser(v)
-
-        data[k] = v
-    return data
 
 
 deserialiser = (
