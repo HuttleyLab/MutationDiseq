@@ -78,9 +78,7 @@ def test_no_fg(get_aln_no_fg, opt_args):
 reader = load_from_sqldb()
 
 
-@pytest.mark.parametrize(
-    "init_hyp_app", (get_no_init_hypothesis, get_init_hypothesis)[:1]
-)
+@pytest.mark.parametrize("init_hyp_app", (get_no_init_hypothesis, get_init_hypothesis))
 def test_get_no_init_hypothesis_app_run(
     tmp_path, dstore_instance, opt_args, init_hyp_app
 ):
