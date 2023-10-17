@@ -13,6 +13,7 @@ from pathlib import Path
 from warnings import filterwarnings
 
 import click
+import trogon
 
 from cogent3 import get_app, make_table, open_data_store
 from rich.console import Console
@@ -89,6 +90,7 @@ def get_opt_settings(testrun):
     )
 
 
+@trogon.tui()
 @click.group()
 @click.version_option(__version__)
 def main():
