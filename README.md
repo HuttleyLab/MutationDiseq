@@ -49,6 +49,7 @@ Commands:
   slide            generate window sized sub-alignments.
   teop             between branch equivalence of mutation process test
   toe              test of existence of mutation equilibrium.
+  tui              Open Textual TUI.
 
 ```
 <!-- [[[end]]] -->
