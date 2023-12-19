@@ -116,8 +116,6 @@ def fasta(tmp_dir):
 
 def test_prep_invalid_input(runner, tmp_dir, fasta):
     """fail if a directory and a db are provided or directory and no suffix"""
-    from cogent3.app import io
-
     inpath = DATADIR / "3000bp.sqlitedb"
     outpath = tmp_dir / "output.sqlitedb"
     args = f"-id {fasta} -i {inpath} -o {outpath}".split()
@@ -131,11 +129,9 @@ def test_prep_invalid_input(runner, tmp_dir, fasta):
 
 def test_prep_defaults(runner, tmp_dir, fasta):
     """remove unamgious characters, exclude alignments < 300"""
-    from cogent3.app import io
-
     outpath = tmp_dir / "output.sqlitedb"
     args = f"-id {fasta} -su fasta -o {outpath} -O".split()
-    r = runner.invoke(prep, args, catch_exceptions=False)
+    runner.invoke(prep, args, catch_exceptions=False)
 
     dstore = open_data_store(outpath)
     assert len(dstore.completed) == 4
@@ -145,8 +141,6 @@ def test_prep_defaults(runner, tmp_dir, fasta):
 
 def test_prep_min_length(runner, tmp_dir, fasta):
     """min_length arg works"""
-    from cogent3.app import io
-
     outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     args = f"-id {fasta} -su fasta -o {outpath} --min_length 600 -O".split()
@@ -160,8 +154,6 @@ def test_prep_min_length(runner, tmp_dir, fasta):
 
 def test_prep_codon_pos(runner, tmp_dir, fasta):
     """codon_pos arg works"""
-    from cogent3.app import io
-
     outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
     args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3} -O".split()
@@ -221,8 +213,6 @@ loader = load_from_sqldb()
 
 
 def test_convergence(runner, tmp_dir):
-    from cogent3.app import io
-
     from mdeq.convergence import delta_nabla
 
     inpath = DATADIR / "toe-300bp.sqlitedb"
