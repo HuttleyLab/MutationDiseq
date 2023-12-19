@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
-from typing import Union
+from typing import ForwardRef, Union
 
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import SerialisableType
@@ -234,7 +234,7 @@ def get_delta_nabla(
 
 @define_app
 def bootstrap_to_nabla(
-    result: "compact_bootstrap_result", fg_edge=None, wrt_nstat=False
+    result: ForwardRef("compact_bootstrap_result"), fg_edge=None, wrt_nstat=False
 ) -> Union[delta_nabla, SerialisableType]:
     """returns delta nabla stats from bootstrap result."""
     from mdeq.bootstrap import deserialise_single_hyp

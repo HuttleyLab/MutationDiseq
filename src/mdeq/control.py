@@ -1,7 +1,7 @@
 import pathlib
 
 from random import Random
-from typing import Union
+from typing import ForwardRef, Union
 
 from cogent3 import ArrayAlignment
 from cogent3.app.composable import define_app
@@ -102,7 +102,8 @@ class control_generator:
     T = Union[ArrayAlignment, grouped, SerialisableType]
 
     def main(
-        self, result: Union[HypothesisResultType, "compact_bootstrap_result"]
+        self,
+        result: Union[HypothesisResultType, ForwardRef("compact_bootstrap_result")],
     ) -> T:
         # this function will only be called on the first result object,
         # it establishes the appropriate method to set for the data

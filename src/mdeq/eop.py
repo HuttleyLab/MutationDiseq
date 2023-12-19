@@ -1,4 +1,4 @@
-from typing import Union
+from typing import ForwardRef, Union
 
 from cogent3 import get_model, make_tree
 from cogent3.app import evo
@@ -56,7 +56,7 @@ class adjacent_eop:
         return list({fg_edge} ^ set(data.elements[0].names))
 
     def main(
-        self, data: "grouped", *args, **kwargs
+        self, data: ForwardRef("grouped"), *args, **kwargs
     ) -> Union[HypothesisResultType, SerialisableType]:
         """fits multiple adjacent loci in."""
         # todo is it possible to get the param rules from each locus in null
