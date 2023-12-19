@@ -1,6 +1,6 @@
 """ordered grouping of alignments for EOP testing."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar, Union
 

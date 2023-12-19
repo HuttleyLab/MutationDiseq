@@ -1,24 +1,17 @@
 import dataclasses
 import json
 import pathlib
-import pickle
 import re
 import warnings
 
 from dataclasses import asdict
-from pathlib import Path, PosixPath, WindowsPath
-from typing import Iterable, Optional, Union
+from pathlib import Path
+from typing import Union
 
 import numpy
 
-from blosc2 import decompress
 from cogent3 import get_app, make_table, open_data_store
 from cogent3.app.composable import NotCompleted, define_app
-from cogent3.app.sqlite_data_store import (
-    _LOG_TABLE,
-    OVERWRITE,
-    DataStoreSqlite,
-)
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.dict_array import DictArray
@@ -247,7 +240,7 @@ def estimate_freq_null(
     """
     pvalues = numpy.array(sorted(pvalues))
     if min(start, stop, step) <= 0 or max(start, stop) >= 1 or start > stop:
-        raise ValueError(f"start, stop, step must all be positive with start < stop")
+        raise ValueError("start, stop, step must all be positive with start < stop")
 
     if pvalues.max() <= stop:
         stop = 0.95 * pvalues.max()
