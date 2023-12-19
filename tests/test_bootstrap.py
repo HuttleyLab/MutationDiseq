@@ -62,7 +62,7 @@ def test_create_bootstrap_app(aln, opt_args):
 
     assert isinstance(bootstrap, compact_bootstrap_result)
     assert len(bootstrap) == 2
-    rd = bootstrap.to_rich_dict()
+    bootstrap.to_rich_dict()  # does not fail
 
 
 def test_deserialise_compact_boostrap_result(aln, opt_args):

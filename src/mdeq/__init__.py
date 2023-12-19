@@ -455,7 +455,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
     writer = write_to_sqldb(out_dstore)
     process = loader + to_delta_nabla + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
-    r = process.apply_to(
+    process.apply_to(
         dstore.completed,
         logger=LOGGER,
         cleanup=True,
