@@ -127,7 +127,7 @@ def make_identifier(data) -> str:
     composite = []
     for e in sources:
         e = Path(e)
-        l = -len(e.suffix) or None
+        l = -len(e.suffix) or None  # noqa: E741
         composite.append(e.name[:l])
 
     return "--".join(composite)

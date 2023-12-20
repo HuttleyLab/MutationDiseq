@@ -280,7 +280,7 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     # returns the frequency that minimises the mean square error
     num = len(pvalues)
     fdr_val = numpy.quantile(freq_null, q=0.1)
-    W = numpy.array([(pvalues > l).sum() for l in lambdas])
+    W = numpy.array([(pvalues > l).sum() for l in lambdas])  # noqa: E741
     a = W / (num**2 * (1 - lambdas) ** 2) * (1 - W / num) + (freq_null - fdr_val) ** 2
     return freq_null[a == a.min()][0]
 

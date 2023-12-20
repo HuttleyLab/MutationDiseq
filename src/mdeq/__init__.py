@@ -1,7 +1,7 @@
 """mdeq: mutation disequilibrium analysis tools."""
 
 # following line to stop automatic threading by numpy
-from mdeq import _block_threading  # isort: skip
+from mdeq import _block_threading  # noqa: F401 isort: skip
 
 import inspect
 import sys
@@ -23,7 +23,7 @@ from scitrack import CachingLogger
 import mdeq._click_options as _cli_opt
 
 # required to ensure registration of define substitution models
-from mdeq import model as _model
+from mdeq import model as _model  # noqa: F401
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import control_generator, select_model_result
