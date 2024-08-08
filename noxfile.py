@@ -10,10 +10,6 @@ def test(session):
     session.run(
         "pytest",
         "-x",
-        "--cov-report",
-        f"lcov:lcov-{session.python}.info",
-        "--cov",
-        "mdeq",
     )
 
 
