@@ -11,6 +11,7 @@ from typing import Union
 import numpy
 
 from cogent3 import get_app, make_table, open_data_store
+from cogent3.app import io as io_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise
@@ -149,8 +150,8 @@ class CompressedValue:
     """container class to support delayed decompression of serialised data"""
 
     data: bytes
-    unpickler = get_app("unpickle_it")
-    decompress = get_app("decompress")
+    unpickler = io_app.unpickle_it()
+    decompress = io_app.decompress()
 
     @property
     def decompressed(self) -> bytes:
@@ -285,16 +286,14 @@ def _minimise_mse(pvalues, lambdas, freq_null):
     return freq_null[a == a.min()][0]
 
 
-deserialiser = (
-    get_app("decompress") + get_app("unpickle_it") + get_app("from_primitive")
-)
+deserialiser = io_app.decompress() + io_app.unpickle_it() + io_app.from_primitive()
 
 
 def load_from_sqldb():
     return get_app("load_db", deserialiser=deserialiser)
 
 
-serialiser = get_app("to_primitive") + get_app("pickle_it") + get_app("compress")
+serialiser = io_app.to_primitive() + io_app.pickle_it() + io_app.compress()
 
 
 def write_to_sqldb(data_store, id_from_source=None):

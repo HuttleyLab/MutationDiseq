@@ -3,6 +3,7 @@ import pathlib
 import pytest
 
 from cogent3 import get_app, make_aligned_seqs
+from cogent3.app import io as io_app
 from numpy.testing import assert_allclose
 
 from mdeq.utils import (
@@ -101,7 +102,7 @@ def test_paths_to_sqlitedbs_matching():
 
 
 def test_compressed_value_decompressed():
-    serialiser = get_app("pickle_it") + get_app("compress")
+    serialiser = io_app.pickle_it() + io_app.compress()
     cv = CompressedValue(None)
     assert isinstance(cv.decompressed, bytes) and not cv.decompressed
     data = "abcdefghijhkly" * 10
@@ -113,9 +114,9 @@ def test_compressed_value_decompressed():
 def test_compressed_value_deserialises():
     from cogent3 import get_app
 
-    to_prim = get_app("to_primitive")
-    pickler = get_app("pickle_it")
-    compressor = get_app("compress")
+    to_prim = io_app.to_primitive()
+    pickler = io_app.pickle_it()
+    compressor = io_app.compress()
 
     serialiser = to_prim + pickler + compressor
 

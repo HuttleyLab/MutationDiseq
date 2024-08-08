@@ -148,7 +148,7 @@ class load_data_group:
         self.data_store_path = data_store_path
         self.data_store = open_data_store(self.data_store_path)
 
-    def main(self, data_identifiers: "grouped") -> Union[grouped, SerialisableType]:
+    def main(self, data_identifiers: grouped) -> Union[grouped, SerialisableType]:
         """
         Notes
         -----

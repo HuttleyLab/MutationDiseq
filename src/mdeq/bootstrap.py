@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Union
 
 from cogent3.app import evo, get_app
+from cogent3.app import io as io_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import bootstrap_result
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
@@ -93,8 +94,8 @@ def _eliminated_redundant_aln_in_place(hyp_result):
 class compact_bootstrap_result(bootstrap_result):
     """removes redundant alignments from individual model results."""
 
-    compress = get_app("pickle_it") + get_app("compress")
-    decompress = get_app("decompress") + get_app("unpickle_it")
+    compress = io_app.pickle_it() + io_app.compress()
+    decompress = io_app.decompress() + io_app.unpickle_it()
 
     def __setitem__(self, key, data):
         # ignore validation checks, put compressed json straight
