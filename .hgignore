@@ -38,3 +38,4 @@ hg_old*
 *-wal
 .nox/*
 lcov*.info
+.ruff_cache/*
