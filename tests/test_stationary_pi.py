@@ -2,12 +2,8 @@ import pathlib
 
 import numpy
 import pytest
-
 from cogent3 import get_model, load_aligned_seqs, make_tree, open_data_store
 from cogent3.app import evo
-from numpy import eye
-from numpy.testing import assert_allclose
-
 from mdeq.jsd import get_jsd
 from mdeq.stationary_pi import (
     OscillatingPiException,
@@ -15,7 +11,8 @@ from mdeq.stationary_pi import (
     get_stat_pi_via_eigen,
 )
 from mdeq.utils import load_from_sqldb
-
+from numpy import eye
+from numpy.testing import assert_allclose
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
@@ -87,7 +84,7 @@ def almost_identity():
                 5.121374414061707e-15,
                 0.9999999999999912,
             ],
-        ]
+        ],
     )
     pi = numpy.array(
         [
@@ -95,7 +92,7 @@ def almost_identity():
             0.30096238355059024,
             0.19247593282973588,
             0.37882764690212656,
-        ]
+        ],
     )
     return P, pi
 
@@ -109,7 +106,7 @@ def identity():
             0.30096238355059024,
             0.19247593282973588,
             0.37882764690212656,
-        ]
+        ],
     )
     return P, pi
 

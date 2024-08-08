@@ -9,7 +9,6 @@ from cogent3.util.misc import extend_docstring_from
 from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
-
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
@@ -28,7 +27,12 @@ def get_param_rules_upper_limit(model_name, upper):
 
 
 def test_of_existence(
-    aln, just_continuous, tree=None, with_gtr=False, sequential=False, opt_args=None
+    aln,
+    just_continuous,
+    tree=None,
+    with_gtr=False,
+    sequential=False,
+    opt_args=None,
 ):
     """make app to test for equilibrium with a dynamically defined background
     edge.
@@ -132,7 +136,9 @@ def get_init_model_coll(aln, just_continuous, opt_args=None):
 
 @define_app
 def get_no_init_hypothesis(
-    aln: AlignedSeqsType, just_continuous, opt_args=None
+    aln: AlignedSeqsType,
+    just_continuous,
+    opt_args=None,
 ) -> SerialisableType:
     if isinstance(aln, NotCompleted):
         return aln
@@ -152,7 +158,9 @@ def get_no_init_hypothesis(
 @extend_docstring_from(test_of_existence)
 @define_app
 def get_init_hypothesis(
-    aln: AlignedSeqsType, just_continuous, opt_args=None
+    aln: AlignedSeqsType,
+    just_continuous,
+    opt_args=None,
 ) -> SerialisableType:
     if isinstance(aln, NotCompleted):
         return aln

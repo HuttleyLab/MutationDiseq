@@ -13,7 +13,6 @@ from cogent3.app.typing import (
 from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
-
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
@@ -56,10 +55,13 @@ class adjacent_eop:
         return list({fg_edge} ^ set(data.elements[0].names))
 
     def main(
-        self, data: ForwardRef("grouped"), *args, **kwargs
+        self,
+        data: ForwardRef("grouped"),
+        *args,
+        **kwargs,
     ) -> Union[HypothesisResultType, SerialisableType]:
         """fits multiple adjacent loci in."""
-        # todo is it possible to get the param rules from each locus in null
+        # TODO is it possible to get the param rules from each locus in null
         # if so, they could then be applied to the corresponding alternate
         bg_edges = self._background_edges(data)
         if isinstance(bg_edges, NotCompleted):
@@ -159,7 +161,7 @@ class temporal_eop:
                         edges=self._edge_names,
                         is_independent=False,
                         upper=RATE_PARAM_UPPER,
-                    )
+                    ),
                 ],
                 name=NULL_TEOP,
                 opt_args=self._opt_args,
@@ -175,7 +177,7 @@ class temporal_eop:
                         edges=self._edge_names,
                         is_independent=True,
                         upper=RATE_PARAM_UPPER,
-                    )
+                    ),
                 ],
                 upper=RATE_PARAM_UPPER,
                 optimise_motif_probs=True,
@@ -184,7 +186,10 @@ class temporal_eop:
         return self._hyp
 
     def main(
-        self, data: AlignedSeqsType, *args, **kwargs
+        self,
+        data: AlignedSeqsType,
+        *args,
+        **kwargs,
     ) -> Union[HypothesisResultType, SerialisableType]:
         app = self._get_app(data)
         return app(data)

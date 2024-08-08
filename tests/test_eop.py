@@ -2,13 +2,10 @@ import pathlib
 
 import numpy
 import pytest
-
 from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.result import hypothesis_result
-
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
 from mdeq.utils import load_from_sqldb
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -81,7 +78,6 @@ loader = load_from_sqldb()
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     from cogent3.util.dict_array import DictArray
-
     from mdeq.adjacent import grouped
 
     aln = loader(dstore_instance[4])

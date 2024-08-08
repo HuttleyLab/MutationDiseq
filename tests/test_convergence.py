@@ -2,14 +2,9 @@ import json
 import pathlib
 
 import pytest
-
 from cogent3 import load_aligned_seqs, make_tree, open_data_store
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.util.deserialise import deserialise_object
-from numpy import array, diag_indices, mean, std
-from numpy.random import default_rng
-from numpy.testing import assert_almost_equal
-
 from mdeq.convergence import (
     bootstrap_to_nabla,
     convergence,
@@ -20,7 +15,9 @@ from mdeq.convergence import (
 )
 from mdeq.model import GN_sm
 from mdeq.utils import load_from_sqldb
-
+from numpy import array, diag_indices, mean, std
+from numpy.random import default_rng
+from numpy.testing import assert_almost_equal
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -44,7 +41,7 @@ def pi_Q_gtr():
             0.07241230639286972,
             0.5281794353326765,
             0.14886585558845405,
-        ]
+        ],
     )
     Q = array(
         [
@@ -72,7 +69,7 @@ def pi_Q_gtr():
                 0.15977738177371378,
                 -0.3340871997518949,
             ],
-        ]
+        ],
     )
     return pi, Q
 
@@ -86,7 +83,7 @@ def pi_Q():
             0.26366666666666666,
             0.26366666666666666,
             0.14966666666666667,
-        ]
+        ],
     )
     Q = array(
         [
@@ -114,7 +111,7 @@ def pi_Q():
                 0.1571661576846348,
                 -0.3262035918434247,
             ],
-        ]
+        ],
     )
 
     return pi, Q
@@ -215,7 +212,7 @@ def test_get_nabla(toe_bstrap):
 def alignment_tree():
     aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["Human", "Mouse", "Rhesus", "Wombat"]).no_degenerates(
-        motif_length=3
+        motif_length=3,
     )
     tree = make_tree("(Wombat,Mouse,(Human,Rhesus))")
     return aln, tree

@@ -1,5 +1,4 @@
 import pathlib
-
 from random import Random
 from typing import ForwardRef, Union
 
@@ -12,7 +11,6 @@ from cogent3.util.deserialise import deserialise_object
 from mdeq.adjacent import grouped
 from mdeq.bootstrap import _reconstitute_collection
 from mdeq.utils import CompressedValue
-
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]

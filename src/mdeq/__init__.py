@@ -5,7 +5,6 @@ from mdeq import _block_threading  # noqa: F401 isort: skip
 
 import inspect
 import sys
-
 from collections import defaultdict
 from functools import reduce
 from operator import add
@@ -14,7 +13,6 @@ from warnings import filterwarnings
 
 import click
 import trogon
-
 from cogent3 import get_app, make_table, open_data_store
 from rich.console import Console
 from rich.progress import Progress, track
@@ -48,13 +46,11 @@ from mdeq.utils import (
     write_to_sqldb,
 )
 
-
 try:
     from wakepy import set_keepawake, unset_keepawake
 except (ImportError, NotImplementedError):
     # may not be installed, or on linux where this library doesn't work
-    def _do_nothing_func(*args, **kwargs):
-        ...
+    def _do_nothing_func(*args, **kwargs): ...
 
     set_keepawake, unset_keepawake = _do_nothing_func, _do_nothing_func
 
@@ -77,7 +73,7 @@ if sys.version_info < _min_version:
     PY_VERSION = ".".join([str(n) for n in sys.version_info])
     _min_version = ".".join(_min_version)
     raise RuntimeError(
-        f"Python-{_min_version} or greater is required, Python-{PY_VERSION} used."
+        f"Python-{_min_version} or greater is required, Python-{PY_VERSION} used.",
     )
 
 
@@ -95,7 +91,6 @@ def get_opt_settings(testrun):
 @click.version_option(__version__)
 def main():
     """mdeq: mutation disequilibrium analysis tools."""
-    pass
 
 
 @main.command(no_args_is_help=True)
@@ -131,7 +126,7 @@ def prep(
     console = Console()
     if indir and inpath:
         console.print(
-            r"[red]EXIT: ambiguous input, set either --indir [b]AND[/b] --suffix [b]OR[/b] --inpath"
+            r"[red]EXIT: ambiguous input, set either --indir [b]AND[/b] --suffix [b]OR[/b] --inpath",
         )
         exit(1)
 
@@ -158,7 +153,7 @@ def prep(
         app_series.append(get_app("take_codon_positions", int(codon_pos)))
 
     app_series.extend(
-        [get_app("omit_degenerates", moltype="dna"), get_app("min_length", min_length)]
+        [get_app("omit_degenerates", moltype="dna"), get_app("min_length", min_length)],
     )
     if fg_edge:
         app_series.append(set_fg_edge(fg_edge=fg_edge))
@@ -171,7 +166,10 @@ def prep(
 
     app = reduce(add, app_series)
     app.apply_to(
-        dstore.completed, logger=LOGGER, cleanup=True, show_progress=verbose > 0
+        dstore.completed,
+        logger=LOGGER,
+        cleanup=True,
+        show_progress=verbose > 0,
     )
     console.print("[green]Done!")
 
@@ -207,7 +205,8 @@ def make_adjacent(inpath, gene_order, outpath, limit, overwrite, verbose, testru
     log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
     writer.data_store.write_log(
-        unique_id=log_file_path.name, data=log_file_path.read_text()
+        unique_id=log_file_path.name,
+        data=log_file_path.read_text(),
     )
     log_file_path.unlink()
     writer.data_store.close()
@@ -247,7 +246,7 @@ def toe(
     testrun,
 ):
     """test of existence of mutation equilibrium."""
-    # todo need a separate command to apply foreground_from_jsd() to an
+    # TODO need a separate command to apply foreground_from_jsd() to an
     #  alignment for decorating alignments with the foreground edge
     # or check alignment.info for a fg_edge key -- all synthetic data
     LOGGER = CachingLogger(create_dir=True)
@@ -269,7 +268,8 @@ def toe(
     _aln = loader(dstore.completed[0])
     if just_continuous and fg_edge is not None:
         click.secho(
-            f"WARN: setting just_continuous overrides {fg_edge!r} setting", fg="yellow"
+            f"WARN: setting just_continuous overrides {fg_edge!r} setting",
+            fg="yellow",
         )
 
     # if fg_edge is specified then this value is checked for existence in alignment
@@ -409,7 +409,9 @@ def aeop(
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
     test_adjacent = adjacent_eop(
-        tree=treepath, opt_args=get_opt_settings(testrun), share_mprobs=share_mprobs
+        tree=treepath,
+        opt_args=get_opt_settings(testrun),
+        share_mprobs=share_mprobs,
     )
     process = loader + test_adjacent + writer
     kwargs = configure_parallel(parallel=parallel, mpi=mpi)
@@ -553,7 +555,7 @@ def make_controls(
     click.secho(f"{func_name!r} is done!", fg="green")
 
 
-# todo postprocess functions, generate figures, tabulate data
+# TODO postprocess functions, generate figures, tabulate data
 @main.command(no_args_is_help=True)
 @_cli_opt._inpath
 def db_summary(inpath):
@@ -583,7 +585,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
     paths = paths_to_sqlitedbs_matching(indir, pattern, recursive)
     if not paths:
         console.print(
-            f"[red]EXIT: no paths found for {indir=}, {recursive=!r}, " f"{pattern=!r}"
+            f"[red]EXIT: no paths found for {indir=}, {recursive=!r}, {pattern=!r}",
         )
         exit(1)
 
@@ -614,7 +616,9 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
                 continue
 
             records = progress.add_task(
-                "[blue]records...", total=len(dstore.completed), transient=True
+                "[blue]records...",
+                total=len(dstore.completed),
+                transient=True,
             )
 
             data = defaultdict(list)
@@ -662,7 +666,7 @@ def slide(
     console = Console()
     if window_size < min_length:
         console.print(
-            f"[red] {window_size=} is less than {min_length=}, should be other way around"
+            f"[red] {window_size=} is less than {min_length=}, should be other way around",
         )
         exit(1)
 
@@ -682,7 +686,8 @@ def slide(
     writer = write_to_sqldb(out_dstore)
     with Progress() as progress:
         alignments = progress.add_task(
-            "[green]Alignment...", total=len(dstore.completed)
+            "[green]Alignment...",
+            total=len(dstore.completed),
         )
         for i, member in enumerate(dstore.completed):
             progress.update(alignments, completed=i + 1)
@@ -690,7 +695,9 @@ def slide(
             aln = loader(member)
             num_windows = len(aln) - window_size + 1
             windows = progress.add_task(
-                "[blue]slide...", total=num_windows, transient=True
+                "[blue]slide...",
+                total=num_windows,
+                transient=True,
             )
             for start in range(0, num_windows, step):
                 progress.update(windows, completed=start + 1)
@@ -711,7 +718,8 @@ def slide(
     log_file_path = Path(LOGGER.log_file_path)
     LOGGER.shutdown()
     writer.data_store.write_log(
-        unique_id=log_file_path.name, data=log_file_path.read_text()
+        unique_id=log_file_path.name,
+        data=log_file_path.read_text(),
     )
     log_file_path.unlink()
     console.print("[green]Done!")

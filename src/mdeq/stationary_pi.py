@@ -10,15 +10,12 @@ from mdeq.numeric import (
     valid_stochastic_matrix,
 )
 
-
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
 class OscillatingPiException(Exception):
     """Did not converge to a unique stationary distribution."""
-
-    pass
 
 
 def get_stat_pi_via_eigen(P, check_precision=True):
@@ -39,7 +36,11 @@ def get_stat_pi_via_eigen(P, check_precision=True):
 
 
 def get_stat_pi_via_brute(
-    P, pi_zero, limit_action="raise", max_iterations=100000, threshold=1e-8
+    P,
+    pi_zero,
+    limit_action="raise",
+    max_iterations=100000,
+    threshold=1e-8,
 ):
     """Obtain the stationary distribution via brute force."""
 

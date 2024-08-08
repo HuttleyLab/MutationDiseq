@@ -1,11 +1,8 @@
 import pytest
-
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
-from numpy import allclose
-
 from mdeq.jsd import get_entropy, get_jsd
-
+from numpy import allclose
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]

@@ -6,7 +6,6 @@ some problems
 
 import os
 
-
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
 

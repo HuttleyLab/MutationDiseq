@@ -9,7 +9,6 @@ from cogent3.evolve.models import register_model
 from cogent3.evolve.ns_substitution_model import GeneralStationary
 from numpy import finfo
 
-
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
@@ -61,7 +60,9 @@ _eps = finfo(float).eps
 
 @define_app
 def mles_within_bounds(
-    result: model_result, lower=1e-5, upper=RATE_PARAM_UPPER
+    result: model_result,
+    lower=1e-5,
+    upper=RATE_PARAM_UPPER,
 ) -> Union[model_result, SerialisableType]:
     """validate fitted model rate parameter estimates are not close to the bounds
 

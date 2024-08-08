@@ -3,13 +3,11 @@ import json
 import pathlib
 import re
 import warnings
-
 from dataclasses import asdict
 from pathlib import Path
 from typing import Union
 
 import numpy
-
 from cogent3 import get_app, make_table, open_data_store
 from cogent3.app import io as io_app
 from cogent3.app.composable import NotCompleted, define_app
@@ -18,7 +16,6 @@ from cogent3.util import deserialise
 from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
 from scipy.interpolate import UnivariateSpline
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -42,7 +39,7 @@ def foreground_from_jsd(aln):
     identifies ingroup which has maximal JSD from the rest.
     """
     if aln.num_seqs != 3:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     freqs = aln.counts_per_seq().to_freq_array()
     jsd_pwise = freqs.pairwise_jsd()
@@ -97,7 +94,8 @@ def configure_parallel(parallel: bool, mpi: int) -> dict:
 
 @define_app
 def set_fg_edge(
-    aln: AlignedSeqsType, fg_edge=None
+    aln: AlignedSeqsType,
+    fg_edge=None,
 ) -> Union[SerialisableType, AlignedSeqsType]:
     """sets aln.info_fg_edge to fg_edge"""
     if fg_edge is None:
@@ -175,7 +173,9 @@ class CompressedValue:
 
 
 def paths_to_sqlitedbs_matching(
-    indir: Path, pattern: str, recursive: bool
+    indir: Path,
+    pattern: str,
+    recursive: bool,
 ) -> list[Path]:
     """finds paths matching pattern in indir
 
@@ -384,7 +384,7 @@ def db_status(inpath):
 
     rich_display(all_params)
     rich_display(
-        make_table(header=["data type"], data=[[f"{record_type!r}"]], title="Contents")
+        make_table(header=["data type"], data=[[f"{record_type!r}"]], title="Contents"),
     )
 
     t = dstore.describe

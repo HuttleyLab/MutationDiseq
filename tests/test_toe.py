@@ -1,10 +1,8 @@
 import pathlib
 
 import pytest
-
 from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.evo import model_collection_result
-
 from mdeq.toe import (
     get_init_hypothesis,
     get_init_model_coll,
@@ -12,7 +10,6 @@ from mdeq.toe import (
     get_no_init_model_coll,
 )
 from mdeq.utils import load_from_sqldb, write_to_sqldb
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -80,7 +77,10 @@ reader = load_from_sqldb()
 
 @pytest.mark.parametrize("init_hyp_app", (get_no_init_hypothesis, get_init_hypothesis))
 def test_get_no_init_hypothesis_app_run(
-    tmp_path, dstore_instance, opt_args, init_hyp_app
+    tmp_path,
+    dstore_instance,
+    opt_args,
+    init_hyp_app,
 ):
     out_dstore = open_data_store(tmp_path / "tempdir.sqlitedb", mode="w")
     writer = write_to_sqldb(out_dstore)

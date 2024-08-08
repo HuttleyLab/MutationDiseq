@@ -5,7 +5,6 @@ from cogent3.util.dict_array import DictArray
 from mdeq.numeric import sum
 from mdeq.stationary_pi import get_stat_pi_via_brute
 
-
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 

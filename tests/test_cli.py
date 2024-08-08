@@ -1,10 +1,8 @@
 import pathlib
 
 import pytest
-
 from click.testing import CliRunner
 from cogent3 import open_data_store
-
 from mdeq import (
     aeop,
     convergence,
@@ -24,7 +22,6 @@ from mdeq._click_options import (
     _valid_sqlitedb_output,
 )
 from mdeq.utils import CompressedValue, matches_type
-
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
@@ -189,7 +186,9 @@ def test_toe_exercise(runner, tmp_dir):
     inpath = DATADIR / "300bp.sqlitedb"
     outpath = tmp_dir / "toe.sqlitedb"
     r = runner.invoke(
-        toe, [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"], catch_exceptions=False
+        toe,
+        [f"-i{inpath}", f"-o{outpath}", "-t", "-n4", "-O"],
+        catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
     # now with incorrect input

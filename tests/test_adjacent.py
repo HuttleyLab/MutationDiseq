@@ -1,10 +1,8 @@
 from pathlib import Path
 
 import pytest
-
 from cogent3 import make_unaligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
-
 from mdeq.adjacent import (
     grouped,
     grouped_alignments,
@@ -14,7 +12,6 @@ from mdeq.adjacent import (
     sequential_groups,
 )
 from mdeq.eop import ALT_AEOP, NULL_AEOP, adjacent_eop
-
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
@@ -154,7 +151,7 @@ def test_new_adjacent_eop():
     group_loader = load_data_group(str(path))
     data = group_loader(pair)
     eop = adjacent_eop(
-        opt_args={"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"}
+        opt_args={"max_restarts": 1, "max_evaluations": 10, "limit_action": "ignore"},
     )
     got = eop(data)
     assert len(got[NULL_AEOP]) == 1

@@ -1,9 +1,7 @@
 from pathlib import Path
 
 import click
-
 from cogent3 import load_table, load_tree
-
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
@@ -38,7 +36,7 @@ def _gene_order_table(*args):
 
 def _valid_path(path, must_exist):
     if not path:
-        return
+        return None
 
     path = Path(path)
     if must_exist and not path.exists():
@@ -88,7 +86,11 @@ _treepath = click.option(
     help="path to newick formatted phylogenetic tree",
 )
 _num_reps = click.option(
-    "-n", "num_reps", type=int, default=100, help="number of samples to simulate"
+    "-n",
+    "num_reps",
+    type=int,
+    default=100,
+    help="number of samples to simulate",
 )
 _sample_size = click.option(
     "-z",
@@ -114,7 +116,10 @@ _testrun = click.option(
     help="don't write anything, quick (but inaccurate) optimisation",
 )
 _fg_edge = click.option(
-    "-fg", "--fg_edge", default=None, help="foreground edge to test for equilibrium"
+    "-fg",
+    "--fg_edge",
+    default=None,
+    help="foreground edge to test for equilibrium",
 )
 _bg_edge = click.option(
     "-bg",
@@ -123,7 +128,11 @@ _bg_edge = click.option(
     help="apply discrete-time process to these edges",
 )
 _mpi = click.option(
-    "-m", "--mpi", type=int, default=0, help="use MPI with this number of procs"
+    "-m",
+    "--mpi",
+    type=int,
+    default=0,
+    help="use MPI with this number of procs",
 )
 _parallel = click.option(
     "-p",
@@ -190,12 +199,20 @@ _indir = click.option(
     help="path containing data files",
 )
 _pattern = click.option(
-    "-g", "--pattern", default="", help="glob pattern for file names"
+    "-g",
+    "--pattern",
+    default="",
+    help="glob pattern for file names",
 )
 _recursive = click.option("-r", "--recursive", is_flag=True)
 # for sliding window analysis
 _window = click.option(
-    "-wz", "window_size", type=int, default=600, help="size of slice", show_default=True
+    "-wz",
+    "window_size",
+    type=int,
+    default=600,
+    help="size of slice",
+    show_default=True,
 )
 _step = click.option(
     "-st",

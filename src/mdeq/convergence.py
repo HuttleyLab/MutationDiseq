@@ -1,5 +1,4 @@
 import json
-
 from dataclasses import dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
@@ -19,7 +18,6 @@ from scipy.optimize import minimize_scalar
 from mdeq.numeric import dot, sum
 from mdeq.toe import ALT_TOE
 from mdeq.utils import SerialisableMixin
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
@@ -98,17 +96,17 @@ class delta_nabla(SerialisableMixin):
         return id((self.source, self.fg_edge, self.obs_nabla, self.null_nabla))
 
     @property
-    @lru_cache()
+    @lru_cache
     def mean_null(self):
         return mean(self.null_nabla)
 
     @property
-    @lru_cache()
+    @lru_cache
     def std_null(self):
         return std(self.null_nabla, ddof=1)
 
     @property
-    @lru_cache()
+    @lru_cache
     def delta_nabla(self):
         """returns observed nabla minus mean of the null nabla distribution."""
         return self.obs_nabla - self.mean_null
@@ -125,7 +123,10 @@ def deserialise_delta_nabla(data: dict):
 
 @singledispatch
 def get_nabla(
-    fg_edge, gn_result=None, time_delta=None, wrt_nstat=False
+    fg_edge,
+    gn_result=None,
+    time_delta=None,
+    wrt_nstat=False,
 ) -> tuple[str, float]:
     """returns the convergence statistic from a model_result object.
 
@@ -170,7 +171,7 @@ def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> tuple[str, f
     # this is triggered when fg_edge is None (i.e. not specified), in which
     # case we need to identify whether there's a clear fg_edge candidate or
     # select an edge as a representative
-    # todo assumes time-homogeneous process
+    # TODO assumes time-homogeneous process
     assert isinstance(time_delta, (NoneType, float))
     tree = gn_result.lf.tree
     names = [e.name for e in tree.get_edge_vector(include_root=False)]
@@ -195,19 +196,25 @@ def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> tuple[str, f
     if num_Q > 1:
         if num_Q != len(names):
             raise NotImplementedError(
-                f"either one or all {len(names)} edges are continuous-time, not {num_Q}"
+                f"either one or all {len(names)} edges are continuous-time, not {num_Q}",
             )
         # use a tip name, to facilitate testing
         fg_edge = tree.get_tip_names()[0]
         time_delta = time_delta or 0.1  # we want a set length
 
     return get_nabla(
-        fg_edge, gn_result=gn_result, time_delta=time_delta, wrt_nstat=wrt_nstat
+        fg_edge,
+        gn_result=gn_result,
+        time_delta=time_delta,
+        wrt_nstat=wrt_nstat,
     )
 
 
 def get_delta_nabla(
-    obs_result, sim_results, fg_edge=None, wrt_nstat=False
+    obs_result,
+    sim_results,
+    fg_edge=None,
+    wrt_nstat=False,
 ) -> delta_nabla:
     """returns the adjusted nabla statistic.
 
@@ -234,7 +241,9 @@ def get_delta_nabla(
 
 @define_app
 def bootstrap_to_nabla(
-    result: ForwardRef("compact_bootstrap_result"), fg_edge=None, wrt_nstat=False
+    result: ForwardRef("compact_bootstrap_result"),
+    fg_edge=None,
+    wrt_nstat=False,
 ) -> Union[delta_nabla, SerialisableType]:
     """returns delta nabla stats from bootstrap result."""
     from mdeq.bootstrap import deserialise_single_hyp
@@ -257,5 +266,8 @@ def bootstrap_to_nabla(
         null_results.append(v[ALT_TOE])
 
     return get_delta_nabla(
-        obs_result, null_results, fg_edge=fg_edge, wrt_nstat=wrt_nstat
+        obs_result,
+        null_results,
+        fg_edge=fg_edge,
+        wrt_nstat=wrt_nstat,
     )

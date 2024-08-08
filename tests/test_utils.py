@@ -1,11 +1,8 @@
 import pathlib
 
 import pytest
-
-from cogent3 import get_app, make_aligned_seqs
+from cogent3 import make_aligned_seqs
 from cogent3.app import io as io_app
-from numpy.testing import assert_allclose
-
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
@@ -15,7 +12,7 @@ from mdeq.utils import (
     paths_to_sqlitedbs_matching,
     set_fg_edge,
 )
-
+from numpy.testing import assert_allclose
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -112,8 +109,6 @@ def test_compressed_value_decompressed():
 
 
 def test_compressed_value_deserialises():
-    from cogent3 import get_app
-
     to_prim = io_app.to_primitive()
     pickler = io_app.pickle_it()
     compressor = io_app.compress()
@@ -170,7 +165,7 @@ def test_est_freq_null_boostrap(ten_pvals):
 def test_est_freq_null_gt1(hedenfalk):
     # shift distribution so estimate would be > 1
     data = hedenfalk[:]
-    data = list(sorted(data))
+    data = sorted(data)
     for i in range(len(data) - 20):
         data[i] = 1.0
     e = estimate_freq_null(data)

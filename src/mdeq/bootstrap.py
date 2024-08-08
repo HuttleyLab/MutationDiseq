@@ -1,9 +1,8 @@
 import json
-
 from copy import deepcopy
 from typing import Union
 
-from cogent3.app import evo, get_app
+from cogent3.app import evo
 from cogent3.app import io as io_app
 from cogent3.app.composable import NotCompleted, define_app
 from cogent3.app.result import bootstrap_result
@@ -13,7 +12,6 @@ from rich.progress import track
 
 from mdeq.model import GN_sm, GS_sm
 from mdeq.toe import ALT_TOE, NULL_TOE, test_of_existence
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -88,7 +86,6 @@ def _eliminated_redundant_aln_in_place(hyp_result):
             assert aln == r, "mismatched alignments!"
         aln = r
     hyp_result[_aln_key] = aln
-    return
 
 
 class compact_bootstrap_result(bootstrap_result):
@@ -158,7 +155,7 @@ class compact_bootstrap_result(bootstrap_result):
                 continue
 
             size_valid += 1
-            if v.LR >= obs:
+            if obs <= v.LR:
                 num_ge += 1
 
         if size_valid == 0:
@@ -193,7 +190,8 @@ class bootstrap:
         self._verbose = verbose
 
     def main(
-        self, aln: AlignedSeqsType
+        self,
+        aln: AlignedSeqsType,
     ) -> Union[SerialisableType, compact_bootstrap_result]:
         result = compact_bootstrap_result(aln.info.source)
         try:
@@ -226,7 +224,7 @@ class bootstrap:
         return result
 
 
-# todo reconcile usage and overlap between this and bootstrap_toe
+# TODO reconcile usage and overlap between this and bootstrap_toe
 def create_bootstrap_app(
     tree=None,
     just_continuous=False,

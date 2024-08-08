@@ -2,7 +2,6 @@ import math
 
 import numpy
 
-
 try:
     from accupy import fdot as dot
     from accupy import fsum as sum
@@ -11,7 +10,6 @@ except ImportError:
     dot = numpy.dot
 
 from cogent3.util.dict_array import DictArray
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -51,7 +49,10 @@ def valid_rate_matrix(matrix):
     if isinstance(matrix, DictArray):
         matrix = matrix.to_array()
     row_sum_zero = numpy.allclose(
-        [sum(row) for row in matrix], numpy.zeros(len(matrix)), rtol=1e-10, atol=1e-14
+        [sum(row) for row in matrix],
+        numpy.zeros(len(matrix)),
+        rtol=1e-10,
+        atol=1e-14,
     )
 
     off_diagonal_elem = [

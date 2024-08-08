@@ -1,17 +1,14 @@
 import pathlib
 
 import pytest
-
 from cogent3 import load_aligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
-
 from mdeq.bootstrap import (
     bootstrap_toe,
     compact_bootstrap_result,
     create_bootstrap_app,
 )
 from mdeq.utils import load_from_sqldb, write_to_sqldb
-
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -100,7 +97,7 @@ def test_estimate_pval(bstrap_result_dstore):
     num_reps = sum(v.LR >= 0 for v in result.values()) - 1
     obs_lr = result.observed.LR
     num_ge_obs = (
-        sum(result[k].LR >= obs_lr for k in result) - 1
+        sum(obs_lr <= result[k].LR for k in result) - 1
     )  # adjust for comparing observed to itself
     got = result.pvalue
     assert got == num_ge_obs / num_reps
@@ -132,7 +129,10 @@ def num_discrete_edges(lf):
 def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
     dstore, tree = dstore4_tree
     bstrap = create_bootstrap_app(
-        tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
+        tree=tree,
+        num_reps=2,
+        opt_args=opt_args,
+        just_continuous=True,
     )
 
     aln = reader(dstore[0])
@@ -148,7 +148,10 @@ def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
 def test_4otu_bootstrap_toe(dstore4_tree, opt_args):
     dstore, tree = dstore4_tree
     bstrap = bootstrap_toe(
-        tree=tree, num_reps=2, opt_args=opt_args, just_continuous=True
+        tree=tree,
+        num_reps=2,
+        opt_args=opt_args,
+        just_continuous=True,
     )
 
     aln = reader(dstore[0])
