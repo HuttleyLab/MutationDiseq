@@ -3,6 +3,7 @@ import pathlib
 import pytest
 from cogent3 import load_aligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
+
 from mdeq.bootstrap import (
     bootstrap_toe,
     compact_bootstrap_result,
@@ -28,12 +29,12 @@ def workingdir(tmp_dir, monkeypatch):
     monkeypatch.chdir(tmp_dir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def opt_args():
     return {"max_evaluations": 100, "limit_action": "ignore", "max_restarts": 1}
 
 
-@pytest.fixture()
+@pytest.fixture
 def aln():
     aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
@@ -43,12 +44,12 @@ def aln():
     return aln
 
 
-@pytest.fixture()
+@pytest.fixture
 def aligns_dstore():
     return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
-@pytest.fixture()
+@pytest.fixture
 def bstrap_result_dstore():
     return open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
 

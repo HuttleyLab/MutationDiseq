@@ -1,14 +1,15 @@
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
-from mdeq.jsd import get_entropy, get_jsd
 from numpy import allclose
+
+from mdeq.jsd import get_entropy, get_jsd
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
 
-@pytest.fixture()
+@pytest.fixture
 def aln():
     _seqs = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",
@@ -20,7 +21,7 @@ def aln():
     return seqs
 
 
-@pytest.fixture()
+@pytest.fixture
 def single_nt_aln():
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -31,7 +32,7 @@ def single_nt_aln():
     return make_aligned_seqs(_seqs, moltype="dna")
 
 
-@pytest.fixture()
+@pytest.fixture
 def diff_nt_aln():
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -42,7 +43,7 @@ def diff_nt_aln():
     return make_aligned_seqs(_seqs, moltype="dna")
 
 
-@pytest.fixture()
+@pytest.fixture
 def diff_nt_aln_with_fg():
     _seqs = {
         "Human": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA",

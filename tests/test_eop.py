@@ -4,6 +4,7 @@ import numpy
 import pytest
 from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.result import hypothesis_result
+
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
 from mdeq.utils import load_from_sqldb
 
@@ -28,7 +29,7 @@ def dstore_instance():
     return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
-@pytest.fixture()
+@pytest.fixture
 def multiple_alns():
     _seqs1 = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",
@@ -54,7 +55,7 @@ def multiple_alns():
     return [aln1, aln2, aln3]
 
 
-@pytest.fixture()
+@pytest.fixture
 def diff_length_alns():
     _seqs1 = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",
@@ -78,6 +79,7 @@ loader = load_from_sqldb()
 
 def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     from cogent3.util.dict_array import DictArray
+
     from mdeq.adjacent import grouped
 
     aln = loader(dstore_instance[4])

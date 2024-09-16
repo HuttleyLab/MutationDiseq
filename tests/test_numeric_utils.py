@@ -2,12 +2,13 @@ import numpy
 from cogent3 import make_aligned_seqs
 from cogent3.app import evo
 from cogent3.util.dict_array import DictArray
+from numpy import eye
+
 from mdeq.numeric import (
     valid_probability_vector,
     valid_rate_matrix,
     valid_stochastic_matrix,
 )
-from numpy import eye
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]

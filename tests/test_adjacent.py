@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from cogent3 import make_unaligned_seqs, open_data_store
 from cogent3.util.deserialise import deserialise_object
+
 from mdeq.adjacent import (
     grouped,
     grouped_alignments,

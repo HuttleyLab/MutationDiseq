@@ -3,6 +3,7 @@ import pathlib
 import pytest
 from cogent3 import make_aligned_seqs, open_data_store
 from cogent3.app.evo import model_collection_result
+
 from mdeq.toe import (
     get_init_hypothesis,
     get_init_model_coll,
@@ -17,17 +18,17 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture()
+@pytest.fixture
 def opt_args():
     return {"max_evaluations": 1000, "limit_action": "ignore"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def dstore_instance():
     return open_data_store(DATADIR / "3000bp.sqlitedb")
 
 
-@pytest.fixture()
+@pytest.fixture
 def get_aln():
     _data = {
         "Human": "ATGCGGCTCGCGGAGGCCGCGCTCGCGGAG",
@@ -39,7 +40,7 @@ def get_aln():
     return aln
 
 
-@pytest.fixture()
+@pytest.fixture
 def get_aln_no_fg():
     _data = {
         "Human": "ATGCGGCTCGCGGAGGCCGCGCTCGCGGAG",
@@ -49,12 +50,12 @@ def get_aln_no_fg():
     return make_aligned_seqs(data=_data, moltype="dna")
 
 
-@pytest.fixture()
+@pytest.fixture
 def no_init_mc(get_aln, opt_args):
     return get_no_init_model_coll(get_aln, just_continuous=False, opt_args=opt_args)
 
 
-@pytest.fixture()
+@pytest.fixture
 def init_mc(get_aln, opt_args):
     return get_init_model_coll(get_aln, just_continuous=False, opt_args=opt_args)
 

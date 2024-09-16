@@ -4,6 +4,9 @@ import numpy
 import pytest
 from cogent3 import get_model, load_aligned_seqs, make_tree, open_data_store
 from cogent3.app import evo
+from numpy import eye
+from numpy.testing import assert_allclose
+
 from mdeq.jsd import get_jsd
 from mdeq.stationary_pi import (
     OscillatingPiException,
@@ -11,8 +14,6 @@ from mdeq.stationary_pi import (
     get_stat_pi_via_eigen,
 )
 from mdeq.utils import load_from_sqldb
-from numpy import eye
-from numpy.testing import assert_allclose
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley"]
@@ -20,7 +21,7 @@ __credits__ = ["Katherine Caley"]
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture()
+@pytest.fixture
 def brca1_alignment():
     aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
@@ -28,7 +29,7 @@ def brca1_alignment():
     return aln
 
 
-@pytest.fixture()
+@pytest.fixture
 def likelihood_gtr(brca1_alignment):
     """optimised GTR likelihood object."""
     model_gtr = get_model("GTR", optimise_motif_probs=True)
@@ -42,7 +43,7 @@ def likelihood_gtr(brca1_alignment):
     return lf_gtr
 
 
-@pytest.fixture()
+@pytest.fixture
 def likelihood_gn(brca1_alignment, likelihood_gtr):
     """optimised GS likelihood object initialised from GTR."""
 
@@ -56,7 +57,7 @@ def likelihood_gn(brca1_alignment, likelihood_gtr):
     return gn_lf
 
 
-@pytest.fixture()
+@pytest.fixture
 def almost_identity():
     P = numpy.array(
         [
@@ -97,7 +98,7 @@ def almost_identity():
     return P, pi
 
 
-@pytest.fixture()
+@pytest.fixture
 def identity():
     P = eye(4)
     pi = numpy.array(
@@ -111,7 +112,7 @@ def identity():
     return P, pi
 
 
-@pytest.fixture()
+@pytest.fixture
 def non_converging():
     dstore = open_data_store(DATADIR / "non_converging.sqlitedb")
     loader = load_from_sqldb()

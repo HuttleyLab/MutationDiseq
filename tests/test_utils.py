@@ -3,6 +3,8 @@ import pathlib
 import pytest
 from cogent3 import make_aligned_seqs
 from cogent3.app import io as io_app
+from numpy.testing import assert_allclose
+
 from mdeq.utils import (
     CompressedValue,
     configure_parallel,
@@ -12,7 +14,6 @@ from mdeq.utils import (
     paths_to_sqlitedbs_matching,
     set_fg_edge,
 )
-from numpy.testing import assert_allclose
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -20,7 +21,7 @@ __credits__ = ["Katherine Caley", "Gavin Huttley"]
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture()
+@pytest.fixture
 def aln():
     _seqs = {
         "Human": "GCCAGCTCATTACAGCATGAGAACAGCAGTTTATTACTCACT",

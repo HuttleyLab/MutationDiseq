@@ -3,6 +3,7 @@ import pathlib
 import pytest
 from cogent3 import open_data_store
 from cogent3.core.alignment import ArrayAlignment
+
 from mdeq import control, load_from_sqldb
 from mdeq.adjacent import grouped
 
@@ -12,12 +13,12 @@ __credits__ = ["Gavin Huttley"]
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture()
+@pytest.fixture
 def opt_args():
     return {"max_evaluations": 100, "limit_action": "ignore", "max_restarts": 1}
 
 
-@pytest.fixture()
+@pytest.fixture
 def apes_dstore():
     return open_data_store(DATADIR / "apes-align.sqlitedb")
 
@@ -56,6 +57,7 @@ def test_select_model_result_model(model_result):
 
 def test_select_aeop(apes_dstore, opt_args):
     from cogent3 import ArrayAlignment
+
     from mdeq.eop import ALT_AEOP, NULL_AEOP, adjacent_eop
 
     def get_selected(result, name):
@@ -85,6 +87,7 @@ def test_select_aeop(apes_dstore, opt_args):
 
 def test_select_teop(apes_dstore, opt_args):
     from cogent3.app.result import model_result
+
     from mdeq.eop import ALT_TEOP, NULL_TEOP, temporal_eop
 
     def get_selected(result, name):

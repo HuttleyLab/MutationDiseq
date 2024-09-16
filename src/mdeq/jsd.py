@@ -48,18 +48,18 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         jsd = jsd_pwise[ingroup]
         return edge, ingroup, jsd
 
-    elif evaluate == "total":
+    if evaluate == "total":
         jsd = jsd_func(freqs[0], freqs[1], freqs[2])
         return edge, (aln.names[0], aln.names[1], aln.names[2]), jsd
 
-    elif evaluate == "max":
+    if evaluate == "max":
         keys = [tup for tup in jsd_pwise.keys() if edge in tup]
         jsd_pwise = {key: jsd_pwise[key] for key in keys}
         max_pair = max(jsd_pwise, key=lambda k: jsd_pwise[k])
         jsd = jsd_pwise[max_pair]
         return edge, max_pair, jsd
 
-    elif evaluate == "all":
+    if evaluate == "all":
         jsds = {}
 
         jsds["total_jsd"] = jsd_func(freqs[0], freqs[1], freqs[2])

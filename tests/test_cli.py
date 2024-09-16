@@ -3,6 +3,7 @@ import pathlib
 import pytest
 from click.testing import CliRunner
 from cogent3 import open_data_store
+
 from mdeq import (
     aeop,
     convergence,

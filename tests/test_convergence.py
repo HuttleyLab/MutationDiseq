@@ -5,6 +5,10 @@ import pytest
 from cogent3 import load_aligned_seqs, make_tree, open_data_store
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.util.deserialise import deserialise_object
+from numpy import array, diag_indices, mean, std
+from numpy.random import default_rng
+from numpy.testing import assert_almost_equal
+
 from mdeq.convergence import (
     bootstrap_to_nabla,
     convergence,
@@ -15,9 +19,6 @@ from mdeq.convergence import (
 )
 from mdeq.model import GN_sm
 from mdeq.utils import load_from_sqldb
-from numpy import array, diag_indices, mean, std
-from numpy.random import default_rng
-from numpy.testing import assert_almost_equal
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
@@ -74,7 +75,7 @@ def pi_Q_gtr():
     return pi, Q
 
 
-@pytest.fixture()
+@pytest.fixture
 def pi_Q():
     """pi0 and Q for a non-stationary process."""
     pi = array(
