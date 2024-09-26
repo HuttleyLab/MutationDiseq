@@ -73,6 +73,12 @@ _inpath_bootstrap = click.option(
     callback=_valid_sqlitedb_input,
     help="path to toe bootstrap result sqlitedb",
 )
+_inpath_convergence = click.option(
+    "-i",
+    "--inpath",
+    callback=_valid_sqlitedb_input,
+    help="path to convergence result sqlitedb",
+)
 _inpath_controls = click.option(
     "-i",
     "--inpath",

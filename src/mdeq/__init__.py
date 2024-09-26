@@ -535,11 +535,12 @@ def make_controls(
         "toe": {"-ve": NULL_TOE, "+ve": ALT_TOE},
         "single-model": {"-ve": "", "+ve": ""},
     }
+    console = Console()
     if not matches_type(dstore, (result_types[analysis],)):
-        click.secho(
+        console.print(
+            "[red]ERROR: "
             f"object type in {inpath!r} does not match expected "
             f"{result_types[analysis]!r} for analysis {analysis!r}",
-            fg="red",
         )
         sys.exit(1)
 
