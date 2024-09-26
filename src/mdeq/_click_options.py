@@ -67,6 +67,12 @@ _inpath = click.option(
     callback=_valid_sqlitedb_input,
     help="path to a sqlitedb of aligments",
 )
+_inpath_bootstrap = click.option(
+    "-i",
+    "--inpath",
+    callback=_valid_sqlitedb_input,
+    help="path to toe bootstrap result sqlitedb",
+)
 _outpath = click.option(
     "-o",
     "--outpath",

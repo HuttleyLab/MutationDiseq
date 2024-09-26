@@ -420,7 +420,7 @@ def aeop(
 
 
 @main.command(no_args_is_help=True)
-@_cli_opt._inpath
+@_cli_opt._inpath_bootstrap
 @_cli_opt._outpath
 @_cli_opt._wrt_nstat
 @_cli_opt._parallel
