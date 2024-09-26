@@ -464,7 +464,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 
 
 @main.command(no_args_is_help=True)
-@_cli_opt._inpath
+@_cli_opt._inpath_controls
 @_cli_opt._outdir
 @_cli_opt._analysis
 @_cli_opt._controls

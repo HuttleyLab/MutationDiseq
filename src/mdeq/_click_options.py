@@ -73,6 +73,13 @@ _inpath_bootstrap = click.option(
     callback=_valid_sqlitedb_input,
     help="path to toe bootstrap result sqlitedb",
 )
+_inpath_controls = click.option(
+    "-i",
+    "--inpath",
+    callback=_valid_sqlitedb_input,
+    help="path to sqlitedbs from any of the hypothesis tests",
+)
+
 _outpath = click.option(
     "-o",
     "--outpath",
@@ -171,7 +178,7 @@ _analysis = click.option(
     "--analysis",
     type=click.Choice(["aeop", "teop", "toe", "single-model"]),
     required=True,
-    help="which control set to generate",
+    help="analysis type",
 )
 _controls = click.option(
     "--controls",
