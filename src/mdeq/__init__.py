@@ -5,7 +5,8 @@ from mdeq import _block_threading  # noqa: F401 isort: skip
 
 import inspect
 import sys
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+from collections.abc import Mapping
 from functools import reduce
 from operator import add
 from pathlib import Path
@@ -78,8 +79,28 @@ def get_opt_settings(testrun):
     )
 
 
+class OrderedGroup(click.Group):
+    """custom group class to ensure help function returns commands in desired order.
+    class is adapted from Максим Стукало's answer to
+    https://stackoverflow.com/questions/47972638/how-can-i-define-the-order-of-click-sub-commands-in-help
+    """
+
+    def __init__(
+        self,
+        name: str | None = None,
+        commands: Mapping[str, click.Command] | None = None,
+        **kwargs,
+    ):
+        super().__init__(name, commands, **kwargs)
+        #: the registered subcommands by their exported names.
+        self.commands = commands or OrderedDict()
+
+    def list_commands(self, ctx: click.Context) -> Mapping[str, click.Command]:
+        return self.commands
+
+
 @trogon.tui()
-@click.group()
+@click.group(cls=OrderedGroup)
 @click.version_option(__version__)
 def main():
     """mdeq: mutation disequilibrium analysis tools."""
