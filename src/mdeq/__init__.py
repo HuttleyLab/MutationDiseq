@@ -44,15 +44,8 @@ from mdeq.utils import (
     paths_to_sqlitedbs_matching,
     set_fg_edge,
     write_to_sqldb,
+keep_running
 )
-
-try:
-    from wakepy import set_keepawake, unset_keepawake
-except (ImportError, NotImplementedError):
-    # may not be installed, or on linux where this library doesn't work
-    def _do_nothing_func(*args, **kwargs): ...
-
-    set_keepawake, unset_keepawake = _do_nothing_func, _do_nothing_func
 
 
 __author__ = "Gavin Huttley"
@@ -437,36 +430,34 @@ def aeop(
 @_cli_opt._verbose
 def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, verbose):
     """estimates convergence towards mutation equilibrium."""
-    set_keepawake(keep_screen_awake=False)
+    with keep_running():
+        LOGGER = CachingLogger(create_dir=True)
+        LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
+        LOGGER.log_args()
+        dstore = open_data_store(inpath, limit=limit)
+        expected_types = ("compact_bootstrap_result",)
+        if not matches_type(dstore, expected_types):
+            click.secho(
+                f"records {dstore.record_type} not one of the expected types {expected_types}",
+                fg="red",
+            )
+            exit(1)
 
-    LOGGER = CachingLogger(create_dir=True)
-    LOGGER.log_file_path = f"{outpath.stem}-mdeq-convergence.log"
-    LOGGER.log_args()
-    dstore = open_data_store(inpath, limit=limit)
-    expected_types = ("compact_bootstrap_result",)
-    if not matches_type(dstore, expected_types):
-        click.secho(
-            f"records {dstore.record_type} not one of the expected types {expected_types}",
-            fg="red",
+        loader = load_from_sqldb()
+        to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
+        out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+        writer = write_to_sqldb(out_dstore)
+        process = loader + to_delta_nabla + writer
+        kwargs = configure_parallel(parallel=parallel, mpi=mpi)
+        process.apply_to(
+            dstore.completed,
+            logger=LOGGER,
+            cleanup=True,
+            show_progress=verbose > 1,
+            **kwargs,
         )
-        exit(1)
-
-    loader = load_from_sqldb()
-    to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
-    out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
-    writer = write_to_sqldb(out_dstore)
-    process = loader + to_delta_nabla + writer
-    kwargs = configure_parallel(parallel=parallel, mpi=mpi)
-    process.apply_to(
-        dstore.completed,
-        logger=LOGGER,
-        cleanup=True,
-        show_progress=verbose > 1,
-        **kwargs,
-    )
-    func_name = inspect.stack()[0].function
-    click.secho(f"{func_name!r} is done!", fg="green")
-    unset_keepawake()
+        func_name = inspect.stack()[0].function
+        click.secho(f"{func_name!r} is done!", fg="green")
 
 
 @main.command(no_args_is_help=True)

@@ -17,6 +17,17 @@ from cogent3.util.dict_array import DictArray
 from cogent3.util.misc import get_object_provenance
 from scipy.interpolate import UnivariateSpline
 
+try:
+    from wakepy.keep import running as keep_running
+
+    # trap flaky behaviour on linux
+    with keep_running():
+        ...
+
+except (NotImplementedError, ImportError):
+
+    keep_running = contextlib.nullcontext
+
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Gavin Huttley"]
 
