@@ -445,7 +445,10 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
 
         loader = load_from_sqldb()
         to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
-        out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
+        outpath.parent.mkdir(parents=True, exist_ok=True)
+        if outpath.exists() and overwrite:
+            outpath.unlink()
+        out_dstore = open_data_store(outpath, mode="w")
         writer = write_to_sqldb(out_dstore)
         process = loader + to_delta_nabla + writer
         kwargs = configure_parallel(parallel=parallel, mpi=mpi)
