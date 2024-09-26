@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import json
 import pathlib
@@ -25,7 +26,6 @@ try:
         ...
 
 except (NotImplementedError, ImportError):
-
     keep_running = contextlib.nullcontext
 
 __author__ = "Katherine Caley"

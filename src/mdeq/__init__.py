@@ -38,15 +38,14 @@ from mdeq.toe import ALT_TOE, NULL_TOE
 from mdeq.utils import (
     configure_parallel,
     db_status,
+    keep_running,
     load_from_sqldb,
     matches_type,
     omit_suffixes_from_path,
     paths_to_sqlitedbs_matching,
     set_fg_edge,
     write_to_sqldb,
-keep_running
 )
-
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
