@@ -4,7 +4,9 @@ from functools import lru_cache, singledispatch
 from types import NoneType
 from typing import ForwardRef, Union
 
+from cogent3 import make_table
 from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.data_store import DataStoreABC
 from cogent3.app.typing import SerialisableType
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.recalculation.scope import InvalidScopeError
@@ -17,7 +19,7 @@ from scipy.optimize import minimize_scalar
 
 from mdeq.numeric import dot, sum
 from mdeq.toe import ALT_TOE
-from mdeq.utils import SerialisableMixin
+from mdeq.utils import SerialisableMixin, load_from_sqldb
 
 __author__ = "Katherine Caley"
 __credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
@@ -271,3 +273,13 @@ def bootstrap_to_nabla(
         fg_edge=fg_edge,
         wrt_nstat=wrt_nstat,
     )
+
+
+def delta_nabla_table(dstore: DataStoreABC) -> "Table":
+    """returns the delta nabla statistics from a convergence type."""
+    loader = load_from_sqldb()
+    rows = []
+    for m in dstore.completed:
+        r = loader(m)
+        rows.append((r.source, r.delta_nabla, r.std_null))
+    return make_table(header=["source", "delta_nabla", "std"], data=rows)

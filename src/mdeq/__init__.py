@@ -26,7 +26,7 @@ from mdeq import model as _model  # noqa: F401
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import control_generator, select_model_result
-from mdeq.convergence import bootstrap_to_nabla
+from mdeq.convergence import bootstrap_to_nabla, delta_nabla_table
 from mdeq.eop import (
     ALT_AEOP,
     ALT_TEOP,
@@ -652,6 +652,42 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 
             table = make_table(data=data)
             table.write(outpath)
+    console.print("[green]Done!")
+
+
+@main.command(no_args_is_help=True)
+@_cli_opt._inpath_convergence
+@_cli_opt._outdir
+@_cli_opt._overwrite
+@_cli_opt._verbose
+def extract_delta_nabla(inpath, outdir, overwrite, verbose):
+    """extracts delta-nabla from convergence sqlitedb results
+
+    generates a tsv with same name in outdir"""
+    console = Console()
+    if verbose:
+        console.print(f"[blue]{inpath!s}")
+
+    outpath = outdir / inpath.with_suffix(".tsv")
+    if overwrite:
+        outpath.unlink(missing_ok=True)
+    elif outpath.exists():
+        console.print(f"[red]{outpath!s} exists, set overwrite to replace")
+        sys.exit(1)
+
+    dstore = open_data_store(inpath, mode="r")
+    data_type = "delta_nabla"
+    console = Console()
+    if not matches_type(dstore, data_type):
+        console.print(
+            "[red]ERROR: "
+            f"object type in {inpath!r} does not match expected "
+            f"{data_type!r}",
+        )
+        sys.exit(1)
+    outpath.parent.mkdir(parents=True, exist_ok=True)
+    table = delta_nabla_table(dstore)
+    table.write(outpath)
     console.print("[green]Done!")
 
 
