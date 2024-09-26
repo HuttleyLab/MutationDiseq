@@ -39,17 +39,18 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  aeop             between loci equivalence of mutation process test
-  convergence      estimates convergence towards mutation equilibrium.
-  db-summary       displays summary information about a db
-  extract-pvalues  extracts p-values from TOE sqlitedb results
-  make-adjacent    makes sqlitedb of adjacent alignment records.
-  make-controls    simulate negative and positive controls
-  prep             pre-process alignment data.
-  slide            generate window sized sub-alignments.
-  teop             between branch equivalence of mutation process test
-  toe              test of existence of mutation equilibrium.
-  tui              Open Textual TUI.
+  tui                  Open Textual TUI.
+  prep                 pre-process alignment data.
+  make-adjacent        makes sqlitedb of adjacent alignment records.
+  toe                  test of existence of mutation equilibrium.
+  teop                 between branch equivalence of mutation process test
+  aeop                 between loci equivalence of mutation process test
+  convergence          estimates convergence towards mutation equilibrium.
+  make-controls        simulate negative and positive controls
+  db-summary           displays summary information about a db
+  extract-pvalues      extracts p-values from TOE sqlitedb results
+  extract-delta-nabla  extracts delta-nabla from convergence sqlitedb results
+  slide                generate window sized sub-alignments.
 
 ```
 <!-- [[[end]]] -->
