@@ -120,11 +120,11 @@ def prep(
         console.print(
             r"[red]EXIT: ambiguous input, set either --indir [b]AND[/b] --suffix [b]OR[/b] --inpath",
         )
-        exit(1)
+        sys.exit(1)
 
     if indir and suffix is None:
         console.print(r"[red]EXIT: must define suffix")
-        exit(1)
+        sys.exit(1)
 
     dstore = open_data_store(inpath or indir, suffix=suffix, limit=limit)
     loader = (
@@ -136,7 +136,7 @@ def prep(
         aln = loader(dstore.completed[0])
         if fg_edge not in aln.names:
             console.print(rf"[red]EXIT: {fg_edge=} not in {aln.names}")
-            exit(1)
+            sys.exit(1)
 
     LOGGER.log_file_path = f"{outpath.stem}-prep.log"
 
@@ -252,7 +252,7 @@ def toe(
             f"records {dstore.record_type} not one of the expected types {expected_types}",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     loader = load_from_sqldb()
 
@@ -268,7 +268,7 @@ def toe(
     if fg_edge is not None:
         if fg_edge not in _aln.names:
             click.secho(f"FAIL: {fg_edge!r} name not present in {_aln.names}", fg="red")
-            exit(1)
+            sys.exit(1)
 
         info_val = _aln.info.get("fg_edge", None)
         if info_val and info_val != fg_edge:
@@ -340,7 +340,7 @@ def teop(
     expected_types = ("ArrayAlignment", "Alignment")
     if not matches_type(dstore, expected_types):
         click.secho(f"records not one of the expected types {expected_types}", fg="red")
-        exit(1)
+        sys.exit(1)
 
     # construct hypothesis app, null constrains edge_names to same process
     loader = load_from_sqldb()
@@ -396,7 +396,7 @@ def aeop(
             f"records {dstore.record_type} not one of the expected types {expected_types}",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     loader = load_from_sqldb()
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
@@ -441,7 +441,7 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
                 f"records {dstore.record_type} not one of the expected types {expected_types}",
                 fg="red",
             )
-            exit(1)
+            sys.exit(1)
 
         loader = load_from_sqldb()
         to_delta_nabla = bootstrap_to_nabla(wrt_nstat=wrt_nstat)
@@ -520,7 +520,7 @@ def make_controls(
             f"{result_types[analysis]!r} for analysis {analysis!r}",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     model_name = control_name[analysis][controls]
     model_selector = select_model_result(model_name)
@@ -581,7 +581,7 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
         console.print(
             f"[red]EXIT: no paths found for {indir=}, {recursive=!r}, {pattern=!r}",
         )
-        exit(1)
+        sys.exit(1)
 
     with Progress(transient=True) as progress:
         all_paths = progress.add_task("[green]Dbs...", total=len(paths))
@@ -662,7 +662,7 @@ def slide(
         console.print(
             f"[red] {window_size=} is less than {min_length=}, should be other way around",
         )
-        exit(1)
+        sys.exit(1)
 
     dstore = open_data_store(inpath)
     expected_types = ("ArrayAlignment", "Alignment")
@@ -671,7 +671,7 @@ def slide(
             f"records {dstore.record_type} not one of the expected types {expected_types}",
             fg="red",
         )
-        exit(1)
+        sys.exit(1)
 
     loader = load_from_sqldb()
     if outpath.exists() and overwrite:
