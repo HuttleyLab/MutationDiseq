@@ -286,6 +286,7 @@ def toe(
         sequential=sequential,
         just_continuous=just_continuous,
     )
+    outpath.parent.mkdir(parents=True, exist_ok=True)
     out_dstore = open_data_store(outpath, mode="w" if overwrite else "r")
     writer = write_to_sqldb(out_dstore)
     if inject_fg:
