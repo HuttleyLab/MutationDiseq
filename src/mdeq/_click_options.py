@@ -3,9 +3,6 @@ from pathlib import Path
 import click
 from cogent3 import load_table, load_tree
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
 
 def _rand_seed(*args):
     """handles random seed input"""

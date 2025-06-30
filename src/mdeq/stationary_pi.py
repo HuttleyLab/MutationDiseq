@@ -10,9 +10,6 @@ from mdeq.numeric import (
     valid_stochastic_matrix,
 )
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 
 class OscillatingPiException(Exception):
     """Did not converge to a unique stationary distribution."""

@@ -27,9 +27,6 @@ try:
 except (NotImplementedError, ImportError):
     keep_running = contextlib.nullcontext
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 
 def get_foreground(aln):
     """returns fg_edge value from info attribute."""

@@ -12,10 +12,6 @@ from rich.progress import track
 from mdeq.model import GN_sm, GS_sm
 from mdeq.toe import ALT_TOE, NULL_TOE, test_of_existence
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
-
 _aln_key = "alignment"
 
 

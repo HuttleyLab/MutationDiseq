@@ -15,9 +15,6 @@ from mdeq.stationary_pi import (
 )
 from mdeq.utils import load_from_sqldb
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

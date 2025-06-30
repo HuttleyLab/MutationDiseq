@@ -6,9 +6,6 @@ some problems
 
 import os
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"

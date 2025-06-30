@@ -8,9 +8,6 @@ from cogent3.app.result import hypothesis_result
 from mdeq.eop import ALT_TEOP, NULL_TEOP, adjacent_eop, temporal_eop
 from mdeq.utils import load_from_sqldb
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

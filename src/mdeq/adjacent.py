@@ -13,9 +13,6 @@ from cogent3.util.misc import get_object_provenance
 
 from mdeq.utils import SerialisableMixin, load_from_sqldb
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
 T = TypeVar("T")
 
 

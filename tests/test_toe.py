@@ -12,9 +12,6 @@ from mdeq.toe import (
 )
 from mdeq.utils import load_from_sqldb, write_to_sqldb
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

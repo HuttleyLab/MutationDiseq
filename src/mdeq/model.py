@@ -7,9 +7,6 @@ from cogent3.evolve.models import register_model
 from cogent3.evolve.ns_substitution_model import GeneralStationary
 from numpy import finfo
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 RATE_PARAM_UPPER = 100
 
 

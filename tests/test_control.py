@@ -7,9 +7,6 @@ from cogent3.core.new_alignment import Alignment
 from mdeq import control, load_from_sqldb
 from mdeq.adjacent import grouped
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

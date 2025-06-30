@@ -50,10 +50,7 @@ from mdeq.utils import (
 
 os.environ["COGENT3_NEW_TYPE"] = "1"
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
-__version__ = "2021.12.20"
+__version__ = "2025.6.30"
 
 filterwarnings("ignore", "Not using MPI")
 filterwarnings("ignore", "Unexpected warning from scipy")

@@ -15,9 +15,6 @@ from mdeq.utils import (
     set_fg_edge,
 )
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

@@ -12,10 +12,6 @@ from mdeq.adjacent import grouped
 from mdeq.bootstrap import _reconstitute_collection
 from mdeq.utils import CompressedValue
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-__version__ = "2021.12.20"
-
 
 class select_model_result:
     """selects the specified model name from a bootstrap result object"""

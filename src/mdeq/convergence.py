@@ -21,9 +21,6 @@ from mdeq.numeric import dot, sum
 from mdeq.toe import ALT_TOE
 from mdeq.utils import SerialisableMixin, load_from_sqldb
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Ben Kaehler", "Gavin Huttley"]
-
 
 def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
     """returns Q with sum(pi_i Q[i,i]) == -1 given pi_0."""

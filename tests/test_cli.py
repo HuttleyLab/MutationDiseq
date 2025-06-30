@@ -25,10 +25,6 @@ from mdeq._click_options import (
 )
 from mdeq.utils import CompressedValue, matches_type
 
-__author__ = "Gavin Huttley"
-__credits__ = ["Gavin Huttley"]
-
-
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 

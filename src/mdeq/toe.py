@@ -9,10 +9,6 @@ from cogent3.util.misc import extend_docstring_from
 from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
-
 NULL_TOE = "GSN"
 ALT_TOE = "GN"
 

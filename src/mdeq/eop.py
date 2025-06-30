@@ -13,9 +13,6 @@ from cogent3.app.typing import (
 from mdeq.model import RATE_PARAM_UPPER
 from mdeq.utils import get_foreground
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley", "Gavin Huttley"]
-
 NULL_AEOP = "GN-aeop-null"
 ALT_AEOP = "GN-aeop-alt"
 

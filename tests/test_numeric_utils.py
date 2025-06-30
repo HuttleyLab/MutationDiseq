@@ -10,9 +10,6 @@ from mdeq.numeric import (
     valid_stochastic_matrix,
 )
 
-__author__ = "Katherine Caley"
-__credits__ = ["Katherine Caley"]
-
 
 def test_valid_rate_matrix_DictArray():
     Q = numpy.random.randint(1, 20, size=(4, 4))
