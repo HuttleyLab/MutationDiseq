@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar, Union
+from typing import TypeVar
 
 from cogent3 import open_data_store
 from cogent3.app.composable import define_app
@@ -147,7 +147,7 @@ class load_data_group:
         self.data_store_path = data_store_path
         self.data_store = open_data_store(self.data_store_path)
 
-    def main(self, data_identifiers: grouped) -> Union[grouped, SerialisableType]:
+    def main(self, data_identifiers: grouped) -> grouped | SerialisableType:
         """
         Notes
         -----

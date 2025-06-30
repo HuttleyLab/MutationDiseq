@@ -1,6 +1,5 @@
 import json
 from copy import deepcopy
-from typing import Union
 
 from cogent3.app import evo
 from cogent3.app import io as io_app
@@ -192,7 +191,7 @@ class bootstrap:
     def main(
         self,
         aln: AlignedSeqsType,
-    ) -> Union[SerialisableType, compact_bootstrap_result]:
+    ) -> SerialisableType | compact_bootstrap_result:
         result = compact_bootstrap_result(get_unique_id(aln))
         try:
             obs = self._hyp(aln)
@@ -253,7 +252,7 @@ def bootstrap_toe(
     sequential=False,
     opt_args=None,
     verbose=False,
-) -> Union[SerialisableType, compact_bootstrap_result]:
+) -> SerialisableType | compact_bootstrap_result:
     """dynamically constructs a bootstrap app and performs the toe."""
     if isinstance(aln, NotCompleted):
         return aln

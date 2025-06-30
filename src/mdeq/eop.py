@@ -1,4 +1,4 @@
-from typing import ForwardRef, Union
+from typing import ForwardRef
 
 from cogent3 import get_model, make_tree
 from cogent3.app import evo
@@ -59,7 +59,7 @@ class adjacent_eop:
         data: ForwardRef("grouped"),
         *args,
         **kwargs,
-    ) -> Union[HypothesisResultType, SerialisableType]:
+    ) -> HypothesisResultType | SerialisableType:
         """fits multiple adjacent loci in."""
         # TODO is it possible to get the param rules from each locus in null
         # if so, they could then be applied to the corresponding alternate
@@ -190,6 +190,6 @@ class temporal_eop:
         data: AlignedSeqsType,
         *args,
         **kwargs,
-    ) -> Union[HypothesisResultType, SerialisableType]:
+    ) -> HypothesisResultType | SerialisableType:
         app = self._get_app(data)
         return app(data)

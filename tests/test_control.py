@@ -66,7 +66,7 @@ def test_select_aeop(apes_dstore, opt_args):
 
     loader = load_from_sqldb()
     alns = [loader(apes_dstore[i]) for i in (2, 4)]
-    for n, a in zip(("a", "b"), alns):
+    for n, a in zip(("a", "b"), alns, strict=False):
         a.info.name = n
     grp = grouped(("a", "b"))
     grp.elements = alns

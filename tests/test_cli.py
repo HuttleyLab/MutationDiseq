@@ -106,7 +106,7 @@ def fasta(tmp_dir):
     dstore = open_data_store(inpath, limit=5)
     # make different lengths
     lengths = [250, 300, 600, 700, 1000]
-    for length, m in zip(lengths, dstore):
+    for length, m in zip(lengths, dstore, strict=False):
         aln = loader(m)[:length]
         fp = outpath / f"{m.unique_id.replace('json', 'fasta')}"
         aln.write(fp)

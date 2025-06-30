@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache, singledispatch
 from types import NoneType
-from typing import ForwardRef, Union
+from typing import ForwardRef
 
 from cogent3 import make_table
 from cogent3.app.composable import NotCompleted, define_app
@@ -35,7 +35,7 @@ def unit_stationary_Q(pi_0: ndarray, Q: ndarray):
     return Q
 
 
-def unit_nonstationary_Q(pi_0: ndarray, Q: ndarray):
+def unit_nonstationary_Q(pi_0: ndarray, Q: ndarray) -> ndarray:
     """returns Q with ENS==1 given pi_0."""
     result = minimize_scalar(
         lambda x: (1.0 - expected_number_subs(pi_0, Q, x)) ** 2,
@@ -80,21 +80,22 @@ def convergence(pi_0: ndarray, Q: ndarray, t: float, wrt_nstat=False) -> float:
 
 
 @dataclass(eq=True)
-class delta_nabla(SerialisableMixin):
+class nabla_c(SerialisableMixin):
     obs_nabla: float
     null_nabla: tuple[float]
     fg_edge: str
-    size_null: int = None
-    source: str = None
+    size_null: int | None = None
+    source: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.null_nabla) <= 1:
-            raise ValueError("len null distribution must be > 1")
+            msg = "len null distribution must be > 1"
+            raise ValueError(msg)
 
         self.null_nabla = tuple(self.null_nabla)
         self.size_null = len(self.null_nabla)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return id((self.source, self.fg_edge, self.obs_nabla, self.null_nabla))
 
     @property
@@ -246,7 +247,7 @@ def bootstrap_to_nabla(
     result: ForwardRef("compact_bootstrap_result"),
     fg_edge=None,
     wrt_nstat=False,
-) -> Union[delta_nabla, SerialisableType]:
+) -> nabla_c | SerialisableType:
     """returns delta nabla stats from bootstrap result."""
     from mdeq.bootstrap import deserialise_single_hyp
 

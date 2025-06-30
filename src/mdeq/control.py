@@ -101,7 +101,7 @@ class control_generator:
 
     def main(
         self,
-        result: Union[HypothesisResultType, ForwardRef("compact_bootstrap_result")],
+        result: HypothesisResultType | ForwardRef("compact_bootstrap_result"),
     ) -> T:
         # this function will only be called on the first result object,
         # it establishes the appropriate method to set for the data
