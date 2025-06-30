@@ -2,10 +2,10 @@ import pathlib
 from random import Random
 from typing import ForwardRef, Union
 
-from cogent3 import ArrayAlignment
 from cogent3.app.composable import define_app
 from cogent3.app.result import bootstrap_result, model_result
 from cogent3.app.typing import HypothesisResultType, SerialisableType
+from cogent3.core.new_alignment import Alignment
 from cogent3.util.deserialise import deserialise_object
 
 from mdeq.adjacent import grouped
@@ -46,7 +46,7 @@ class control_generator:
         self.rng = Random()
         self.rng.seed(a=seed)
 
-    def _from_single_model_single_locus(self, result) -> ArrayAlignment:
+    def _from_single_model_single_locus(self, result) -> Alignment:
         source = pathlib.Path(result.source).stem
         # conventional model object
         model = self._select_model(result)
@@ -54,7 +54,7 @@ class control_generator:
             model.deserialise_values()
 
         sim = model.lf.simulate_alignment(random_series=self.rng)
-        sim.info.source = source
+        sim.source = source
         return sim
 
     def _from_single_model_multi_locus(self, result) -> grouped:
@@ -91,13 +91,13 @@ class control_generator:
         for name, lf in model.items():
             ids.append(name)
             sim = lf.simulate_alignment()
-            sim.info.source = ids[-1]
+            sim.source = ids[-1]
             sims.append(sim)
         result = grouped(ids, source=source)
         result.elements = sims
         return result
 
-    T = Union[ArrayAlignment, grouped, SerialisableType]
+    T = Union[Alignment, grouped, SerialisableType]
 
     def main(
         self,

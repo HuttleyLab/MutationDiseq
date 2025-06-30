@@ -11,7 +11,7 @@ from typing import Union
 import numpy
 from cogent3 import get_app, make_table, open_data_store
 from cogent3.app import io as io_app
-from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.composable import NotCompleted, define_app, get_unique_id
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise
 from cogent3.util.dict_array import DictArray
@@ -121,7 +121,7 @@ def set_fg_edge(
             "ERROR",
             set_fg_edge.__name__,
             f"{fg_edge!r} not in {aln.names}",
-            source=aln.info.source,
+            source=get_unique_id(aln),
         )
 
     aln.info.fg_edge = fg_edge

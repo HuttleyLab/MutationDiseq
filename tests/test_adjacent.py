@@ -49,10 +49,10 @@ def test_sequential_groups():
 
 
 def test_make_identifier():
-    a = make_unaligned_seqs({"a": "ACGG"}, info=dict(source="blah/a.json"))
-    b = make_unaligned_seqs({"a": "ACGG"}, info=dict(source="blah/b.json"))
-    c = make_unaligned_seqs({"a": "ACGG"}, info=dict(source="blah/c.json"))
-    d = make_unaligned_seqs({"a": "ACGG"})
+    a = make_unaligned_seqs({"a": "ACGG"}, moltype="dna", source="blah/a.json")
+    b = make_unaligned_seqs({"a": "ACGG"}, moltype="dna", source="blah/b.json")
+    c = make_unaligned_seqs({"a": "ACGG"}, moltype="dna", source="blah/c.json")
+    d = make_unaligned_seqs({"a": "ACGG"}, moltype="dna")
 
     # missing identifier
     with pytest.raises(ValueError):
@@ -72,9 +72,21 @@ def test_make_identifier():
 
 
 def test_grouped_alignments():
-    a = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/a.json"))
-    b = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/b.json"))
-    c = make_unaligned_seqs({"a": "ACGG", "d": "ACGG"}, info=dict(source="blah/c.json"))
+    a = make_unaligned_seqs(
+        {"a": "ACGG", "b": "ACGG"},
+        moltype="dna",
+        source="blah/a.json",
+    )
+    b = make_unaligned_seqs(
+        {"a": "ACGG", "b": "ACGG"},
+        moltype="dna",
+        source="blah/b.json",
+    )
+    c = make_unaligned_seqs(
+        {"a": "ACGG", "d": "ACGG"},
+        moltype="dna",
+        source="blah/c.json",
+    )
     got = grouped_alignments([a, b])
     assert isinstance(got, grouped_alignments)
     with pytest.raises(AssertionError):
@@ -97,8 +109,16 @@ def test_grouped_data():
     got = grouped(identifiers=("a", "a"))
     assert got.source == "a--a"
 
-    a = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/a.json"))
-    b = make_unaligned_seqs({"a": "ACGG", "b": "ACGG"}, info=dict(source="blah/b.json"))
+    a = make_unaligned_seqs(
+        {"a": "ACGG", "b": "ACGG"},
+        moltype="dna",
+        source="blah/a.json",
+    )
+    b = make_unaligned_seqs(
+        {"a": "ACGG", "b": "ACGG"},
+        moltype="dna",
+        source="blah/b.json",
+    )
     got.elements = [a, b]
     assert isinstance(got.elements, grouped_alignments)
     assert len(got.elements) == len(got.identifiers)
@@ -123,7 +143,7 @@ def test_load_data_group():
         assert got.source == source
         for i, n in enumerate(pair):
             o = got.elements[i]
-            assert o.info.source == n.replace(".json", "")
+            assert o.source == n.replace(".json", "")
 
     path = DATADIR / "300bp.sqlitedb"
     dstore = open_data_store(path)

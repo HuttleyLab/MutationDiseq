@@ -89,6 +89,6 @@ def mles_within_bounds(
                     "FAIL",
                     "mles_within_bounds",
                     f"({minval:.1e}, {maxval:.1f}) params are close to bounds ({lower:.1e}, {upper:.1f})",
-                    source=str(result.source),
+                    source=result,
                 )
     return result

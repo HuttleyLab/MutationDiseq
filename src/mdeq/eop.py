@@ -3,7 +3,7 @@ from typing import ForwardRef, Union
 from cogent3 import get_model, make_tree
 from cogent3.app import evo
 from cogent3.app import result as c3_result
-from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.composable import NotCompleted, define_app, get_unique_id
 from cogent3.app.typing import (
     AlignedSeqsType,
     HypothesisResultType,
@@ -45,7 +45,7 @@ class adjacent_eop:
                 "ERROR",
                 self,
                 f"inconsistent foreground edges {selected_foreground}",
-                source=data.source,
+                source=data,
             )
 
         fg_edge = selected_foreground[0]
@@ -74,9 +74,9 @@ class adjacent_eop:
 
         names = list(aligns)
         if self._tree is None:
-            assert (
-                len(data.elements[0].names) == 3
-            ), f"need tree specified for {len(data.elements)} seqs"
+            assert len(data.elements[0].names) == 3, (
+                f"need tree specified for {len(data.elements)} seqs"
+            )
             tree = make_tree(tip_names=data.elements[0].names)
         else:
             tree = self._tree
@@ -95,10 +95,10 @@ class adjacent_eop:
         lf.optimise(**self._opt_args)
         lf.name = "null"
 
-        null_result = c3_result.model_result(source=data.source)
+        null_result = c3_result.model_result(source=get_unique_id(data))
         null_result["null"] = lf
         # each alignment fit separately under alt
-        alt_results = c3_result.model_result(source=data.source)
+        alt_results = c3_result.model_result(source=get_unique_id(data))
         alt = get_model("GN", optimise_motif_probs=True)
         for locus, aln in aligns.items():
             lf = alt.make_likelihood_function(
@@ -112,7 +112,7 @@ class adjacent_eop:
             lf.name = aln.info.name
             alt_results[locus] = lf
 
-        combined = c3_result.hypothesis_result(NULL_AEOP, source=data.source)
+        combined = c3_result.hypothesis_result(NULL_AEOP, source=get_unique_id(data))
         combined[NULL_AEOP] = null_result
         combined[ALT_AEOP] = alt_results
         return combined
@@ -141,9 +141,9 @@ class temporal_eop:
             "show_progress": False,
             **opt_args,
         }
-        assert (
-            not isinstance(edge_names, str) and len(edge_names) > 1
-        ), "must specify > 1 edge name"
+        assert not isinstance(edge_names, str) and len(edge_names) > 1, (
+            "must specify > 1 edge name"
+        )
         self._edge_names = edge_names
         self._tree = tree
         self._hyp = None

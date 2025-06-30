@@ -137,7 +137,7 @@ def test_4otu_create_bootstrap_app(dstore4_tree, opt_args):
     )
 
     aln = reader(dstore[0])
-    result = bstrap(aln)
+    result = bstrap.main(aln)
     result.deserialised_values()
     assert isinstance(result, compact_bootstrap_result)
     n = num_discrete_edges(result.observed.null.lf)

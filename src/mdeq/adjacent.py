@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar, Union
 
-from cogent3 import _Table as Table
 from cogent3 import open_data_store
 from cogent3.app.composable import define_app
 from cogent3.app.typing import SerialisableType
+from cogent3.core.table import Table
 from cogent3.util import deserialise
 from cogent3.util.misc import get_object_provenance
 

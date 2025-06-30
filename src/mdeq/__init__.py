@@ -2,8 +2,8 @@
 
 # following line to stop automatic threading by numpy
 from mdeq import _block_threading  # noqa: F401 isort: skip
-
 import inspect
+import os
 import sys
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
@@ -47,6 +47,8 @@ from mdeq.utils import (
     set_fg_edge,
     write_to_sqldb,
 )
+
+os.environ["COGENT3_NEW_TYPE"] = "1"
 
 __author__ = "Gavin Huttley"
 __credits__ = ["Gavin Huttley"]
@@ -758,7 +760,7 @@ def slide(
                 if sub is None or len(sub) < min_length:
                     continue
 
-                sub.info.source = f"{n}-{start}"
+                sub.source = f"{n}-{start}"
                 sub.info.index = start
                 if "fg_edge" in aln.info:
                     sub.info.fg_edge = aln.info["fg_edge"]

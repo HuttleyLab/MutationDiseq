@@ -89,7 +89,7 @@ def runner():
 
 def test_get_obj_type():
     types = {
-        "300bp.sqlitedb": "ArrayAlignment",
+        "300bp.sqlitedb": "Alignment",
         "toe-300bp.sqlitedb": "compact_bootstrap_result",
     }
     for path, expect in types.items():
@@ -155,7 +155,7 @@ def test_prep_codon_pos(runner, tmp_dir, fasta):
     """codon_pos arg works"""
     outpath = tmp_dir / "output.sqlitedb"
     outpath.unlink(missing_ok=True)
-    args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600//3} -O".split()
+    args = f"-id {fasta} -su fasta -o {outpath} -c 1 -ml {600 // 3} -O".split()
     r = runner.invoke(prep, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
 
@@ -367,17 +367,17 @@ def test_make_controls_aeop_exercise(runner, tmp_dir):
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
-    from cogent3 import ArrayAlignment
+    from cogent3.core.new_alignment import Alignment
 
     inpath = DATADIR / "teop-apes.sqlitedb"
-    exercise_make_controls(runner, inpath, tmp_dir, "teop", ArrayAlignment)
+    exercise_make_controls(runner, inpath, tmp_dir, "teop", Alignment)
 
 
 def test_make_controls_toe_exercise(runner, tmp_dir):
-    from cogent3 import ArrayAlignment
+    from cogent3.core.new_alignment import Alignment
 
     inpath = DATADIR / "toe-300bp.sqlitedb"
-    exercise_make_controls(runner, inpath, tmp_dir, "toe", ArrayAlignment)
+    exercise_make_controls(runner, inpath, tmp_dir, "toe", Alignment)
 
 
 def test_sqlitedb_summary(runner):

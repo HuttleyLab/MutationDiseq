@@ -4,7 +4,7 @@ from typing import Union
 
 from cogent3.app import evo
 from cogent3.app import io as io_app
-from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.composable import NotCompleted, define_app, get_unique_id
 from cogent3.app.result import bootstrap_result
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util import deserialise, union_dict
@@ -193,7 +193,7 @@ class bootstrap:
         self,
         aln: AlignedSeqsType,
     ) -> Union[SerialisableType, compact_bootstrap_result]:
-        result = compact_bootstrap_result(aln.info.source)
+        result = compact_bootstrap_result(get_unique_id(aln))
         try:
             obs = self._hyp(aln)
         except ValueError as err:
@@ -204,7 +204,7 @@ class bootstrap:
 
         result.observed = obs
         self._null = obs[NULL_TOE]
-        self._inpath = aln.info.source
+        self._inpath = get_unique_id(aln)
 
         series = range(self._num_reps)
         if self._verbose:
@@ -213,7 +213,7 @@ class bootstrap:
         for i in series:
             sim_aln = self._null.simulate_alignment()
             sim_aln.info.update(aln.info)
-            sim_aln.info.source = f"{self._inpath} - simalign {i}"
+            sim_aln.source = f"{self._inpath} - simalign {i}"
             sim_result = self._hyp(sim_aln)
             if not sim_result:
                 continue

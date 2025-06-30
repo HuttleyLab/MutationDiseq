@@ -64,7 +64,7 @@ def test_set_fg_edge():
     from cogent3.app.composable import NotCompleted
 
     data = dict(a="ACCGG", b="ACCGG", c="ACCGG")
-    aln = make_aligned_seqs(data, info=dict(source="blah"))
+    aln = make_aligned_seqs(data, source="blah", moltype="dna")
     app = set_fg_edge(fg_edge="c")
     got = app(aln)
     assert got.info.fg_edge == "c"

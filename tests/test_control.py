@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 from cogent3 import open_data_store
-from cogent3.core.alignment import ArrayAlignment
+from cogent3.core.new_alignment import Alignment
 
 from mdeq import control, load_from_sqldb
 from mdeq.adjacent import grouped
@@ -56,7 +56,7 @@ def test_select_model_result_model(model_result):
 
 
 def test_select_aeop(apes_dstore, opt_args):
-    from cogent3 import ArrayAlignment
+    from cogent3.core.new_alignment import Alignment
 
     from mdeq.eop import ALT_AEOP, NULL_AEOP, adjacent_eop
 
@@ -78,7 +78,7 @@ def test_select_aeop(apes_dstore, opt_args):
     # should have multiple loci in lf itself
     a = n.lf.get_param_value("alignment", locus="a")
 
-    assert isinstance(a, ArrayAlignment)
+    assert isinstance(a, Alignment)
     a = get_selected(result, ALT_AEOP)
     assert len(a) == 2
     # keyed by alignments
@@ -112,10 +112,10 @@ def test_gen_toe_null(toe_result):
     selector = control.select_model_result(NULL_TOE)
     gen = control.control_generator(selector)
     got = gen(toe_result)
-    assert isinstance(got, ArrayAlignment)
+    assert isinstance(got, Alignment)
     # successive calls work too
     got = gen(toe_result)
-    assert isinstance(got, ArrayAlignment)
+    assert isinstance(got, Alignment)
 
 
 def test_gen_toe_alt(toe_result):
@@ -124,7 +124,7 @@ def test_gen_toe_alt(toe_result):
     selector = control.select_model_result(ALT_TOE)
     gen = control.control_generator(selector)
     got = gen(toe_result)
-    assert isinstance(got, ArrayAlignment)
+    assert isinstance(got, Alignment)
 
 
 @pytest.fixture(scope="session")
@@ -151,7 +151,7 @@ def test_gen_aeop_null(aeop_result):
     def validate_for_result(generator, result):
         r = generator(result)
         assert isinstance(r, grouped)
-        assert all(isinstance(e, ArrayAlignment) for e in r.elements)
+        assert all(isinstance(e, Alignment) for e in r.elements)
 
     selector = control.select_model_result(NULL_AEOP)
     for result in aeop_result:
@@ -166,7 +166,7 @@ def test_gen_aeop_alt(aeop_result):
     def validate_for_result(generator, result):
         r = generator(result)
         assert isinstance(r, grouped)
-        assert all(isinstance(e, ArrayAlignment) for e in r.elements)
+        assert all(isinstance(e, Alignment) for e in r.elements)
 
     selector = control.select_model_result(ALT_AEOP)
     gen = control.control_generator(selector)
@@ -179,7 +179,7 @@ def test_gen_teop_null(teop_result):
 
     def validate_for_result(generator, result):
         r = generator(result)
-        assert isinstance(r, ArrayAlignment)
+        assert isinstance(r, Alignment)
 
     selector = control.select_model_result(NULL_TEOP)
     gen = control.control_generator(selector)
@@ -192,9 +192,8 @@ def test_gen_teop_alt(teop_result):
 
     def validate_for_result(generator, result):
         r = generator(result)
-        assert isinstance(r, ArrayAlignment)
+        return isinstance(r, Alignment)
 
     selector = control.select_model_result(ALT_TEOP)
     gen = control.control_generator(selector)
-    for result in teop_result:
-        validate_for_result(gen, result)
+    assert all(validate_for_result(gen, result) for result in teop_result)

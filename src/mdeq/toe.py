@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from cogent3.app import evo
-from cogent3.app.composable import NotCompleted, define_app
+from cogent3.app.composable import NotCompleted, define_app, get_unique_id
 from cogent3.app.result import generic_result
 from cogent3.app.typing import AlignedSeqsType, SerialisableType
 from cogent3.util.misc import extend_docstring_from
@@ -150,7 +150,7 @@ def get_no_init_hypothesis(
         sequential=False,
         opt_args=opt_args,
     )(aln)
-    result = generic_result(source=aln.info.source)
+    result = generic_result(source=get_unique_id(aln))
     result.update([("mcr", mc_result)])
     return result
 
@@ -172,6 +172,6 @@ def get_init_hypothesis(
         sequential=True,
         opt_args=opt_args,
     )(aln)
-    result = generic_result(source=aln.info.source)
+    result = generic_result(source=get_unique_id(aln))
     result.update([("mcr", mc_result)])
     return result
