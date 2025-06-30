@@ -8,7 +8,7 @@ from mdeq import (
     aeop,
     convergence,
     db_summary,
-    extract_delta_nabla,
+    extract_nabla_c,
     extract_pvalues,
     load_from_sqldb,
     make_adjacent,
@@ -392,7 +392,7 @@ def test_extract_pvalues(runner, tmp_dir):
     assert r.exit_code == 0, r.output
 
 
-def test_extract_delta_nabla(runner, tmp_dir):
+def test_extract_nabla_c(runner, tmp_dir):
     # generate the convergence results
     inpath = DATADIR / "toe-300bp.sqlitedb"
     outpath = tmp_dir / "delme.sqlitedb"
@@ -403,7 +403,7 @@ def test_extract_delta_nabla(runner, tmp_dir):
     # run extract command on output of convergence command
     tsv_file = outpath.with_suffix(".tsv")
     args = f"-i {outpath!s} -od {tsv_file.parent}".split()
-    r = runner.invoke(extract_delta_nabla, args, catch_exceptions=False)
+    r = runner.invoke(extract_nabla_c, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
     # table num rows should equal number of completeds in convergence dstore
     dstore = open_data_store(outpath)

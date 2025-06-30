@@ -662,8 +662,8 @@ def extract_pvalues(indir, pattern, recursive, outdir, limit, overwrite, verbose
 @_cli_opt._outdir
 @_cli_opt._overwrite
 @_cli_opt._verbose
-def extract_delta_nabla(inpath, outdir, overwrite, verbose):
-    """extracts delta-nabla from convergence sqlitedb results
+def extract_nabla_c(inpath, outdir, overwrite, verbose):
+    """extracts nabla-c from convergence sqlitedb results
 
     generates a tsv with same name in outdir"""
     console = Console()
