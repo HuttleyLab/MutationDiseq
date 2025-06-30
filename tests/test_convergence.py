@@ -12,8 +12,8 @@ from numpy.testing import assert_almost_equal
 from mdeq.convergence import (
     bootstrap_to_nabla,
     convergence,
-    delta_nabla,
     get_nabla,
+    nabla_c,
     unit_nonstationary_Q,
     unit_stationary_Q,
 )
@@ -135,13 +135,12 @@ def test_convergence_GTR(pi_Q_gtr):
     assert_almost_equal(conv, 0, decimal=10)
 
 
-# testing delta_nabla dataclass
-def test_make_delta_nabla():
+def test_make_nabla_c():
     """works if list, tuple or numpy array used."""
     data = [0.2, 1, 1.8]
     fg_edge = "blah"
     for _type_ in (tuple, list, array):
-        obj = delta_nabla(3.0, _type_(data), fg_edge)
+        obj = nabla_c(3.0, _type_(data), fg_edge)
         assert obj.mean_null == 1
         assert obj.size_null == 3
 
@@ -151,16 +150,16 @@ def test_fail_make_delta_nabla():
     for _type_ in (tuple, list, array):
         for data in ([], [2]):
             with pytest.raises(ValueError):
-                delta_nabla(3.0, _type_(data), "blah", 3)
+                nabla_c(3.0, _type_(data), "blah", 3)
 
 
-def test_delta_nabla_value():
-    """given statistic and null of statistic computes correct delta_nabla."""
+def test_nabla_c_value():
+    """given statistic and null of statistic computes correct nabla_c."""
     rng = default_rng()
     size = 67
     obs_nabla = rng.uniform(low=1e-6, high=100, size=1)[0]
     null_nabla = rng.uniform(low=1e-6, high=100, size=size)
-    dnab = delta_nabla(obs_nabla, null_nabla, "blah")
+    dnab = nabla_c(obs_nabla, null_nabla, "blah")
     assert dnab.obs_nabla == obs_nabla
     assert dnab.size_null == size
     assert dnab.fg_edge == "blah"
@@ -169,32 +168,32 @@ def test_delta_nabla_value():
     std_null = std(null_nabla, ddof=1)
     assert std_null == dnab.std_null
 
-    assert dnab.delta_nabla == obs_nabla - mean_null
+    assert dnab.nabla_c == obs_nabla - mean_null
 
 
 def test_rich_dict():
     """dict can be json formatted."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
+    obj = nabla_c(3.0, (0.2, 1.0, 1.8), "blah")
     got = obj.to_rich_dict()
     _ = json.dumps(got)  # should not fail
     # type value has correct name
-    assert got["type"].endswith(delta_nabla.__name__)
+    assert got["type"].endswith(nabla_c.__name__)
 
 
 def test_roundtrip_json():
     """direct deserialisation works."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
+    obj = nabla_c(3.0, (0.2, 1.0, 1.8), "blah")
     j = obj.to_json()
-    g = delta_nabla.from_dict(json.loads(j))
+    g = nabla_c.from_dict(json.loads(j))
     assert g == obj
 
 
 def test_cogent3_deserialisation():
     """works with deserialise_object."""
-    obj = delta_nabla(3.0, (0.2, 1.0, 1.8), "blah")
+    obj = nabla_c(3.0, (0.2, 1.0, 1.8), "blah")
     j = obj.to_json()
     g = deserialise_object(j)
-    assert isinstance(g, delta_nabla)
+    assert isinstance(g, nabla_c)
     assert g == obj
 
 
@@ -250,12 +249,12 @@ def toe_bstrap():
     return result
 
 
-def test_load_delta_nabla(toe_bstrap):
-    """returns a series of delta_nabla instances."""
+def test_load_nabla_c(toe_bstrap):
+    """returns a series of nabla_c instances."""
     app = bootstrap_to_nabla()
     results = [app(r) for r in toe_bstrap]
-    assert {type(r) for r in results} == {delta_nabla}
-    assert all(v.delta_nabla >= 0 for v in results)
+    assert {type(r) for r in results} == {nabla_c}
+    assert all(v.nabla_c >= 0 for v in results)
 
 
 def test_unit_ens(pi_Q):

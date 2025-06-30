@@ -26,7 +26,7 @@ from mdeq import model as _model  # noqa: F401
 from mdeq.adjacent import load_data_group, physically_adjacent
 from mdeq.bootstrap import bootstrap_toe
 from mdeq.control import control_generator, select_model_result
-from mdeq.convergence import bootstrap_to_nabla, delta_nabla_table
+from mdeq.convergence import bootstrap_to_nabla, nabla_c_table
 from mdeq.eop import (
     ALT_AEOP,
     ALT_TEOP,
@@ -678,7 +678,7 @@ def extract_nabla_c(inpath, outdir, overwrite, verbose):
         sys.exit(1)
 
     dstore = open_data_store(inpath, mode="r")
-    data_type = "delta_nabla"
+    data_type = "delta_nabla", "nabla_c"
     console = Console()
     if not matches_type(dstore, data_type):
         console.print(
@@ -688,7 +688,7 @@ def extract_nabla_c(inpath, outdir, overwrite, verbose):
         )
         sys.exit(1)
     outpath.parent.mkdir(parents=True, exist_ok=True)
-    table = delta_nabla_table(dstore)
+    table = nabla_c_table(dstore)
     table.write(outpath)
     console.print("[green]Done!")
 

@@ -214,18 +214,18 @@ loader = load_from_sqldb()
 
 
 def test_convergence(runner, tmp_dir):
-    from mdeq.convergence import delta_nabla
+    from mdeq.convergence import nabla_c
 
     inpath = DATADIR / "toe-300bp.sqlitedb"
     outpath = tmp_dir / "delme.sqlitedb"
     args = [f"-i{inpath}", f"-o{outpath}", "-O"]
     r = runner.invoke(convergence, args, catch_exceptions=False)
     assert r.exit_code == 0, r.output
-    # now load the saved records and check they're delta_nabla instances
+    # now load the saved records and check they're nabla_c instances
     dstore = open_data_store(outpath)
 
     results = [loader(m) for m in dstore]
-    assert {type(r) for r in results} == {delta_nabla}
+    assert {type(r) for r in results} == {nabla_c}
     assert len(dstore) == len(results)
 
     # now with incorrect input

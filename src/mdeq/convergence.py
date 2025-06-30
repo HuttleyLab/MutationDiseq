@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from functools import lru_cache, singledispatch
+from functools import singledispatch
 from types import NoneType
 from typing import ForwardRef
 
@@ -99,29 +99,29 @@ class nabla_c(SerialisableMixin):
         return id((self.source, self.fg_edge, self.obs_nabla, self.null_nabla))
 
     @property
-    @lru_cache
     def mean_null(self):
         return mean(self.null_nabla)
 
     @property
-    @lru_cache
     def std_null(self):
         return std(self.null_nabla, ddof=1)
 
     @property
-    @lru_cache
-    def delta_nabla(self):
+    def nabla_c(self):
         """returns observed nabla minus mean of the null nabla distribution."""
         return self.obs_nabla - self.mean_null
 
-    def to_json(self):
+    def to_json(self) -> str:
         return json.dumps(self.to_rich_dict())
 
 
-@deserialise.register_deserialiser(get_object_provenance(delta_nabla))
-def deserialise_delta_nabla(data: dict):
-    """recreates delta_nabla instance from dict."""
-    return delta_nabla.from_dict(data)
+@deserialise.register_deserialiser(
+    get_object_provenance(nabla_c),
+    "mdeq.convergence.delta_nabla",
+)
+def deserialise_nabla_c(data: dict) -> nabla_c:
+    """recreates nabla_c instance from dict."""
+    return nabla_c.from_dict(data)
 
 
 @singledispatch
@@ -213,12 +213,12 @@ def _(fg_edge, gn_result=None, time_delta=None, wrt_nstat=False) -> tuple[str, f
     )
 
 
-def get_delta_nabla(
+def get_nabla_c(
     obs_result,
     sim_results,
     fg_edge=None,
     wrt_nstat=False,
-) -> delta_nabla:
+) -> nabla_c:
     """returns the adjusted nabla statistic.
 
     Parameters
@@ -239,7 +239,7 @@ def get_delta_nabla(
     kwargs = dict(wrt_nstat=wrt_nstat)
     fg_edge, obs_nabla = get_nabla(fg_edge, gn_result=obs_result, **kwargs)
     sim_nabla = tuple(get_nabla(fg_edge, gn_result=r, **kwargs)[1] for r in sim_results)
-    return delta_nabla(obs_nabla, tuple(sim_nabla), fg_edge, source=obs_result.source)
+    return nabla_c(obs_nabla, tuple(sim_nabla), fg_edge, source=obs_result.source)
 
 
 @define_app
@@ -268,7 +268,7 @@ def bootstrap_to_nabla(
             v = deserialise_single_hyp(v)
         null_results.append(v[ALT_TOE])
 
-    return get_delta_nabla(
+    return get_nabla_c(
         obs_result,
         null_results,
         fg_edge=fg_edge,
@@ -276,11 +276,11 @@ def bootstrap_to_nabla(
     )
 
 
-def delta_nabla_table(dstore: DataStoreABC) -> "Table":
-    """returns the delta nabla statistics from a convergence type."""
+def nabla_c_table(dstore: DataStoreABC) -> "Table":
+    """returns the centered nabla statistics from a convergence type."""
     loader = load_from_sqldb()
     rows = []
     for m in dstore.completed:
         r = loader(m)
-        rows.append((r.source, r.delta_nabla, r.std_null))
-    return make_table(header=["source", "delta_nabla", "std"], data=rows)
+        rows.append((r.source, r.nabla_c, r.std_null))
+    return make_table(header=["source", "nabla_c", "std"], data=rows)
