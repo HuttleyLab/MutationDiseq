@@ -13,8 +13,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "blosc2", # todo remove blosc dependency when dropping mdeq.sqlite*
-    "cogent3 @ git+https://github.com/cogent3/cogent3.git@develop",
+    "cogent3>=2025.7.10a5",
     "click",
     "numpy",
     "scipy",
@@ -107,7 +106,7 @@ target-version = "py310"
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
 select = ["ALL"]
-ignore = ["EXE002", "FA100", "E501", "D"]
+ignore = ["EXE002", "FA100", "E501", "D", "ICN001"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
