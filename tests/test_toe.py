@@ -32,7 +32,7 @@ def get_aln():
         "Mouse": "ATGCCCGGCGCCAAGGCAGCGCTGGCGGAG",
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
-    aln = make_aligned_seqs(data=_data, moltype="dna")
+    aln = make_aligned_seqs(_data, moltype="dna")
     aln.info["fg_edge"] = "Human"
     return aln
 
@@ -44,7 +44,7 @@ def get_aln_no_fg():
         "Mouse": "ATGCCCGGCGCCAAGGCAGCGCTGGCGGAG",
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
-    return make_aligned_seqs(data=_data, moltype="dna")
+    return make_aligned_seqs(_data, moltype="dna")
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 from cogent3 import open_data_store
-from cogent3.core.new_alignment import Alignment
+from cogent3.core.alignment import Alignment
 
 from mdeq import control, load_from_sqldb
 from mdeq.adjacent import grouped
@@ -53,7 +53,7 @@ def test_select_model_result_model(model_result):
 
 
 def test_select_aeop(apes_dstore, opt_args):
-    from cogent3.core.new_alignment import Alignment
+    from cogent3.core.alignment import Alignment
 
     from mdeq.eop import ALT_AEOP, NULL_AEOP, adjacent_eop
 

@@ -150,7 +150,7 @@ def prep(
     loader = (
         load_from_sqldb()
         if inpath
-        else get_app("load_aligned", format=suffix, moltype="dna")
+        else get_app("load_aligned", format_name=suffix, moltype="dna")
     )
     if fg_edge:
         aln = loader(dstore.completed[0])

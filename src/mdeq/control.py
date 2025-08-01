@@ -5,7 +5,7 @@ from typing import ForwardRef, Union
 from cogent3.app.composable import define_app
 from cogent3.app.result import bootstrap_result, model_result
 from cogent3.app.typing import HypothesisResultType, SerialisableType
-from cogent3.core.new_alignment import Alignment
+from cogent3.core.alignment import Alignment
 from cogent3.util.deserialise import deserialise_object
 
 from mdeq.adjacent import grouped

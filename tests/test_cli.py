@@ -363,14 +363,14 @@ def test_make_controls_aeop_exercise(runner, tmp_dir):
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
-    from cogent3.core.new_alignment import Alignment
+    from cogent3.core.alignment import Alignment
 
     inpath = DATADIR / "teop-apes.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "teop", Alignment)
 
 
 def test_make_controls_toe_exercise(runner, tmp_dir):
-    from cogent3.core.new_alignment import Alignment
+    from cogent3.core.alignment import Alignment
 
     inpath = DATADIR / "toe-300bp.sqlitedb"
     exercise_make_controls(runner, inpath, tmp_dir, "toe", Alignment)
