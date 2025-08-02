@@ -50,15 +50,10 @@ test = [
     "nox",
 ]
 dev = [
-    "click",
     "cogapp",
     "docformatter",
     "flit",
-    "pytest",
-    "pytest-cov",
-    "pytest-xdist",
-    "ruff==0.6.5",
-    "nox",
+    "mdeq[test]"
 ]
 
 [tool.pytest.ini_options]
