@@ -38,9 +38,9 @@ def get_jsd(aln, edge=None, evaluate="ingroup"):
         tip_dists = aln.distance_matrix().to_dict()
         ingroup = min(tip_dists, key=lambda k: tip_dists[k])
 
-        assert edge in ingroup, (
-            'evaluate="ingroup" is not valid if given edge is not in ingroup'
-        )
+        assert (
+            edge in ingroup
+        ), 'evaluate="ingroup" is not valid if given edge is not in ingroup'
 
         jsd = jsd_pwise[ingroup]
         return edge, ingroup, jsd
@@ -87,9 +87,9 @@ def get_entropy(model_result, edge, stat_pi=True):
     -------
             Entropy of a nucleotide distribution.
     """
-    assert edge in model_result.alignment.names, (
-        "edge input name is not included in model_result"
-    )
+    assert (
+        edge in model_result.alignment.names
+    ), "edge input name is not included in model_result"
 
     lf = model_result.lf
     pi = lf.get_motif_probs().to_array()
