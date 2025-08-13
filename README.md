@@ -1,5 +1,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/HuttleyLab/MutationDiseq/badge.svg)](https://coveralls.io/github/HuttleyLab/MutationDiseq)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![DOI](https://zenodo.org/badge/351654591.svg)](https://doi.org/10.5281/zenodo.16829613)
 
 # mdeq: a tool for analysing mutation disequilibrium
 
