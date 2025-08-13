@@ -60,14 +60,6 @@ filterwarnings("ignore", "Used mean of.*", module="cogent3")
 filterwarnings("ignore", "use.*")
 filterwarnings("ignore", category=DeprecationWarning)
 
-_min_version = (3, 10)
-if sys.version_info < _min_version:
-    PY_VERSION = ".".join([str(n) for n in sys.version_info])
-    _min_version = ".".join(_min_version)
-    raise RuntimeError(
-        f"Python-{_min_version} or greater is required, Python-{PY_VERSION} used.",
-    )
-
 
 def get_opt_settings(testrun):
     """create optimisation settings."""
