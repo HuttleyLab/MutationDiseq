@@ -39,3 +39,4 @@ hg_old*
 .nox/*
 lcov*.info
 .ruff_cache/*
+.mypy_cache/*
