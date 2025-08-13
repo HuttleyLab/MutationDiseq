@@ -337,6 +337,9 @@ def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
             args = args if seed else args[:-1]
             # make_controls(args)  # useful for debugging
             r = runner.invoke(make_controls, args, catch_exceptions=False)
+            if r.exit_code != 0:
+                print(f"## {r.output}")
+
             assert r.exit_code == 0, r.output
 
             dstore = open_data_store(outpath)
