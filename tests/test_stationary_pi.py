@@ -49,7 +49,7 @@ def likelihood_gn(brca1_alignment, likelihood_gtr):
     gn_lf = fitted_gn.lf
 
     gn_lf.initialise_from_nested(likelihood_gtr)
-    gn_lf.optimise()
+    gn_lf.optimise(show_progress=False)
 
     return gn_lf
 
