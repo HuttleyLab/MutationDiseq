@@ -71,9 +71,9 @@ class adjacent_eop:
 
         names = list(aligns)
         if self._tree is None:
-            assert (
-                len(data.elements[0].names) == 3
-            ), f"need tree specified for {len(data.elements)} seqs"
+            assert len(data.elements[0].names) == 3, (
+                f"need tree specified for {len(data.elements)} seqs"
+            )
             tree = make_tree(tip_names=data.elements[0].names)
         else:
             tree = self._tree
@@ -138,9 +138,9 @@ class temporal_eop:
             "show_progress": False,
             **opt_args,
         }
-        assert (
-            not isinstance(edge_names, str) and len(edge_names) > 1
-        ), "must specify > 1 edge name"
+        assert not isinstance(edge_names, str) and len(edge_names) > 1, (
+            "must specify > 1 edge name"
+        )
         self._edge_names = edge_names
         self._tree = tree
         self._hyp = None
