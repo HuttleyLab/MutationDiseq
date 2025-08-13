@@ -1,20 +1,15 @@
 # mdeq: a tool for analysing mutation disequilibrium
 
+A manuscript describing the methods will be made available as a preprint soon.
+
 ## Installation
 
-Create a conda environment, install flit and the git version of cogent3. Then do a developer install of this tool, again using flit  
-
-### Installing `accupy`
-
-For the most numerically accurate results you will need to install `accupy`. This is just a `pip install`, but it requires you have the `Eigen` library installed.
-
-## Running the tests
-
 ```
-$ pytest -n auto
+$ pip install mdeq
 ```
 
-This runs in parallel, greatly speeding things up.
+> **Note**
+> `accupy` is an optional package for the most numerically accurate routines involving matrices (e.g. dot products). These routines are explicitly employed for computing the nabla related statistics and are used if this package is installed. Unfortunately it is not easily installed and (at the time of writing) is not under active development.
 
 ## The available commands
 
