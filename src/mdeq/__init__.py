@@ -313,6 +313,7 @@ def toe(
         show_progress=verbose > 2,
         **kwargs,
     )
+    out_dstore.close()
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
 
@@ -366,6 +367,7 @@ def teop(
         show_progress=verbose > 2,
         **kwargs,
     )
+    out_dstore.close()
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
 
@@ -424,6 +426,7 @@ def aeop(
         show_progress=verbose > 1,
         **kwargs,
     )
+    out_dstore.close()
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
 
@@ -468,6 +471,8 @@ def convergence(inpath, outpath, wrt_nstat, parallel, mpi, limit, overwrite, ver
             show_progress=verbose > 1,
             **kwargs,
         )
+        out_dstore.close()
+
         func_name = inspect.stack()[0].function
         click.secho(f"{func_name!r} is done!", fg="green")
 
@@ -555,6 +560,7 @@ def make_controls(
     writer = write_to_sqldb(out_dstore)
     proc = loader + generator + writer
     proc.apply_to(dstore, logger=LOGGER, cleanup=True, show_progress=verbose > 2)
+    out_dstore.close()
     func_name = inspect.stack()[0].function
     click.secho(f"{func_name!r} is done!", fg="green")
 
@@ -762,6 +768,7 @@ def slide(
         data=log_file_path.read_text(),
     )
     log_file_path.unlink()
+    out_dstore.close()
     console.print("[green]Done!")
 
 
