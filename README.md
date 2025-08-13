@@ -4,7 +4,7 @@
 
 # mdeq: a tool for analysing mutation disequilibrium
 
-A manuscript describing the methods will be made available as a preprint soon.
+A manuscript describing the methods will be made available as a preprint soon. Associated analyses are [here](https://github.com/HuttleyLab/MutationDiseqAnalysis).
 
 ## Installation
 
@@ -13,7 +13,7 @@ $ pip install mdeq
 ```
 
 > **Note**
-> `accupy` is an optional package for the most numerically accurate routines involving matrices (e.g. dot products). These routines are explicitly employed for computing the nabla related statistics and are used if this package is installed. Unfortunately it is not easily installed and (at the time of writing) is not under active development.
+> `accupy` is an optional package for the most numerically accurate routines involving matrices (e.g. dot products). These routines are explicitly employed for computing the nabla related statistics and are used if this package is installed. Unfortunately it is not easily installed and (at the time of writing) is not under active development. Use the Docker container [here](https://github.com/HuttleyLab/MutationDiseqAnalysis) to get an Ubuntu VM with this library, accupy and otrher useful dependencies.
 
 ## The available commands
 
