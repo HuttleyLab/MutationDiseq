@@ -28,9 +28,9 @@ from mdeq.utils import CompressedValue, matches_type
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture(scope="session")
-def tmp_dir(tmpdir_factory):
-    return pathlib.Path(tmpdir_factory.mktemp("sqlitedb"))
+@pytest.fixture
+def tmp_dir(tmp_path_factory):
+    return pathlib.Path(tmp_path_factory.mktemp("sqlitedb"))
 
 
 @pytest.fixture(autouse=True)
@@ -93,7 +93,7 @@ def test_get_obj_type():
         assert matches_type(dstore, (expect,))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def fasta(tmp_dir):
     """write a few fasta formatted flat files"""
     inpath = DATADIR / "3000bp.sqlitedb"
@@ -233,7 +233,7 @@ def test_convergence(runner, tmp_dir):
     assert "not one of the expected types" in r.output
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def adjacent_path(runner, tmp_dir):
     from mdeq.adjacent import grouped
 
