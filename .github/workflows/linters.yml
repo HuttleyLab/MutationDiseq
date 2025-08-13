@@ -12,7 +12,7 @@ on:
 jobs:
   linters:
     runs-on: ubuntu-latest
-    if: github.repository == 'HuttleyLab/DiverseSeq'
+    if: github.repository == 'HuttleyLab/MutationDiseq'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
