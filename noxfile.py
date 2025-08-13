@@ -10,6 +10,7 @@ def test(session):
     session.run(
         "pytest",
         "-x",
+        "-s",
         *session.posargs,  # propagates sys.argv to pytest
     )
 

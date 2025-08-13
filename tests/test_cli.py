@@ -28,9 +28,9 @@ from mdeq.utils import CompressedValue, matches_type
 DATADIR = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.fixture(scope="session")
-def tmp_dir(tmpdir_factory):
-    return pathlib.Path(tmpdir_factory.mktemp("sqlitedb"))
+@pytest.fixture
+def tmp_dir(tmp_path_factory):
+    return pathlib.Path(tmp_path_factory.mktemp("sqlitedb"))
 
 
 @pytest.fixture(autouse=True)
@@ -93,7 +93,7 @@ def test_get_obj_type():
         assert matches_type(dstore, (expect,))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def fasta(tmp_dir):
     """write a few fasta formatted flat files"""
     inpath = DATADIR / "3000bp.sqlitedb"
@@ -233,7 +233,7 @@ def test_convergence(runner, tmp_dir):
     assert "not one of the expected types" in r.output
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def adjacent_path(runner, tmp_dir):
     from mdeq.adjacent import grouped
 
@@ -311,13 +311,14 @@ def test_teop_exercise(runner, tmp_dir):
     assert "not one of the expected types" in r.output
 
 
-def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
+def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
     controls = (
         "neg_control",
         "pos_control",
     )
+    dir_path.mkdir(parents=True, exist_ok=True)
     for ctl in controls:
-        outpath = tmp_dir / pathlib.Path(f"{analysis}-{ctl}-{inpath.stem}.sqlitedb")
+        outpath = dir_path / f"{analysis}-{ctl}-{inpath.stem}.sqlitedb"
         control = "-ve" if "neg" in ctl else "+ve"
         for seed in (None, 123):
             outpath.unlink(missing_ok=True)
@@ -329,7 +330,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
                 "--controls",
                 control,
                 "-od",
-                f"{tmp_dir}",
+                f"{dir_path}",
                 "-O",
                 f"-s{seed}",
             ]
@@ -351,15 +352,16 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
     args[1] = f"{invalidinput}"
     r = runner.invoke(make_controls, args, catch_exceptions=False)
     assert r.exit_code != 0
+    error_msg = " ".join(r.output.split())
     # checking the error message
-    assert "does not match expected" in r.output
+    assert "does not match expected" in error_msg
 
 
-def test_make_controls_aeop_exercise(runner, tmp_dir):
+def test_make_controls_aeop_exercise(runner, tmp_path):
     from mdeq.adjacent import grouped
 
     inpath = DATADIR / "aeop-apes.sqlitedb"
-    exercise_make_controls(runner, inpath, tmp_dir, "aeop", grouped)
+    exercise_make_controls(runner, inpath, tmp_path, "aeop", grouped)
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
