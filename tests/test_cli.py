@@ -337,9 +337,6 @@ def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
             args = args if seed else args[:-1]
             # make_controls(args)  # useful for debugging
             r = runner.invoke(make_controls, args, catch_exceptions=False)
-            if r.exit_code != 0:
-                print(f"## {r.output}")
-
             assert r.exit_code == 0, r.output
 
             dstore = open_data_store(outpath)
@@ -355,8 +352,9 @@ def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
     args[1] = f"{invalidinput}"
     r = runner.invoke(make_controls, args, catch_exceptions=False)
     assert r.exit_code != 0
+    error_msg = " ".join(r.output.split())
     # checking the error message
-    assert "does not match expected" in r.output
+    assert "does not match expected" in error_msg
 
 
 def test_make_controls_aeop_exercise(runner, tmp_path):
