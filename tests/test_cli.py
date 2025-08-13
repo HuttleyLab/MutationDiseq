@@ -311,13 +311,14 @@ def test_teop_exercise(runner, tmp_dir):
     assert "not one of the expected types" in r.output
 
 
-def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
+def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
     controls = (
         "neg_control",
         "pos_control",
     )
+    dir_path.mkdir(parents=True, exist_ok=True)
     for ctl in controls:
-        outpath = tmp_dir / pathlib.Path(f"{analysis}-{ctl}-{inpath.stem}.sqlitedb")
+        outpath = dir_path / f"{analysis}-{ctl}-{inpath.stem}.sqlitedb"
         control = "-ve" if "neg" in ctl else "+ve"
         for seed in (None, 123):
             outpath.unlink(missing_ok=True)
@@ -329,7 +330,7 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
                 "--controls",
                 control,
                 "-od",
-                f"{tmp_dir}",
+                f"{dir_path}",
                 "-O",
                 f"-s{seed}",
             ]
@@ -355,11 +356,11 @@ def exercise_make_controls(runner, inpath, tmp_dir, analysis, result_type):
     assert "does not match expected" in r.output
 
 
-def test_make_controls_aeop_exercise(runner, tmp_dir):
+def test_make_controls_aeop_exercise(runner, tmp_path):
     from mdeq.adjacent import grouped
 
     inpath = DATADIR / "aeop-apes.sqlitedb"
-    exercise_make_controls(runner, inpath, tmp_dir, "aeop", grouped)
+    exercise_make_controls(runner, inpath, tmp_path, "aeop", grouped)
 
 
 def test_make_controls_teop_exercise(runner, tmp_dir):
