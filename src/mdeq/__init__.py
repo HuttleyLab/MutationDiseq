@@ -3,7 +3,6 @@
 # following line to stop automatic threading by numpy
 from mdeq import _block_threading  # noqa: F401 isort: skip
 import inspect
-import os
 import sys
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
@@ -47,8 +46,6 @@ from mdeq.utils import (
     set_fg_edge,
     write_to_sqldb,
 )
-
-os.environ["COGENT3_NEW_TYPE"] = "1"
 
 __version__ = "2025.6.30"
 
