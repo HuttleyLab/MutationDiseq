@@ -52,7 +52,7 @@ dev = [
     "cogapp",
     "docformatter",
     "mdeq[test]",
-    "ruff==0.12.9",
+    "ruff==0.12.10",
 ]
 
 [tool.pytest.ini_options]
