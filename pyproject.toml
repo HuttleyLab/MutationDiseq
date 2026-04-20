@@ -50,7 +50,7 @@ mdeq = "mdeq:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov", "pytest-xdist", "nox"]
-dev = ["cogapp", "docformatter", "mdeq[test]", "ruff==0.15.8"]
+dev = ["cogapp", "docformatter", "mdeq[test]", "ruff==0.15.11"]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "-ra"]
