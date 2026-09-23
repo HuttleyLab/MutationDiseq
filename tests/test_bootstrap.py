@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 from cogent3 import load_aligned_seqs, open_data_store
-from cogent3.util.deserialise import deserialise_object
+from scinexus.deserialise import deserialise_object
 
 from mdeq.bootstrap import (
     bootstrap_toe,
