@@ -4,10 +4,10 @@ import pathlib
 import pytest
 from cogent3 import load_aligned_seqs, make_tree, open_data_store
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
-from scinexus.deserialise import deserialise_object
 from numpy import array, diag_indices, mean, std
 from numpy.random import default_rng
 from numpy.testing import assert_almost_equal
+from scinexus.deserialise import deserialise_object
 
 from mdeq.convergence import (
     bootstrap_to_nabla,

@@ -1,8 +1,4 @@
 name: Lint code using ruff
-# modified from https://towardsdatascience.com/black-with-git-hub-actions-4ffc5c61b5fe
-# caching https://stackoverflow.com/questions/59127258/how-can-i-use-pip-cache-in-github-actions
-# black integration https://black.readthedocs.io/en/stable/integrations/github_actions.html
-# isort integration https://pycqa.github.io/isort/docs/configuration/github_action.html
 
 on:
   push:
@@ -13,21 +9,25 @@ jobs:
   linters:
     runs-on: ubuntu-latest
     if: github.repository == 'HuttleyLab/MutationDiseq'
+
+    env:
+      # fail rather than silently re-resolving when uv.lock is out of date
+      UV_LOCKED: "1"
+
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Python
-        uses: actions/setup-python@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
         with:
-          python-version: '3.13'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tomli
-          export ruff_version=$(python -c 'import tomli; print([line for line in tomli.load(open("pyproject.toml","rb"))["project"]["optional-dependencies"]["dev"] if "ruff" in line][0])')
-          echo "Click version: ruff_version"
-          python -m pip install $ruff_version
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
       - name: Format code using ruff
-        run: ruff check --fix-only . && ruff format .
+        run: |
+          uv run --only-group lint ruff check --fix-only .
+          uv run --only-group lint ruff format .
+
       - name: Commit changes
         uses: EndBug/add-and-commit@v11
         with:

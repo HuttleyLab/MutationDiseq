@@ -1,9 +1,11 @@
 [build-system]
-requires = ["flit_core >=3.12.0,<5"]
-build-backend = "flit_core.buildapi"
+requires = ["uv_build>=0.9.0,<0.14.0"]
+build-backend = "uv_build"
 
 [project]
 name = "mdeq"
+version = "2026.4.21"
+description = "mdeq: mutation disequilibrium analysis tools."
 authors = [
     { name = "Katherine Caley", email = "katherine.caley@anu.edu.au" },
     { name = "Gavin Huttley", email = "Gavin.Huttley@anu.edu.au" },
@@ -18,9 +20,9 @@ keywords = [
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.11,<=3.14"
+requires-python = ">=3.11,<3.15"
 dependencies = [
-    "cogent3>=2025.7.10a5",
+    "cogent3>=2026.9.10",
     "scinexus",
     "click",
     "numpy",
@@ -41,17 +43,26 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-dynamic = ["version", "description"]
-
-[tool.flit.sdist]
-include = ["src/*", "pyproject.toml"]
 
 [project.scripts]
 mdeq = "mdeq:main"
 
-[project.optional-dependencies]
+[dependency-groups]
 test = ["pytest", "pytest-cov", "pytest-xdist", "nox"]
-dev = ["cogapp", "docformatter", "mdeq[test]", "ruff==0.16.3"]
+lint = ["ruff==0.16.3"]
+dev = [
+    "cogapp",
+    "docformatter",
+    { include-group = "test" },
+    { include-group = "lint" },
+]
+
+[tool.uv.build-backend]
+module-name = "mdeq"
+module-root = "src"
+# the backend does not read .gitignore, so tool caches under src/ would ship
+source-exclude = ["**/.mypy_cache", "**/.pytest_cache", "**/.ruff_cache"]
+wheel-exclude = ["**/.mypy_cache", "**/.pytest_cache", "**/.ruff_cache"]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "-ra"]

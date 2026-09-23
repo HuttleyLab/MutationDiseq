@@ -9,29 +9,22 @@ jobs:
   cogent3-dev:
     name: "cogent3-dev"
     runs-on: ubuntu-latest
-    if: github.repository == 'HuttleyLab/DiverseSeq'
+    if: github.repository == 'HuttleyLab/MutationDiseq'
 
     steps:
       - uses: "actions/checkout@v7"
         with:
           fetch-depth: 0
 
-      - uses: "actions/setup-python@v7"
-        with:
-            python-version: "3.12"
-
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10
         with:
-            enable-cache: true
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+          python-version: "3.12"
 
-      - name: Install the cogent3 dev branch
-        run: |
-          uv pip install "cogent3 @ git+https://github.com/cogent3/cogent3.git@develop" --system
+      - name: Install nox
+        run: uv tool install nox
 
-      - name: Install the project
-        run: |
-          uv pip install ".[test]" --system
-
-      - name: Run tests
-        run: uv run pytest tests
+      - name: Run tests against the cogent3 develop branch
+        run: nox -db uv -s test_dev

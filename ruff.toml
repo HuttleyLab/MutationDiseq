@@ -42,10 +42,21 @@ select = ["ALL"]
 # ignoring checks on having boolean flag as arguments to functions
 # ignoring checks on the number of arguments to a functions
 # numpy should NOT always be imported as np
-# turning of SQL injectiuon risk warnings, we are querying public data only
+# turning of SQL injection risk warnings, we are querying public data only
 # turning off checking using open instead of pathlib.Path.open
-ignore = ["EXE002", "FA100", "E501", "D", "ICN001", "FBT001", "FBT002",
-          "PLR0913", "S608", "PTH123"]
+ignore = [
+    "EXE002",
+    "FA100",
+    "E501",
+    "D",
+    "ICN001",
+    "FBT001",
+    "FBT002",
+    "PLR0913",
+    "S608",
+    "PTH123",
+    "COM812",
+]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -56,19 +67,19 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [lint.per-file-ignores]
 "tests/**/*.py" = [
-    "S101", # asserts allowed in tests...
+    "S101",   # asserts allowed in tests...
     "INP001", # __init__.py files are not required...
     "ANN",
     "N802",
     "N803",
-    "S608",  # sql injection unlikely
+    "S608",   # sql injection unlikely
 ]
 "noxfile.py" = [
-    "S101", # asserts allowed in tests...
+    "S101",   # asserts allowed in tests...
     "INP001", # __init__.py files are not required...
     "ANN",
     "N802",
-    "N803"
+    "N803",
 ]
 
 [format]

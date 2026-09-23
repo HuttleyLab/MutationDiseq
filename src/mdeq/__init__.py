@@ -7,6 +7,7 @@ import sys
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
 from functools import reduce
+from importlib.metadata import version
 from operator import add
 from pathlib import Path
 from warnings import filterwarnings
@@ -47,7 +48,7 @@ from mdeq.utils import (
     write_to_sqldb,
 )
 
-__version__ = "2026.4.21"
+__version__ = version("mdeq")
 
 filterwarnings("ignore", "Not using MPI")
 filterwarnings("ignore", "Unexpected warning from scipy")
