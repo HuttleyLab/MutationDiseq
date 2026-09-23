@@ -4,7 +4,7 @@ from functools import singledispatch
 from types import NoneType
 
 from cogent3 import make_table
-from cogent3.app.data_store import DataStoreABC
+from scinexus.data_store import DataStoreABC
 from cogent3.app.typing import SerialisableType
 from cogent3.maths.matrix_exponential_integration import expected_number_subs
 from cogent3.recalculation.scope import InvalidScopeError
