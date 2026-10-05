@@ -49,7 +49,7 @@ mdeq = "mdeq:main"
 
 [dependency-groups]
 test = ["pytest", "pytest-cov", "pytest-xdist", "nox"]
-lint = ["ruff==0.16.7"]
+lint = ["ruff==0.16.10"]
 dev = [
     "cogapp",
     "docformatter",
