@@ -795,7 +795,7 @@ wheels = [
 
 [[package]]
 name = "scinexus"
-version = "2026.9.21"
+version = "2026.10.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "charset-normalizer" },
@@ -804,9 +804,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/46/18f8f70dcb86aef1b916459800e30837dcb519affb041e9b44cf099cb143/scinexus-2026.9.21.tar.gz", hash = "sha256:eed4ef37a286b7feea206a8f4f18f8c959bd45d94b0a8781d10e5ded30bbd3b1", size = 517446, upload-time = "2026-09-22T22:30:03.326Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ac/de/67b3b022d7a8cade6948ac08f5697c9787197eb8263204bd9cf5493193a6/scinexus-2026.10.2.tar.gz", hash = "sha256:47498a76534c24cb7b842fe9fededc4062ed0c8d85abd5f7c50df48afea002a5", size = 523174, upload-time = "2026-10-02T02:41:55.889Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/19/21/87fce8f0d62d039614a597e2c795c9b38c2caa1a00472740c6f8af0710fd/scinexus-2026.9.21-py3-none-any.whl", hash = "sha256:b9d7a46ec7c8fa48f824126b8d9992b586749dd66995029fe43b8bc3649aa417", size = 77599, upload-time = "2026-09-22T22:30:01.63Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/86/0868b34b865441517b8319f253297ef2acbec7eecb99058b7f1457100b16/scinexus-2026.10.2-py3-none-any.whl", hash = "sha256:95be155e571bd7d36eba17e94bc747714ccb1b837a04634a7b0cbaf040b6eb6b", size = 78840, upload-time = "2026-10-02T02:41:54.386Z" },
 ]
 
 [package.optional-dependencies]
