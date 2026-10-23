@@ -946,11 +946,11 @@ wheels = [
 
 [[package]]
 name = "scitrack"
-version = "2026.8.5"
+version = "2026.10.10"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/02/61/631d9322aa824f7733ab7ce3d269fc1aab72be42d7755849a2f4769926ca/scitrack-2026.8.5.tar.gz", hash = "sha256:1eb6fba03107021d43cb8890bc13f4be1a7e342cdc695c9f5e1dca95b1e4f27f", size = 13779, upload-time = "2026-08-04T23:48:26.169Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/9d/53eee16e9a20b1dd580a462bb0b99c91da4ac696924c58684c90f4e7e900/scitrack-2026.10.10.tar.gz", hash = "sha256:6706228ac88a29242f81964267f132f4be82f643c503ba693cb1d38dcefb8fce", size = 13812, upload-time = "2026-10-10T00:11:17.876Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/e7/a212ae6fb7827ac45c163706dcc90d923d87b833b7afb8ba2efeef2ef12e/scitrack-2026.8.5-py3-none-any.whl", hash = "sha256:264cc1326995f00095e4236fa5be5d556754c64e70ffb2b1cf1b62936f6f64f2", size = 14003, upload-time = "2026-08-04T23:48:25.127Z" },
+    { url = "https://files.pythonhosted.org/packages/20/6b/b6e2042ecbca941327db475e3610b5da7b38ef164cae7de2af7d564a9bd7/scitrack-2026.10.10-py3-none-any.whl", hash = "sha256:75357a82b7830fd02ff2d9a42be303b175f30165bee14fac9af9398804777fd3", size = 14042, upload-time = "2026-10-10T00:11:16.711Z" },
 ]
 
 [[package]]
