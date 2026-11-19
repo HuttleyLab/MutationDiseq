@@ -106,7 +106,7 @@ class adjacent_eop:
             lf.set_alignment(aln)
             lf.set_time_heterogeneity(**self._time_het)
             lf.optimise(**self._opt_args)
-            lf.name = aln.info.name
+            lf.name = locus
             alt_results[locus] = lf
 
         combined = c3_result.hypothesis_result(NULL_AEOP, source=get_unique_id(data))

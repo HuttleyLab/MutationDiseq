@@ -89,6 +89,7 @@ def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     app = adjacent_eop(opt_args=opt_args)
     result = app(grp)
     numpy.testing.assert_almost_equal(result.LR, 0, decimal=5)
+    assert result.alt["locus-0"].name == "locus-0"
     # just one mrpobs
     mprobs = result.null.lf.get_motif_probs()
     assert isinstance(mprobs, DictArray)
