@@ -243,7 +243,8 @@ def toe_bstrap():
     result = [loader(m) for m in dstore]
     for e in result:
         e.deserialised_values()
-    return result
+    yield result
+    dstore.close()
 
 
 def test_load_nabla_c(toe_bstrap):

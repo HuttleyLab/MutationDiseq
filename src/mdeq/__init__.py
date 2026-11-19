@@ -173,6 +173,7 @@ def prep(
         cleanup=True,
         show_progress=verbose > 0,
     )
+    out_dstore.close()
     console.print("[green]Done!")
 
 

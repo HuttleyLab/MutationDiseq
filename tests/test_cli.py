@@ -91,6 +91,7 @@ def test_get_obj_type():
     for path, expect in types.items():
         dstore = open_data_store(DATADIR / path)
         assert matches_type(dstore, (expect,))
+        dstore.close()
 
 
 @pytest.fixture
@@ -106,6 +107,7 @@ def fasta(tmp_dir):
         aln = loader(m)[:length]
         fp = outpath / f"{m.unique_id.replace('json', 'fasta')}"
         aln.write(fp)
+    dstore.close()
     return outpath
 
 
@@ -132,6 +134,7 @@ def test_prep_defaults(runner, tmp_dir, fasta):
     assert len(dstore.completed) == 4
     assert len(dstore.not_completed) == 1
     assert all(len(loader(m)) >= 300 for m in dstore.completed)
+    dstore.close()
 
 
 def test_prep_min_length(runner, tmp_dir, fasta):
@@ -145,6 +148,7 @@ def test_prep_min_length(runner, tmp_dir, fasta):
     dstore = open_data_store(outpath)
     assert len(dstore.completed) == 3
     assert len(dstore.not_completed) == 2
+    dstore.close()
 
 
 def test_prep_codon_pos(runner, tmp_dir, fasta):
@@ -158,6 +162,7 @@ def test_prep_codon_pos(runner, tmp_dir, fasta):
     dstore = open_data_store(outpath)
     assert len(dstore.completed) == 3  # since alignment length is reduced by 1/3
     assert len(dstore.not_completed) == 2
+    dstore.close()
 
 
 def test_prep_fg_edge(runner, tmp_dir, fasta):
@@ -178,6 +183,7 @@ def test_prep_fg_edge(runner, tmp_dir, fasta):
     for m in dstore.completed:
         aln = loader(m)
         assert aln.metadata.fg_edge == fg_edge
+    dstore.close()
 
 
 def test_toe_exercise(runner, tmp_dir):
@@ -204,6 +210,7 @@ def test_toe_exercise(runner, tmp_dir):
     result = loader(dstore[0])
     assert isinstance(result.observed["data"], bytes)
     assert isinstance(CompressedValue(result.observed["data"]).as_primitive, dict)
+    dstore.close()
 
 
 loader = load_from_sqldb()
@@ -231,6 +238,7 @@ def test_convergence(runner, tmp_dir):
     assert r.exit_code != 0
     # checking the error message
     assert "not one of the expected types" in r.output
+    dstore.close()
 
 
 @pytest.fixture
@@ -253,6 +261,7 @@ def adjacent_path(runner, tmp_dir):
         assert isinstance(r, grouped)
         assert len(r.elements) == 2
 
+    dstore.close()
     return outpath
 
 
@@ -309,6 +318,7 @@ def test_teop_exercise(runner, tmp_dir):
     r = runner.invoke(teop, args, catch_exceptions=False)
     assert r.exit_code != 0
     assert "not one of the expected types" in r.output
+    dstore.close()
 
 
 def exercise_make_controls(runner, inpath, dir_path, analysis, result_type):
@@ -407,6 +417,7 @@ def test_extract_nabla_c(runner, tmp_dir):
     dstore = open_data_store(outpath)
     t = load_table(tsv_file)
     assert t.shape[0] == len(dstore.completed)
+    dstore.close()
 
 
 def test_slide(runner, tmp_dir):

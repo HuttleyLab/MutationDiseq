@@ -22,7 +22,9 @@ def opt_args():
 
 @pytest.fixture
 def dstore_instance():
-    return open_data_store(DATADIR / "3000bp.sqlitedb")
+    dstore = open_data_store(DATADIR / "3000bp.sqlitedb")
+    yield dstore
+    dstore.close()
 
 
 @pytest.fixture
@@ -85,3 +87,4 @@ def test_get_no_init_hypothesis_app_run(
     process = reader + init_hyp_app(just_continuous=False, opt_args=opt_args) + writer
     process.apply_to(dstore_instance[:1])
     assert len(out_dstore.summary_not_completed) == 0
+    out_dstore.close()

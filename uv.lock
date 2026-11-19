@@ -484,7 +484,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "click" },
-    { name = "cogent3", specifier = ">=2026.9.10" },
+    { name = "cogent3", specifier = ">=2026.11.17" },
     { name = "numpy" },
     { name = "rich" },
     { name = "scinexus" },
