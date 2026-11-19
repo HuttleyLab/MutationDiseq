@@ -119,8 +119,8 @@ def make_identifier(data) -> str:
     from scinexus.data_store import get_data_source
 
     sources = [get_data_source(e) for e in data]
-    if "unknown" in sources:
-        raise ValueError(f"'unknown' source present in {sources}")
+    if None in sources or "unknown" in sources:
+        raise ValueError(f"missing source present in {sources}")
 
     composite = []
     for e in sources:
