@@ -209,7 +209,7 @@ class bootstrap:
 
         for i in series:
             sim_aln = self._null.simulate_alignment()
-            sim_aln.info.update(aln.info)
+            sim_aln.metadata.update(aln.metadata)
             sim_aln.source = f"{self._inpath} - simalign {i}"
             sim_result = self._hyp(sim_aln)
             if not sim_result:

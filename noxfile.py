@@ -2,7 +2,7 @@ import nox
 
 nox.options.default_venv_backend = "uv"
 
-_py_versions = range(11, 15)
+_py_versions = range(11, 16)
 
 
 def _sync(session, *groups, only=False):

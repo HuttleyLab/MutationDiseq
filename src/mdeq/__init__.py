@@ -173,6 +173,7 @@ def prep(
         cleanup=True,
         show_progress=verbose > 0,
     )
+    out_dstore.close()
     console.print("[green]Done!")
 
 
@@ -251,7 +252,7 @@ def toe(
     """test of existence of mutation equilibrium."""
     # TODO need a separate command to apply foreground_from_jsd() to an
     #  alignment for decorating alignments with the foreground edge
-    # or check alignment.info for a fg_edge key -- all synthetic data
+    # or check alignment.metadata for a fg_edge key -- all synthetic data
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = f"{outpath.stem}-mdeq-toe.log"
     LOGGER.log_args()
@@ -267,7 +268,7 @@ def toe(
 
     loader = load_from_sqldb()
 
-    # check consistency of just_continuous / fg_edge / aln.info
+    # check consistency of just_continuous / fg_edge / aln.metadata
     _aln = loader(dstore.completed[0])
     if just_continuous and fg_edge is not None:
         click.secho(
@@ -281,10 +282,10 @@ def toe(
             click.secho(f"FAIL: {fg_edge!r} name not present in {_aln.names}", fg="red")
             sys.exit(1)
 
-        info_val = _aln.info.get("fg_edge", None)
+        info_val = _aln.metadata.get("fg_edge", None)
         if info_val and info_val != fg_edge:
             click.secho(
-                f"WARN: fg_edge={fg_edge!r} will override aln.info.fg_edge={info_val!r}",
+                f"WARN: fg_edge={fg_edge!r} will override aln.metadata.fg_edge={info_val!r}",
                 fg="yellow",
             )
 
@@ -696,7 +697,7 @@ def slide(
 ):
     """generate window sized sub-alignments. The source of each sub-alignment
     is recorded as parent source with index position."""
-    # or check alignment.info for a fg_edge key -- all synthetic data
+    # or check alignment.metadata for a fg_edge key -- all synthetic data
     LOGGER = CachingLogger(create_dir=True)
     LOGGER.log_file_path = f"{outpath.stem}-slide.log"
     LOGGER.log_args()
@@ -735,9 +736,9 @@ def slide(
                 continue
 
             sub.source = f"{n}-{start}"
-            sub.info.index = start
-            if "fg_edge" in aln.info:
-                sub.info.fg_edge = aln.info["fg_edge"]
+            sub.metadata.index = start
+            if "fg_edge" in aln.metadata:
+                sub.metadata.fg_edge = aln.metadata["fg_edge"]
 
             # write it
             writer(sub)

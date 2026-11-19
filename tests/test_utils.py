@@ -30,7 +30,7 @@ def aln():
 
 
 def test_get_foreground(aln):
-    """returns None if no key in info."""
+    """returns None if no key in metadata."""
     fg_edge = get_foreground(aln)
     assert fg_edge is None
 
@@ -64,7 +64,7 @@ def test_set_fg_edge():
     aln = make_aligned_seqs(data, source="blah", moltype="dna")
     app = set_fg_edge(fg_edge="c")
     got = app(aln)
-    assert got.info.fg_edge == "c"
+    assert got.metadata.fg_edge == "c"
 
     # returns NotCompleted with message ValueError if no fg_edge value provided
     app = set_fg_edge(fg_edge=None)

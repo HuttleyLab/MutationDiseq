@@ -30,9 +30,9 @@ except (NotImplementedError, ImportError):
 
 
 def get_foreground(aln):
-    """returns fg_edge value from info attribute."""
+    """returns fg_edge value from metadata attribute."""
     try:
-        fg = aln.info.get("fg_edge", None)
+        fg = aln.metadata.get("fg_edge", None)
     except AttributeError:
         fg = None
     return fg
@@ -105,7 +105,7 @@ def set_fg_edge(
     aln: AlignedSeqsType,
     fg_edge=None,
 ) -> SerialisableType | AlignedSeqsType:
-    """sets aln.info_fg_edge to fg_edge"""
+    """sets aln.metadata.fg_edge to fg_edge"""
     if fg_edge is None:
         raise ValueError("fg_edge not set")
 
@@ -121,7 +121,7 @@ def set_fg_edge(
             source=get_unique_id(aln),
         )
 
-    aln.info.fg_edge = fg_edge
+    aln.metadata.fg_edge = fg_edge
     return aln
 
 

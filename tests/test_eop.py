@@ -81,7 +81,7 @@ def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
 
     aln = loader(dstore_instance[4])
 
-    aln.info.pop("fg_edge")
+    aln.metadata.pop("fg_edge")
     grp = grouped(("a", "b"))
     grp.elements = [aln, aln]
 
@@ -89,6 +89,7 @@ def test_adjacent_eop_same_aln(dstore_instance, tmp_dir, opt_args):
     app = adjacent_eop(opt_args=opt_args)
     result = app(grp)
     numpy.testing.assert_almost_equal(result.LR, 0, decimal=5)
+    assert result.alt["locus-0"].name == "locus-0"
     # just one mrpobs
     mprobs = result.null.lf.get_motif_probs()
     assert isinstance(mprobs, DictArray)
@@ -107,7 +108,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
     identifiers = []
     for i, aln in enumerate(multiple_alns):
         identifiers.append(f"name-{i}")
-        aln.info.name = identifiers[-1]
+        aln.metadata.name = identifiers[-1]
 
     grp = grouped(identifiers=tuple(identifiers))
     grp.elements = multiple_alns[:2]
@@ -116,7 +117,7 @@ def test_adjacent_eop(multiple_alns, opt_args):
     got = test_adjacent(grp)
     assert isinstance(got, hypothesis_result)
     for aln in multiple_alns:
-        aln.info.fg_edge = "Human"
+        aln.metadata.fg_edge = "Human"
     # although elements is immutable, the alignment instance members are
     # not so the data is actually different
     got = test_adjacent(grp)

@@ -69,7 +69,9 @@ def test_of_existence(
     else:
         fg_edge = get_foreground(aln)
         if fg_edge is None:
-            raise ValueError(f"alignment.info {aln.info!r} missing 'fg_edge' value")
+            raise ValueError(
+                f"alignment.metadata {aln.metadata!r} missing 'fg_edge' value"
+            )
 
         bg_edges = list({fg_edge} ^ set(aln.names)) if fg_edge else None
         # turning off selection of pade for now (expm=None), possibly related
@@ -104,7 +106,7 @@ def get_no_init_model_coll(aln, just_continuous, opt_args=None):
 
     Notes
     -----
-    aln needs the foreground edge as an entry to the .info dictionary!
+    aln needs the foreground edge as an entry to the .metadata dictionary!
 
     Returns
     -------

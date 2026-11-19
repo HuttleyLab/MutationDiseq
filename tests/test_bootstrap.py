@@ -36,19 +36,23 @@ def aln():
     aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
-    aln.info["fg_edge"] = "TombBat"
+    aln.metadata["fg_edge"] = "TombBat"
 
     return aln
 
 
 @pytest.fixture
 def aligns_dstore():
-    return open_data_store(DATADIR / "3000bp.sqlitedb")
+    dstore = open_data_store(DATADIR / "3000bp.sqlitedb")
+    yield dstore
+    dstore.close()
 
 
 @pytest.fixture
 def bstrap_result_dstore():
-    return open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
+    dstore = open_data_store(DATADIR / "fg_GSN_synthetic-lo_lo-300bp-1rep.sqlitedb")
+    yield dstore
+    dstore.close()
 
 
 def test_create_bootstrap_app(aln, opt_args):
@@ -86,6 +90,7 @@ def test_create_bootstrap_app_composable(tmp_path, aligns_dstore, opt_args):
     assert isinstance(result, compact_bootstrap_result)
     pvalue = result.pvalue
     assert isinstance(pvalue, float)
+    out_dstore.close()
 
 
 def test_estimate_pval(bstrap_result_dstore):
@@ -106,7 +111,8 @@ def dstore4_tree():
     inpath = DATADIR / "4otu-aligns.sqlitedb"
     tree = "(Human,Platypus,(Mouse,Rat))"
     dstore = open_data_store(inpath)
-    return dstore, tree
+    yield dstore, tree
+    dstore.close()
 
 
 def num_discrete_edges(lf):

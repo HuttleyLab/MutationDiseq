@@ -153,6 +153,7 @@ def test_load_data_group():
     # pair elements does not end with json
     eval_input(pair)
     eval_input(tuple(e.replace(".json", "") for e in pair))
+    dstore.close()
 
 
 def test_new_adjacent_eop():
@@ -179,6 +180,7 @@ def test_new_adjacent_eop():
 
     # alt has more parameters than null
     assert got[ALT_AEOP].nfp > got[NULL_AEOP].nfp
+    dstore.close()
 
 
 def test_physically_adjacent():

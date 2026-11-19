@@ -20,9 +20,9 @@ keywords = [
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.16"
 dependencies = [
-    "cogent3>=2026.9.10",
+    "cogent3>=2026.11.17",
     "scinexus",
     "click",
     "numpy",
@@ -42,6 +42,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 
 [project.scripts]

@@ -22,7 +22,9 @@ def opt_args():
 
 @pytest.fixture
 def dstore_instance():
-    return open_data_store(DATADIR / "3000bp.sqlitedb")
+    dstore = open_data_store(DATADIR / "3000bp.sqlitedb")
+    yield dstore
+    dstore.close()
 
 
 @pytest.fixture
@@ -33,7 +35,7 @@ def get_aln():
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
     aln = make_aligned_seqs(_data, moltype="dna")
-    aln.info["fg_edge"] = "Human"
+    aln.metadata["fg_edge"] = "Human"
     return aln
 
 
@@ -65,7 +67,7 @@ def test_model_results_construction(no_init_mc, init_mc):
 def test_no_fg(get_aln_no_fg, opt_args):
     get_no_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
-    get_aln_no_fg.info = None
+    get_aln_no_fg.metadata.clear()
     get_no_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
 
@@ -85,3 +87,4 @@ def test_get_no_init_hypothesis_app_run(
     process = reader + init_hyp_app(just_continuous=False, opt_args=opt_args) + writer
     process.apply_to(dstore_instance[:1])
     assert len(out_dstore.summary_not_completed) == 0
+    out_dstore.close()
