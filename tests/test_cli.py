@@ -177,7 +177,7 @@ def test_prep_fg_edge(runner, tmp_dir, fasta):
     dstore = open_data_store(outpath)
     for m in dstore.completed:
         aln = loader(m)
-        assert aln.info.fg_edge == fg_edge
+        assert aln.metadata.fg_edge == fg_edge
 
 
 def test_toe_exercise(runner, tmp_dir):
@@ -427,11 +427,11 @@ def test_slide(runner, tmp_dir):
     assert len(dstore.completed) >= 25, dstore
     assert len(dstore.not_completed) >= 0, dstore.not_completed
     assert len(dstore.logs) == 1, dstore.logs
-    # the info attribute should have the correct fg_edge setting
+    # the metadata attribute should have the correct fg_edge setting
     expect = "73021"
     for m in dstore:
         aln = loader(m)
-        assert aln.info["fg_edge"] == expect
+        assert aln.metadata["fg_edge"] == expect
 
     dstore.close()
 

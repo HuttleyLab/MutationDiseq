@@ -36,7 +36,7 @@ def aln():
     aln = load_aligned_seqs(DATADIR / "brca1.fasta", moltype="dna")
     aln = aln.take_seqs(["TombBat", "RoundEare", "DogFaced"])
     aln = aln.no_degenerates(motif_length=3)
-    aln.info["fg_edge"] = "TombBat"
+    aln.metadata["fg_edge"] = "TombBat"
 
     return aln
 

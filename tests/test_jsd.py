@@ -49,7 +49,7 @@ def diff_nt_aln_with_fg():
     }
 
     seqs = make_aligned_seqs(_seqs, moltype="dna")
-    seqs.info["fg_edge"] = "Human"
+    seqs.metadata["fg_edge"] = "Human"
 
     return seqs
 

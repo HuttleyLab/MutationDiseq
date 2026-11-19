@@ -33,7 +33,7 @@ def get_aln():
         "Opossum": "ATGCCAGTGAAAGTGGCGGCGGTGGCTGAG",
     }
     aln = make_aligned_seqs(_data, moltype="dna")
-    aln.info["fg_edge"] = "Human"
+    aln.metadata["fg_edge"] = "Human"
     return aln
 
 
@@ -65,7 +65,7 @@ def test_model_results_construction(no_init_mc, init_mc):
 def test_no_fg(get_aln_no_fg, opt_args):
     get_no_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
-    get_aln_no_fg.info = None
+    get_aln_no_fg.metadata.clear()
     get_no_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
     get_init_model_coll(get_aln_no_fg, just_continuous=True, opt_args=opt_args)
 
