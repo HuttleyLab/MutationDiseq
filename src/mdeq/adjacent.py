@@ -150,7 +150,7 @@ class load_data_group:
         """
         Notes
         -----
-        Each data object has its identifier assigned to info.name attribute
+        Each data object has its identifier assigned to metadata.name attribute
         """
         data_objs = []
         for identifier in data_identifiers:
@@ -162,7 +162,7 @@ class load_data_group:
             obj = _new_loader(m[0])
             if not obj:  # probably not completed error
                 return obj
-            obj.info.name = identifier.replace(".json", "")
+            obj.metadata.name = identifier.replace(".json", "")
             data_objs.append(obj)
 
         data_identifiers.elements = data_objs

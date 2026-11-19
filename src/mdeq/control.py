@@ -66,7 +66,7 @@ class control_generator:
             n = name
             names.append(n)
             sim = model.lf.simulate_alignment(random_series=self.rng, locus=name)
-            sim.info.name = n
+            sim.metadata.name = n
             alns.append(sim)
 
         r = grouped(names, source=source)

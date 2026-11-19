@@ -66,7 +66,7 @@ class adjacent_eop:
 
         aligns = {}
         for i, e in enumerate(data.elements):
-            n = e.info.get("name", f"locus-{i}")
+            n = e.metadata.get("name", f"locus-{i}")
             aligns[n] = e
 
         names = list(aligns)
